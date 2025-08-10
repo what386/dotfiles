@@ -106,7 +106,6 @@ local function show_prompt()
 	})
 end
 
--- Connect to your custom signal
-awesome.connect_signal("module::promptbox:activate", function()
+awesome.connect_signal("flyout::promptbox:activate", function()
 	show_prompt()
 end)

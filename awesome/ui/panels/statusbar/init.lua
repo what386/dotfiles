@@ -6,19 +6,16 @@ local beautiful = require("beautiful")
 local xresources = beautiful.xresources
 local dpi = xresources.apply_dpi
 local widgetdir = "ui.panels.statusbar.widgets."
-
 local tasklist = require("ui.panels.statusbar.applets.tasklist")
-
 local battery_widget = require(widgetdir .. "battery")
 local clock_widget = require(widgetdir .. "clock")
 local volume_widget = require(widgetdir .. "volume")
 local network_widget = require(widgetdir .. "network")
 local bluetooth_widget = require(widgetdir .. "bluetooth")
-
 local layoutbox_widget = require(widgetdir .. "layoutbox")
-local infopanel_widget = require(widgetdir .. "infopanel-toggle")
-
+local dashboard_widget = require(widgetdir .. "dashboard-toggle")
 local dropdown_widget = require(widgetdir .. "dropdown")
+local osk_widget = require(widgetdir .. "osk-toggle")
 
 local separator = wibox.widget({
 	orientation = "vertical",
@@ -41,8 +38,33 @@ local right_widgets = wibox.widget({
 	widget = wibox.container.margin,
 })
 
+-- Store statusbars for each screen
+local statusbars = {}
+
+-- Function to check if current client is fullscreen and update statusbar visibility
+local function update_statusbar_visibility(s)
+	local statusbar = statusbars[s]
+	if not statusbar then
+		return
+	end
+
+	local c = client.focus
+	if c and c.screen == s and c.fullscreen then
+		statusbar.visible = false
+	else
+		statusbar.visible = true
+	end
+end
+
+-- Function to update all statusbars
+local function update_all_statusbars()
+	for s in screen do
+		update_statusbar_visibility(s)
+	end
+end
+
 local function statusbar(s)
-	statusbar = awful.wibar({
+	local bar = awful.wibar({
 		screen = s,
 		position = "top",
 		type = "dock",
@@ -55,11 +77,12 @@ local function statusbar(s)
 		opacity = 1,
 	})
 
-	statusbar:setup({
+	bar:setup({
 		expand = "none",
 		layout = wibox.layout.align.horizontal,
 		{ -- left
-			layoutbox_widget(s),
+			dashboard_widget,
+			osk_widget,
 			separator,
 			tasklist(s),
 			spacing = dpi(8),
@@ -71,11 +94,27 @@ local function statusbar(s)
 			dropdown_widget,
 			right_widgets,
 			separator,
-			infopanel_widget,
+			layoutbox_widget(s),
 			spacing = dpi(8),
 			layout = wibox.layout.fixed.horizontal,
 		},
 	})
+
+	-- Store the statusbar for this screen
+	statusbars[s] = bar
+
+	return bar
 end
+
+-- Connect signals to handle fullscreen changes
+client.connect_signal("focus", update_all_statusbars)
+client.connect_signal("unfocus", update_all_statusbars)
+client.connect_signal("property::fullscreen", update_all_statusbars)
+client.connect_signal("unmanage", update_all_statusbars)
+
+-- Handle screen changes
+screen.connect_signal("removed", function(s)
+	statusbars[s] = nil
+end)
 
 return statusbar

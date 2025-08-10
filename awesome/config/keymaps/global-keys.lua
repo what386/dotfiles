@@ -20,21 +20,36 @@ local keys = gears.table.join(
 
 	awful.key({ modkey }, "F2", function()
 		local focused = awful.screen.focused()
-		focused.dashboard:toggle(false)
-	end, { description = "toggle control panel", group = "panes" }),
+		focused.dashboard:toggle()
+	end, { description = "toggle dashboard ", group = "panes" }),
 
 	awful.key({ modkey }, "F3", function()
 		local focused = awful.screen.focused()
 		focused.infopanel:toggle()
-	end, { description = "toggle today pane", group = "panes" }),
+	end, { description = "toggle infopanel", group = "panes" }),
 
 	awful.key({ modkey }, "F4", function()
 		awesome.emit_signal("panel::dock:show")
 	end, { description = "show the dock", group = "panes" }),
 
+	awful.key({ modkey }, "r", function()
+		awesome.emit_signal("flyout::promptbox:activate")
+	end, { description = "show run dialogue", group = "flyouts" }),
+
+	awful.key({ modkey }, "Return", function()
+		awesome.emit_signal("flyout::quake_terminal:toggle")
+	end, { description = "show terminal", group = "flyouts" }),
+
+	awful.key({ modkey }, "k", function()
+		awesome.emit_signal("flyout::osd_keyboard:toggle")
+	end, { description = "show keyboard", group = "flyouts" }),
+
+	--awesome
+
 	awful.key({ modkey }, "Escape", function()
 		awesome.emit_signal("screen::exit_screen:show")
 	end, { description = "show exit menu", group = "awesome" }),
+
 	awful.key(
 		{ modkey, "Control" },
 		"h",
@@ -48,20 +63,13 @@ local keys = gears.table.join(
 
 	-- Launcher
 
-	awful.key({ modkey }, "r", function()
-		awesome.emit_signal("module::promptbox:activate")
-	end, { description = "show run dialogue", group = "launcher" }),
-
-	awful.key({ modkey }, "Return", function()
-		awesome.emit_signal("module::quake_terminal:toggle")
-	end, { description = "show terminal", group = "launcher" }),
-
 	awful.key({ modkey }, "o", function()
 		awful.spawn(apps.default.rofi_appmenu)
 	end, { description = "open program", group = "launcher" }),
 
 	awful.key({ modkey }, "p", function()
-		awful.spawn("rofi -show window -show-icons")
+		awful.spawn(apps.default.rofi_global)
+		--awful.spawn("rofi -show window -show-icons")
 	end, { description = "search windows", group = "launcher" }),
 
 	awful.key({ modkey }, "Print", function()

@@ -3,8 +3,52 @@ local gears = require("gears")
 local naughty = require("naughty")
 local json = require("dependencies.json")
 
-local session_file = gears.filesystem.get_configuration_dir() .. "persistent/session.json"
-local command_file = gears.filesystem.get_configuration_dir() .. "persistent/command_table.json"
+local config_dir = gears.filesystem.get_configuration_dir()
+
+local data_dir = config_dir .. "persistent/settings/"
+local session_file = config_dir .. "persistent/session.json"
+local command_file = config_dir .. "persistent/command_table.json"
+
+local autorestore_allowed = false
+
+-- this function is blocking on purpose!!! DO NOT change this behavior
+local check_autorestore_state = function()
+	local filepath = data_dir .. "autorestore_allowed"
+
+	local file = io.open(filepath, "r")
+	if file then
+		local status = file:read("*a") -- Read entire file
+		file:close()
+
+		-- Trim whitespace
+		status = status:gsub("^%s*(.-)%s*$", "%1")
+
+		if status == "true" then
+			autorestore_allowed = true
+		elseif status == "false" then
+			autorestore_allowed = false
+		else
+			-- Invalid content: set to false to avoid
+			-- restoring from a broken state
+			autorestore_allowed = false
+			local write_file = io.open(filepath, "w")
+			if write_file then
+				write_file:write("false")
+				write_file:close()
+			end
+		end
+	else
+		-- File doesn't exist, create it with default value
+		autorestore_allowed = true
+		local write_file = io.open(filepath, "w")
+		if write_file then
+			write_file:write("true")
+			write_file:close()
+		end
+	end
+end
+
+check_autorestore_state()
 
 -- Table to store pending applications to restore
 local pending_restore = {}
@@ -212,20 +256,39 @@ local existing_keys = root.keys()
 
 local keys = gears.table.join(
 	awful.key({ modkey, "Shift" }, "r", function()
-		awesome.emit_signal("module::session_manager:restore")
+		restore()
 	end, { description = "restore session", group = "awesome" }),
 
 	awful.key({ modkey, "Shift" }, "s", function()
-		awesome.emit_signal("module::session_manager:save")
+		save()
 	end, { description = "save session", group = "awesome" })
 )
 
 root.keys(gears.table.join(existing_keys, keys))
 
+awesome.connect_signal("startup", function()
+	if autorestore_allowed then
+		restore()
+	end
+end)
+
 awesome.connect_signal("module::session_manager:save", function()
-	save()
+	if autorestore_allowed then
+		save()
+	end
 end)
 
 awesome.connect_signal("module::session_manager:restore", function()
-	restore()
+	if autorestore_allowed then
+		restore()
+	end
+end)
+
+awesome.connect_signal("module::session_manager:autosave_enable", function()
+	awful.spawn.with_shell('echo "true" > ' .. data_dir .. "autorestore_allowed")
+end)
+
+awesome.connect_signal("module::session_manager:autosave_disable", function()
+	autorestore_allowed = false
+	awful.spawn.with_shell('echo "false" > ' .. data_dir .. "autorestore_allowed")
 end)

@@ -267,19 +267,8 @@ icons.widgets.wifi = {
 	wifi_strength_3 = dir .. "widgets/wifi/wifi-strength-3.svg",
 	wifi_strength_4 = dir .. "widgets/wifi/wifi-strength-4.svg",
 
-	wifi_strength_lock = dir .. "widgets/wifi/.svg",
-	wifi_strength_lock_outline = dir .. "widgets/wifi/.svg",
-	wifi_strength_1_lock = dir .. "widgets/wifi/.svg",
-	wifi_strength_2_lock = dir .. "widgets/wifi/.svg",
-	wifi_strength_3_lock = dir .. "widgets/wifi/.svg",
-	wifi_strength_4_lock = dir .. "widgets/wifi/.svg",
-
 	wifi_strength_alert = dir .. "widgets/wifi/.svg",
 	wifi_strength_alert_outline = dir .. "widgets/wifi/.svg",
-	wifi_strength_1_alert = dir .. "widgets/wifi/.svg",
-	wifi_strength_2_alert = dir .. "widgets/wifi/.svg",
-	wifi_strength_3_alert = dir .. "widgets/wifi/.svg",
-	wifi_strength_4_alert = dir .. "widgets/wifi/.svg",
 }
 
 icons.widgets.ethernet = {
@@ -288,8 +277,5 @@ icons.widgets.ethernet = {
 	eth_connected = dir .. "widgets/ethernet/wired-connected.svg",
 	eth_no_route = dir .. "widgets/ethernet/wired-no-route.svg",
 }
-
--- TODO: this entire thing is for later
-icons.titlebar = {}
 
 return icons

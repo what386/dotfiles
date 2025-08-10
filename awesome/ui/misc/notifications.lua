@@ -77,6 +77,17 @@ ruled.notification.connect_signal("request::rules", function()
 	})
 end)
 
+-- Error handling
+--naughty.connect_signal("request::display_error", function(message, startup)
+--	naughty.notification({
+--		urgency = "critical",
+--		title = "Oops, an error happened" .. (startup and " during startup!" or "!"),
+--		message = message,
+--		app_name = "System Notification",
+--		icon = beautiful.awesome_icon,
+--	})
+--end)
+
 -- XDG icon lookup
 naughty.connect_signal("request::icon", function(n, context, hints)
 	if context ~= "app_icon" then
@@ -207,11 +218,12 @@ naughty.connect_signal("request::display", function(n)
 						widget = naughty.container.background,
 					},
 					strategy = "min",
-					width = dpi(160),
+					width = dpi(250),
 					widget = wibox.container.constraint,
 				},
 				strategy = "max",
-				width = beautiful.notification_max_width or dpi(500),
+				height = dpi(250),
+				width = dpi(250),
 				widget = wibox.container.constraint,
 			},
 			bg = beautiful.background,
@@ -220,10 +232,10 @@ naughty.connect_signal("request::display", function(n)
 		},
 	})
 
-	-- Destroy popups if dont_disturb mode is on
-	-- Or if the right_panel is visible
+	-- Destroy popups if dont_disturb_state mode is on
+	-- Or if the info_center is visible
 	local focused = awful.screen.focused()
-	if _G.dont_disturb or (focused.infopanel and focused.infopanel.visible) then
+	if _G.dont_disturb_state or (focused.info_center and focused.info_center.visible) then
 		naughty.destroy_all_notifications(nil, 1)
 	end
 end)

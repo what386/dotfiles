@@ -242,7 +242,7 @@ local update_wired = function()
 			update_tooltip(
 				"<b>Connected but no internet!</b>" .. "\nEthernet Interface: <b>" .. interfaces.lan_interface .. "</b>"
 			)
-			widget.icon:set_image(icons.ethernet.eth_no_route)
+			widget.icon:set_image(icons.widgets.ethernet.eth_no_route)
 		else
 			update_tooltip("Ethernet Interface: <b>" .. interfaces.lan_interface .. "</b>")
 			if startup or reconnect_startup then
@@ -251,7 +251,7 @@ local update_wired = function()
 				update_startup(false)
 			end
 			update_reconnect_startup(false)
-			widget.icon:set_image(icons.ethernet.eth_connected)
+			widget.icon:set_image(icons.widgets.ethernet.eth_connected)
 		end
 	end)
 end

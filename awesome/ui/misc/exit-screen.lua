@@ -148,7 +148,7 @@ end
 local logout_command = function()
 	awesome.emit_signal("module::session_manager:save")
 	gears.timer({
-		timeout = 1,
+		timeout = 0.5,
 		autostart = true,
 		single_shot = true,
 		callback = function()
@@ -170,7 +170,7 @@ end
 local poweroff_command = function()
 	awesome.emit_signal("module::session_manager:save")
 	gears.timer({
-		timeout = 1,
+		timeout = 0.5,
 		autostart = true,
 		single_shot = true,
 		callback = function()
@@ -183,7 +183,7 @@ end
 local reboot_command = function()
 	awesome.emit_signal("module::session_manager:save")
 	gears.timer({
-		timeout = 1,
+		timeout = 0.5,
 		autostart = true,
 		single_shot = true,
 		callback = function()

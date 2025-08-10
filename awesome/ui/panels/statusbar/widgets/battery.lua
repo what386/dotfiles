@@ -4,6 +4,7 @@ local awful = require("awful")
 local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
+local naughty = require("naughty")
 
 local icons = require("theme.icons")
 local clickable_container = require("ui.clickable-container")
@@ -101,41 +102,44 @@ local battery_tooltip = awful.tooltip({
 
 local icon_list = icons_battery
 
-local update_tooltip = function(message)
-	battery_tooltip:set_markup(message)
-end
-
-local persistent_battery_info
+local persistent_battery_info = ""
 
 awful.spawn.easy_async_with_shell("acpi -i", function(stdout)
-	local design_cap, effective_cap, health = string.match(stdout, ".+:.+:.+ .+ (%d+ mAh).+ .+ .+ (%d+ mAh).+= (%d+%%)")
+	-- Debug: see what we're trying to parse
 
-	persistent_battery_info = "\nDesign capacity: <b>"
-		.. design_cap
-		.. "</b>"
-		.. "\nEffective capacity: <b>"
-		.. effective_cap
-		.. "</b>"
-		.. "\nBattery health: <b>"
-		.. health
-		.. "</b>"
+	-- Try to extract battery info from the second line
+	local design_cap, effective_cap, health =
+		string.match(stdout, "design capacity (%d+ mAh), last full capacity (%d+ mAh) = (%d+%%)")
+
+	if design_cap and effective_cap and health then
+		persistent_battery_info = "\nDesign capacity: <b>"
+			.. design_cap
+			.. "</b>\nEffective capacity: <b>"
+			.. effective_cap
+			.. "</b>\nBattery health: <b>"
+			.. health
+			.. "</b>"
+	else
+		persistent_battery_info =
+			"\nDesign capacity: <b>unknown</b>\nEffective capacity: <b>unknown</b>\nBattery health: <b>unknown</b>"
+	end
 end)
 
-local function update_widget(status, charge, time)
-	local formatted_time
+local function get_battery_icon(charge)
+	-- Clamp charge to 0-100 range
+	charge = math.max(0, math.min(100, charge))
+
+	-- Calculate icon index (1-21 for 0%-100%)
+	local icon_index = math.floor(charge / 5) + 1
+	icon_index = math.max(1, math.min(21, icon_index))
+
+	return icon_list[icon_index]
+end
+
+local update_tooltip = function(status, charge, time)
 	local formatted_status
-
-	if not charge then
-		return
-	end
-
-	if status == "Charging" then
-		icon_list = icons_charging
-		formatted_status = "charged"
-	else
-		icon_list = icons_battery
-		formatted_status = "discharged"
-	end
+	local formatted_charge
+	local formatted_time
 
 	if time and not time:match("unknown") then
 		formatted_time = time
@@ -143,36 +147,66 @@ local function update_widget(status, charge, time)
 		formatted_time = "unavailable"
 	end
 
-	if charge == 0 then
-		widget.icon:set_image(icons.widgets.battery)
-	end
+	formatted_charge = "Percentage: <b>" .. charge .. "%</b>"
 
-	if charge == 100 then
-		widget.icon:set_image(icon_list[21])
+	if status == "Charging" then
+		formatted_status = "Time until fully charged: <b>" .. formatted_time .. "</b>"
+	elseif status == "Not charging" then
+		formatted_status = "Battery is not charging. "
+	elseif status == "discharging at zero rate - will never fully discharge" then
+		formatted_status = "Battery discharging at zero rate. "
 	else
-		widget.icon:set_image(icon_list[math.floor(charge / 5) + 1])
+		formatted_status = "Time until discharged: <b>" .. formatted_time .. "</b>"
 	end
 
-	update_tooltip(
-		"Battery percentage: <b>"
-		.. charge
-		.. "%</b>"
-		.. "\nTime until "
-		.. formatted_status
-		.. ": <b>"
-		.. formatted_time
-		.. "</b>"
-		.. persistent_battery_info
-	)
+	local message = formatted_charge .. "\n" .. formatted_status .. "\n" .. persistent_battery_info
 
-	--widget.percentage.text = charge .. "%"
+	battery_tooltip:set_markup(message)
 end
 
-awful.widget.watch("acpi -i", 10, function(_, stdout)
-	local status, charge_str, time = string.match(stdout, ".+: (%a+), (%d+)%%, (%d+:%d+:%d+)")
-	local charge = tonumber(charge_str)
+local function update_widget(status, charge)
+	if not charge then
+		return
+	end
 
-	update_widget(status, charge, time)
+	if status == "Charging" then
+		icon_list = icons_charging
+	elseif status == "Not charging" then
+		icon_list = icons_charging
+	elseif status == "discharging at zero rate - will never fully discharge" then
+		icon_list = icons_battery
+	else
+		icon_list = icons_battery
+	end
+
+	if charge then
+		widget.icon:set_image(get_battery_icon(charge))
+	else
+		widget.icon:set_image(icons.widgets.battery.battery_alert)
+	end
+end
+
+awful.widget.watch("acpi -i", 5, function(_, stdout)
+	local first_line = stdout:match("^[^\r\n]+")
+	local status, charge_str, time
+
+	-- Try to match the standard format with time (HH:MM)
+	status, charge_str, time = first_line:match("Battery %d+: ([^,]+), (%d+)%%, (%d+:%d+):")
+
+	if not time then
+		-- Try to match format with time remaining text (like "discharging at zero rate...")
+		status, charge_str, time = first_line:match("Battery %d+: ([^,]+), (%d+)%%, (.+)$")
+
+		if not time then
+			-- Fallback: just status and charge without any time info
+			status, charge_str = first_line:match("Battery %d+: ([^,]+), (%d+)%%")
+			time = "Unavailable"
+		end
+	end
+
+	local charge = tonumber(charge_str)
+	update_widget(status, charge)
+	update_tooltip(status, charge, time)
 end)
 
 return widget_button

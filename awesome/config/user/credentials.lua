@@ -4,11 +4,10 @@ return {
 		local_ip = "10.0.0.2",
 	},
 
-	-- put your openweathermap API info here
 	weather = {
-		city_id = "",
-		api_key = "",
-		zip_code = "",
+		city_id = "5233742",
+		api_key = "664c24f2cac2ac069b6fff15ff465666",
+		zip_code = "05201",
 		units = "metric",
 		update_interval = 1200, -- in seconds
 	},

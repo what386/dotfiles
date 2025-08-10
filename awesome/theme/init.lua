@@ -13,3 +13,5 @@ theme.awesome_overrides(final_theme)
 require("theme.wallpapers")
 
 beautiful.init(final_theme)
+
+require("theme.sounds")

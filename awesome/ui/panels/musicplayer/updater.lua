@@ -1,13 +1,12 @@
 local awful = require("awful")
 local gears = require("gears")
 local naughty = require("naughty")
-
 local playing_trackid = nil
 local music_updater = {}
-
 -- Store references to widgets that need updating
 local widgets = {}
 local update_timer = nil
+local show_timer = nil -- Add timer for delayed show signal
 
 -- Helper function to format time from seconds
 local function format_time(seconds)
@@ -61,6 +60,7 @@ local function get_media_info()
 
 		-- Create a unique identifier for this track
 		local current_track_id = create_track_identifier(media_data)
+		local track_changed = current_track_id ~= playing_trackid
 
 		-- Update title widget
 		if media_data.title then
@@ -108,10 +108,24 @@ local function get_media_info()
 			end
 		end
 
-		-- Check if track has changed and emit signal
-		if current_track_id ~= playing_trackid then
-			awesome.emit_signal("panel::musicplayer:show")
+		-- Check if track has changed and emit signal with delay
+		if track_changed and current_track_id then
 			playing_trackid = current_track_id
+
+			-- Cancel any existing show timer
+			if show_timer then
+				show_timer:stop()
+			end
+
+			-- Delay the show signal to allow all widgets to update
+			show_timer = gears.timer({
+				timeout = 0.1, -- Small delay (100ms)
+				single_shot = true,
+				callback = function()
+					awesome.emit_signal("panel::musicplayer:show")
+				end,
+			})
+			show_timer:start()
 		elseif not current_track_id and playing_trackid then
 			-- Music stopped playing
 			playing_trackid = nil
@@ -123,12 +137,10 @@ end
 -- Register widget references for updating
 function music_updater.register_widgets(widget_refs)
 	widgets = widget_refs
-
 	-- Start the update timer once widgets are registered
 	if update_timer then
 		update_timer:stop()
 	end
-
 	update_timer = gears.timer({
 		timeout = 2,
 		call_now = true,
@@ -148,13 +160,16 @@ function music_updater.stop_updates()
 		update_timer:stop()
 		update_timer = nil
 	end
+	if show_timer then
+		show_timer:stop()
+		show_timer = nil
+	end
 end
 
 -- Get current media info without updating widgets (for external use)
 function music_updater.get_current_media_info(callback)
 	awful.spawn.easy_async_with_shell(cmd, function(stdout)
 		local media_data = {}
-
 		for line in stdout:gmatch("[^\n]+") do
 			local key, value = line:match("^([^:]+):(.*)$")
 			if key and value and value ~= "" then

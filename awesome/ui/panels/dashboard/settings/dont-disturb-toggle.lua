@@ -6,7 +6,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local config_dir = gears.filesystem.get_configuration_dir()
-local data_dir = config_dir .. "persistent/"
+local data_dir = config_dir .. "persistent/settings/"
 local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
 local icons = require("theme.icons")
 
