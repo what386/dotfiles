@@ -186,27 +186,47 @@ local function update_widget(status, charge)
 	end
 end
 
-awful.widget.watch("acpi -i", 5, function(_, stdout)
-	local first_line = stdout:match("^[^\r\n]+")
-	local status, charge_str, time
+local function update_battery_widget()
+	awful.spawn.easy_async_with_shell("acpi -i", function(stdout)
+		local first_line = stdout:match("^[^\r\n]+")
+		local status, charge_str, time
 
-	-- Try to match the standard format with time (HH:MM)
-	status, charge_str, time = first_line:match("Battery %d+: ([^,]+), (%d+)%%, (%d+:%d+):")
-
-	if not time then
-		-- Try to match format with time remaining text (like "discharging at zero rate...")
-		status, charge_str, time = first_line:match("Battery %d+: ([^,]+), (%d+)%%, (.+)$")
+		-- Try to match the standard format with time (HH:MM)
+		status, charge_str, time = first_line:match("Battery %d+: ([^,]+), (%d+)%%, (%d+:%d+):")
 
 		if not time then
-			-- Fallback: just status and charge without any time info
-			status, charge_str = first_line:match("Battery %d+: ([^,]+), (%d+)%%")
-			time = "Unavailable"
-		end
-	end
+			-- Try to match format with text (like "discharging at zero rate...")
+			status, charge_str, time = first_line:match("Battery %d+: ([^,]+), (%d+)%%, (.+)$")
 
-	local charge = tonumber(charge_str)
-	update_widget(status, charge)
-	update_tooltip(status, charge, time)
-end)
+			if not time then
+				-- Fallback: just status and charge without any time info
+				status, charge_str = first_line:match("Battery %d+: ([^,]+), (%d+)%%")
+				time = "Unavailable"
+			end
+		end
+
+		local charge = tonumber(charge_str)
+		update_widget(status, charge)
+		update_tooltip(status, charge, time)
+	end)
+end
+
+-- Regular polling as fallback (every 5 seconds)
+gears.timer({
+	timeout = 10,
+	call_now = true,
+	autostart = true,
+	callback = update_battery_widget,
+})
+
+-- Event-driven updates using acpi_listen
+awful.spawn.with_line_callback("acpi_listen", {
+	stdout = function(line)
+		if line:match("ac_adapter") then
+			-- Charger state changed -> refresh immediately
+			update_battery_widget()
+		end
+	end,
+})
 
 return widget_button

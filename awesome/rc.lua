@@ -10,10 +10,11 @@ local awful = require("awful")
 local gfs = require("gears.filesystem")
 
 local config_dir = gfs.get_configuration_dir()
-local script_dir = config_dir .. "/scripts/"
+local script_dir = config_dir .. "scripts/"
 
 awful.spawn.with_shell(script_dir .. "preferences.sh")
 awful.spawn.with_shell(script_dir .. "autorun.sh")
+awful.spawn.with_shell(script_dir .. "screenlock.sh start")
 
 require("ui.misc.notifications")
 

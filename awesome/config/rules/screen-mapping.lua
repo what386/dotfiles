@@ -2,13 +2,13 @@ awful = require("awful")
 ruled = require("ruled")
 
 ruled.client.append_rule({
-	rule = { class = "wezterm" },
+	rule = { class = "org.wezfurlong.wezterm" },
 	properties = { screen = 1, tag = awful.screen.focused().tags[1] },
 })
 
 ruled.client.append_rule({
-	rule = { class = "zenbrowser" },
-	properties = { screen = 1, tag = awful.screen.focused().tags[2] },
+	rule = { class = "zen" },
+	properties = { screen = 1, tag = awful.screen.focused().tags[3] },
 })
 
 ruled.client.append_rule({
@@ -21,7 +21,7 @@ ruled.client.append_rule({
 	properties = { screen = 1, tag = awful.screen.focused().tags[8] },
 })
 ruled.client.append_rule({
-	rule = { class = "thunderbird" },
+	rule = { class = "eu.betterbird.Betterbird" },
 	properties = { screen = 1, tag = awful.screen.focused().tags[9] },
 })
 ruled.client.append_rule({

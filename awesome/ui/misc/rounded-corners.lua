@@ -1,6 +1,5 @@
 -- Required libraries
 local gears = require("gears")
-local awful = require("awful")
 
 local function apply_rounded_corners(c)
 	c.shape = function(cr, w, h)
@@ -15,7 +14,7 @@ end
 -- Apply on manage
 client.connect_signal("manage", apply_rounded_corners)
 
--- Reapply when client geometry changes
+-- Reapply when client geometry change
 client.connect_signal("property::geometry", apply_rounded_corners)
 
 -- Reapply when fullscreen state changes

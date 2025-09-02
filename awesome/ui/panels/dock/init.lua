@@ -68,12 +68,16 @@ local create_dock = function(s)
 	local function should_always_show_dock()
 		local current_tag = s.selected_tag
 
-		if true then
-			return false
-		end
-
 		if not current_tag then
 			return true -- No tag selected, show dock
+		end
+
+		-- Get all clients on the current tag
+		local clients = current_tag:clients()
+
+		-- If no clients on the tag, always show dock
+		if #clients == 0 then
+			return true
 		end
 
 		-- Get dock geometry (approximate, since it might not be visible)
@@ -85,7 +89,6 @@ local create_dock = function(s)
 		}
 
 		-- Check if any visible clients overlap with dock area
-		local clients = current_tag:clients()
 		for _, c in ipairs(clients) do
 			if c.valid and not c.hidden and not c.minimized and c.screen == s then
 				local cg = c:geometry()
@@ -97,7 +100,7 @@ local create_dock = function(s)
 					and cg.y < dock_area.y + dock_area.height
 					and cg.y + cg.height > dock_area.y
 				then
-					return false -- Client overlaps dock area
+					return false -- Client overlaps dock area, hide dock
 				end
 			end
 		end

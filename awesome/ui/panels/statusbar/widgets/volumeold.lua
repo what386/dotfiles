@@ -1,6 +1,8 @@
+-- Required libraries
 local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
+local watch = require("awful.widget.watch")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
@@ -49,24 +51,34 @@ local is_muted = false
 local device = "speakers"
 
 local function get_volume_icon(level)
+	local icon
 	if tonumber(level) >= 75 then
-		return icons.widgets.volume.volume_high
+		icon = icons.widgets.volume.volume_high
 	elseif tonumber(level) >= 50 then
-		return icons.widgets.volume.volume_medium
+		icon = icons.widgets.volume.volume_medium
 	elseif tonumber(level) >= 25 then
-		return icons.widgets.volume.volume_low
+		icon = icons.widgets.volume.volume_low
 	else
-		return icons.widgets.volume.volume_off
+		icon = icons.widgets.volume.volume_off
 	end
+	return icon
 end
 
 local function update_volume_display()
 	local icon
 
 	if device == "headphones" then
-		icon = is_muted and icons.widgets.volume.headphones_muted or icons.widgets.volume.headphones
+		if is_muted then
+			icon = icons.widgets.volume.headphones_muted
+		else
+			icon = icons.widgets.volume.headphones
+		end
 	else
-		icon = is_muted and icons.widgets.volume.volume_muted or get_volume_icon(volume_level)
+		if is_muted == true then
+			icon = icons.widgets.volume.volume_muted
+		else
+			icon = get_volume_icon(volume_level)
+		end
 	end
 
 	-- this is so that other widgets can share this logic
@@ -88,13 +100,7 @@ end
 
 local function update_volume_level()
 	awful.spawn.easy_async_with_shell("pactl get-sink-volume @DEFAULT_SINK@", function(stdout)
-		local new_level = tonumber(stdout:match("Volume: front.- (%d+)%%") or "0")
-		if new_level ~= volume_level then
-			volume_level = new_level
-
-			-- broadcast to any listener (OSD, notifications, etc.)
-			awesome.emit_signal("widget::volume:level", volume_level)
-		end
+		volume_level = tonumber(stdout:match("Volume: front.- (%d+)%%") or "0")
 		update_volume_display()
 	end)
 end
@@ -102,11 +108,11 @@ end
 local function update_volume_muted()
 	awful.spawn.easy_async_with_shell("pactl get-sink-mute @DEFAULT_SINK@", function(stdout)
 		local is_muted_string = stdout:match("Mute: (%a+)")
-		local new_muted = (is_muted_string == "yes")
-		if new_muted ~= is_muted then
-			is_muted = new_muted
-			-- re-broadcast full state
-			awesome.emit_signal("widget::volume:level", volume_level)
+
+		if is_muted_string == "yes" then
+			is_muted = true
+		else
+			is_muted = false
 		end
 		update_volume_display()
 	end)
@@ -128,48 +134,45 @@ local function update_volume_device()
 	end)
 end
 
--- Event-driven: listen for volume changes from PulseAudio
-awful.spawn.with_line_callback("pactl subscribe", {
-	stdout = function(line)
-		-- sink events cover volume, mute, and device changes
-		if
-			line:match("Event 'change' on sink")
-			or line:match("Event 'new' on sink")
-			or line:match("Event 'remove' on sink")
-		then
-			update_volume_level()
-			update_volume_muted()
-			update_volume_device()
-		elseif line:match("Event 'change' on server") then
-			-- default sink changed
-			update_volume_level()
-			update_volume_muted()
-			update_volume_device()
-		end
-	end,
-})
-
--- Initial refresh on startup
-gears.timer({
-	timeout = 1,
-	autostart = true,
-	single_shot = true,
-	callback = function()
-		update_volume_level()
-		update_volume_muted()
-		update_volume_device()
-	end,
-})
-
--- Click handlers
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	awful.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle", false)
+	update_volume_muted()
 end)))
 
 volume:connect_signal("button::press", function(_, _, _, button)
 	if button == 1 then
 		awful.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle")
+		update_volume_muted()
 	end
 end)
+
+awesome.connect_signal("volume::changed:level", function()
+	update_volume_level()
+end)
+
+awesome.connect_signal("volume::changed:muted", function()
+	update_volume_muted()
+end)
+
+awesome.connect_signal("volume::changed:device", function()
+	update_volume_device()
+end)
+
+awesome.connect_signal("volume::update:level", function(level)
+	volume_level = level
+	update_volume_display()
+end)
+
+gears.timer({
+	timeout = 10,
+	call_now = true,
+	autostart = true,
+	callback = function()
+		update_volume_level()
+		update_volume_muted()
+		update_volume_device()
+		collectgarbage("collect")
+	end,
+})
 
 return widget_button

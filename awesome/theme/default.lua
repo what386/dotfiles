@@ -173,10 +173,10 @@ local awesome_overrides = function(theme)
 	theme.layout_floating = theme.icons .. "layouts/floating.svg"
 
 	-- Taglist
-	theme.taglist_bg_empty = theme.background .. "99"
-	theme.taglist_bg_occupied = "#ffffff" .. "1A"
+	theme.taglist_bg_empty = "#ffffff" .. "1A"
+	theme.taglist_bg_occupied = "#ffffff" .. "0A"
 	theme.taglist_bg_urgent = "#E91E63" .. "99"
-	theme.taglist_bg_focus = theme.background
+	theme.taglist_bg_focus = "#ffffff00" --"#ffffff" .. "1A"
 	theme.taglist_spacing = dpi(0)
 
 	-- Tasklist

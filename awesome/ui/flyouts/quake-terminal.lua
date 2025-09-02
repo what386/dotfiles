@@ -3,32 +3,18 @@ local ruled = require("ruled")
 local beautiful = require("beautiful")
 local gears = require("gears")
 local dpi = beautiful.xresources.apply_dpi
+local rubato = require("dependencies.rubato")
+
 local app = require("config.user.preferences").default.quake -- e.g. "kitty --name QuakeTerminal"
 local quake_instance_name = "QuakeTerminal"
 local previous_client = nil
 local quake_client = nil
-local anim_timer = nil
-local anim_fps = 60
-local anim_duration = 0.20
-local steps = anim_duration * anim_fps
 local margins = dpi(2.5)
 local lr_margins = dpi(300)
 
 -- Function to get current screen dimensions and calculate positioning
 local function get_screen_geometry()
-	local focused_screen = awful.screen.focused()
-
-	-- Fallback to primary screen if focused screen is nil
-	if not focused_screen then
-		focused_screen = screen.primary
-	end
-
-	-- If still nil, try the first available screen
-	if not focused_screen and screen.count() > 0 then
-		focused_screen = screen[1]
-	end
-
-	-- If we still don't have a screen, return nil
+	local focused_screen = awful.screen.focused() or screen.primary or screen[1]
 	if not focused_screen then
 		return nil
 	end
@@ -90,49 +76,38 @@ local function update_quake_geometry(c, geom)
 	if not c or not c.valid then
 		return false
 	end
-
-	-- Get geometry if not provided
-	if not geom then
-		geom = get_screen_geometry()
-	end
-
-	-- Return early if we can't get screen geometry
+	geom = geom or get_screen_geometry()
 	if not geom then
 		return false
 	end
 
-	local focused_screen = geom.screen
-
-	-- Move client to focused screen if it's on a different screen
-	if c.screen ~= focused_screen then
-		c:move_to_screen(focused_screen)
+	if c.screen ~= geom.screen then
+		c:move_to_screen(geom.screen)
 	end
 
-	-- Update geometry for the current screen
 	c:geometry({
 		x = geom.panel_x,
 		y = geom.workarea.y - geom.panel_height - margins,
 		width = geom.panel_width,
 		height = geom.panel_height,
 	})
-
 	return true
 end
 
+-- Rubato animation object (created lazily when terminal spawns)
+local quake_y_anim = nil
+
+-- Animate quake terminal using rubato
 local function animate_quake_terminal(show)
 	if not quake_client or not quake_client.valid then
 		return
 	end
-
 	local geom = get_screen_geometry()
-
-	-- Return early if we can't get screen geometry
 	if not geom then
 		return
 	end
 
-	-- Only update screen/width if we're on a different screen
-	-- Don't update Y position as that will interfere with animation
+	-- Update width/screen without touching y
 	if quake_client.screen ~= geom.screen then
 		quake_client:move_to_screen(geom.screen)
 		quake_client:geometry({
@@ -142,11 +117,26 @@ local function animate_quake_terminal(show)
 		})
 	end
 
-	-- Calculate animation positions
-	local target_y = show and geom.workarea.y + margins or geom.workarea.y - geom.panel_height - margins - dpi(36)
-	local start_y = quake_client.y
-	local dy = (target_y - start_y) / steps
-	local step = 0
+	-- Animation target positions
+	local target_y_show = geom.workarea.y + margins
+	local target_y_hide = geom.workarea.y - geom.panel_height - margins - dpi(36)
+
+	-- Create rubato animator if not already
+	if not quake_y_anim then
+		quake_y_anim = rubato.timed({
+			intro = 0.15, -- acceleration time
+			outro = 0.15,
+			duration = 0.3,
+			easing = rubato.quadratic,
+			subscribed = function(pos)
+				if quake_client and quake_client.valid then
+					local g = quake_client:geometry()
+					g.y = pos
+					quake_client:geometry(g)
+				end
+			end,
+		})
+	end
 
 	-- Focus handling
 	if show then
@@ -154,7 +144,6 @@ local function animate_quake_terminal(show)
 		quake_client.hidden = false
 		quake_client:emit_signal("request::activate", "quake_toggle", { raise = true })
 	else
-		-- Restore focus to previously focused client if it's still valid
 		if previous_client and previous_client.valid then
 			client.focus = previous_client
 		end
@@ -163,36 +152,22 @@ local function animate_quake_terminal(show)
 	quake_client.hidden = false
 	quake_client:raise()
 
-	if anim_timer and anim_timer.started then
-		anim_timer:stop()
-	end
+	-- Set rubato target
+	quake_y_anim.target = show and target_y_show or target_y_hide
 
-	anim_timer = gears.timer({
-		timeout = 1 / anim_fps,
-		autostart = true,
-		call_now = true,
-		callback = function()
-			if not quake_client or not quake_client.valid then
-				anim_timer:stop()
-				return
-			end
-
-			if step >= steps then
-				quake_client.y = target_y
-				if not show then
+	-- When animation finishes hiding, mark hidden
+	if not show then
+		gears.timer({
+			timeout = quake_y_anim.duration + quake_y_anim.intro,
+			autostart = true,
+			single_shot = true,
+			callback = function()
+				if quake_client and quake_client.valid then
 					quake_client.hidden = true
 				end
-				anim_timer:stop()
-				return
-			end
-
-			local new_y = math.floor(start_y + dy * step)
-			quake_client:geometry({
-				y = new_y,
-			})
-			step = step + 1
-		end,
-	})
+			end,
+		})
+	end
 end
 
 -- Toggle quake terminal
@@ -214,12 +189,10 @@ end)
 client.connect_signal("manage", function(c)
 	if c.instance == quake_instance_name then
 		quake_client = c
-		-- Set initial geometry on the focused screen
 		local success = update_quake_geometry(c)
 		if success then
 			c.hidden = true
 		else
-			-- If we can't get geometry, delay the setup
 			gears.timer.delayed_call(function()
 				update_quake_geometry(c)
 				c.hidden = true
@@ -232,5 +205,6 @@ end)
 client.connect_signal("unmanage", function(c)
 	if c == quake_client then
 		quake_client = nil
+		quake_y_anim = nil
 	end
 end)

@@ -3,6 +3,7 @@ local gears = require("gears")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
+local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
 
 local osd_header = wibox.widget({
@@ -44,10 +45,14 @@ local slider_osd = wibox.widget({
 
 local vol_osd_slider = slider_osd.vol_osd_slider
 
--- Dragging the slider changes volume, but still uses the signals to update UI
 vol_osd_slider:connect_signal("property::value", function()
 	local volume_level = vol_osd_slider:get_value()
 	awful.spawn("pactl set-sink-volume @DEFAULT_SINK@ " .. volume_level .. "%", false)
+
+	-- Update textbox widget text
+	osd_value.text = volume_level .. "%"
+
+	-- Update the volume slider if values here change
 	awesome.emit_signal("volume::update:level", volume_level)
 
 	if awful.screen.focused().show_vol_osd then
@@ -63,11 +68,9 @@ vol_osd_slider:connect_signal("mouse::enter", function()
 	awful.screen.focused().show_vol_osd = true
 end)
 
--- 📡 Passive updates: only respond to signals
-awesome.connect_signal("volume::update:level", function(level)
-	vol_osd_slider:set_value(level)
-	osd_value.text = tostring(level) .. "%"
-	awesome.emit_signal("osd::volume_osd:show", true) -- show OSD on level change
+-- The emit will come from the volume-slider
+awesome.connect_signal("volume::update:level", function(volume)
+	vol_osd_slider:set_value(volume)
 end)
 
 local widget = wibox.widget({
@@ -84,7 +87,6 @@ local widget = wibox.widget({
 
 awesome.connect_signal("widget::volume:icon", function(newicon)
 	widget.icon:set_image(newicon)
-	awesome.emit_signal("osd::volume_osd:show", true) -- show OSD on mute/unmute change
 end)
 
 local volume_slider_osd = wibox.widget({
@@ -99,10 +101,14 @@ local osd_width = dpi(300)
 local osd_margin = dpi(25)
 
 screen.connect_signal("request::desktop_decoration", function(s)
+	local s = s or {}
 	s.show_vol_osd = false
 
+	-- Create the box
 	s.volume_osd_overlay = awful.popup({
-		widget = {},
+		widget = {
+			-- Removing this block causes error (???)
+		},
 		ontop = true,
 		visible = false,
 		type = "notification",
@@ -144,6 +150,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		widget = wibox.container.background(),
 	})
 
+	-- Reset timer on mouse hover
 	s.volume_osd_overlay:connect_signal("mouse::enter", function()
 		awful.screen.focused().show_vol_osd = true
 		awesome.emit_signal("osd::volume_osd:rerun")
@@ -180,5 +187,3 @@ awesome.connect_signal("osd::volume_osd:show", function(bool)
 		end
 	end
 end)
-
-return volume_slider_osd

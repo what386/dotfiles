@@ -67,7 +67,7 @@ local control_center_row_one = wibox.widget({
 			spacing = dpi(10),
 			require("ui.panels.dashboard.switch")(),
 			vertical_separator,
-			require("ui.panels.dashboard.end-session")(),
+			--require("ui.panels.dashboard.end-session")(),
 		}),
 		left = dpi(10),
 		widget = wibox.container.margin,
@@ -126,7 +126,7 @@ local main_control_row_sliders = wibox.widget({
 		widget = wibox.container.margin,
 	}),
 	format_item({
-		require("ui.panels.dashboard.settings.volume-slider"),
+		--require("ui.panels.dashboard.settings.volume-slider"),
 		margins = dpi(10),
 		widget = wibox.container.margin,
 	}),

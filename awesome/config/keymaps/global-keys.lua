@@ -36,6 +36,10 @@ local keys = gears.table.join(
 		awesome.emit_signal("flyout::promptbox:activate")
 	end, { description = "show run dialogue", group = "flyouts" }),
 
+	awful.key({ modkey }, "s", function()
+		awesome.emit_signal("flyout::promptbox:activate")
+	end, { description = "show signal dialogue", group = "flyouts" }),
+
 	awful.key({ modkey }, "Return", function()
 		awesome.emit_signal("flyout::quake_terminal:toggle")
 	end, { description = "show terminal", group = "flyouts" }),

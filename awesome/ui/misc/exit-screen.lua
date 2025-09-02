@@ -159,7 +159,8 @@ end
 
 local lock_command = function()
 	awesome.emit_signal("screen::exit_screen:hide")
-	awful.spawn.with_shell(userprefs.default.lock)
+	awesome.emit_signal("screen::lockscreen:show")
+	--awful.spawn.with_shell(userprefs.default.lock)
 end
 
 local hibernate_command = function()

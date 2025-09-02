@@ -267,7 +267,7 @@ local keys = gears.table.join(
 root.keys(gears.table.join(existing_keys, keys))
 
 awesome.connect_signal("startup", function()
-	if autorestore_allowed then
+	if awesome.startup and autorestore_allowed then
 		restore()
 	end
 end)

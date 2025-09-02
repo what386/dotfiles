@@ -12,17 +12,17 @@ local tags = {
 		gap = beautiful.useless_gap,
 	},
 	{
+		type = "development",
+		icon = icons.tags.development,
+		default_app = "",
+		gap = beautiful.useless_gap,
+		layout = awful.layout.suit.tile,
+	},
+	{
 		type = "internet",
 		icon = icons.tags.web_browser,
 		default_app = apps.default.web_browser,
 		gap = beautiful.useless_gap,
-	},
-	{
-		type = "files",
-		icon = icons.tags.file_manager,
-		default_app = apps.default.file_manager,
-		gap = beautiful.useless_gap,
-		layout = awful.layout.suit.tile,
 	},
 	{
 		type = "text",

@@ -60,8 +60,8 @@ return {
 
 	-- List of binaries/shell scripts that will execute for a certain task
 	utils = {
-		full_screenshot = scripts_dir .. "snap full",
-		gui_screenshot = scripts_dir .. "flameshot gui",
+		full_screenshot = "snap full",
+		gui_screenshot = "flameshot gui",
 		update_profile = scripts_dir .. "update_profile.sh",
 	},
 }
