@@ -167,6 +167,7 @@ return { -- LSP Configuration & Plugins
 			powershell_es = {},
 
 			dockerls = {},
+
 			docker_compose_language_service = {},
 		}
 

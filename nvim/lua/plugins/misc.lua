@@ -35,4 +35,7 @@ return {
 			})
 		end,
 	},
+	{ -- debug attacher
+		"mfussenegger/nvim-dap",
+	},
 }
