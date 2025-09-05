@@ -1,50 +1,52 @@
-return {
-   window_decorations = "RESIZE",
-   window_close_confirmation = "AlwaysPrompt",
-   default_workspace = "home/source/",
-   default_prog = { "/usr/bin/fish" },
+local M = {}
 
-   automatically_reload_config = true,
-   exit_behavior = 'CloseOnCleanExit', -- if the shell program exited with a successful status
-   exit_behavior_messaging = 'Verbose',
-   status_update_interval = 1000,
+function M.apply(config)
+    -- Window and behavior settings
+    config.window_decorations = "RESIZE"
+    config.window_close_confirmation = "AlwaysPrompt"
+    config.automatically_reload_config = true
+    config.exit_behavior = "CloseOnCleanExit"
+    config.exit_behavior_messaging = "Verbose"
+    config.status_update_interval = 1000
+    config.scrollback_lines = 20000
 
-   scrollback_lines = 20000,
+    -- Hyperlink detection rules
+    config.hyperlink_rules = {
+        -- URL in parens: (URL)
+        {
+            regex = "\\((\\w+://\\S+)\\)",
+            format = "$1",
+            highlight = 1,
+        },
+        -- URL in brackets: [URL]
+        {
+            regex = "\\[(\\w+://\\S+)\\]",
+            format = "$1",
+            highlight = 1,
+        },
+        -- URL in curly braces: {URL}
+        {
+            regex = "\\{(\\w+://\\S+)\\}",
+            format = "$1",
+            highlight = 1,
+        },
+        -- URL in angle brackets: <URL>
+        {
+            regex = "<(\\w+://\\S+)>",
+            format = "$1",
+            highlight = 1,
+        },
+        -- URLs not wrapped in brackets
+        {
+            regex = "\\b\\w+://\\S+[)/a-zA-Z0-9-]+",
+            format = "$0",
+        },
+        -- Implicit mailto link
+        {
+            regex = "\\b\\w+@[\\w-]+(\\.[\\w-]+)+\\b",
+            format = "mailto:$0",
+        },
+    }
+end
 
-   hyperlink_rules = {
-      -- Matches: a URL in parens: (URL)
-      {
-         regex = '\\((\\w+://\\S+)\\)',
-         format = '$1',
-         highlight = 1,
-      },
-      -- Matches: a URL in brackets: [URL]
-      {
-         regex = '\\[(\\w+://\\S+)\\]',
-         format = '$1',
-         highlight = 1,
-      },
-      -- Matches: a URL in curly braces: {URL}
-      {
-         regex = '\\{(\\w+://\\S+)\\}',
-         format = '$1',
-         highlight = 1,
-      },
-      -- Matches: a URL in angle brackets: <URL>
-      {
-         regex = '<(\\w+://\\S+)>',
-         format = '$1',
-         highlight = 1,
-      },
-      -- Then handle URLs not wrapped in brackets
-      {
-         regex = '\\b\\w+://\\S+[)/a-zA-Z0-9-]+',
-         format = '$0',
-      },
-      -- implicit mailto link
-      {
-         regex = '\\b\\w+@[\\w-]+(\\.[\\w-]+)+\\b',
-         format = 'mailto:$0',
-      },
-   },
-}
+return M

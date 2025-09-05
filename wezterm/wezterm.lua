@@ -1,16 +1,11 @@
-local Config = require("config")
+local wezterm = require("wezterm")
 
---require('events.left-status').setup()
---require('events.right-status').setup({ date_format = '%a %H:%M:%S' })
---require('events.tab-title').setup({ hide_active_tab_unseen = false, unseen_icon = 'circle' })
---require('events.new-tab-button').setup()
+local config = wezterm.config_builder()
 
-return Config:init()
-	:append(require("config.keymaps"))
-	:append(require("config.options"))
-	:append(require("config.domains"))
-	:append(require("theme.fonts"))
-	:append(require("theme.colors"))
-	:append(require("theme.appearance"))
-	:append(require("theme.tabline"))
-	:append(require("config.launch")).options
+-- Load configuration modules in order
+require("config").apply(config)
+require("platform").apply(config)
+require("theme").apply(config)
+require("modules").apply(config)
+
+return config

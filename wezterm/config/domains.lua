@@ -1,28 +1,28 @@
-return {
-   -- ref: https://wezfurlong.org/wezterm/config/lua/SshDomain.html
-   -- ssh_domains = {},
-   ssh_domains = {
-      -- yazi's image preview on Windows will only work if launched via ssh from WSL
-      {
-         name = 'wsl.ssh',
-         remote_address = 'localhost',
-         multiplexing = 'None',
-         --default_prog = { 'fish', '-l' },
-         assume_shell = 'Posix'
-      }
-   },
+local M = {}
 
-   -- ref: https://wezfurlong.org/wezterm/multiplexing.html#unix-domains
-   unix_domains = {},
+function M.apply(config)
+    -- SSH domains configuration
+    config.ssh_domains = {
+        {
+            name = "wsl.ssh",
+            remote_address = "localhost",
+            multiplexing = "None",
+            assume_shell = "Posix",
+        },
+    }
 
-   -- ref: https://wezfurlong.org/wezterm/config/lua/WslDomain.html
-   wsl_domains = {
-      {
-         name = 'WSL:Ubuntu',
-         distribution = 'Ubuntu',
-         username = 'bmorin',
-         default_cwd = '/home/bmorin/',
-         --default_prog = { 'fish', '-l' },
-      },
-   },
-}
+    -- Unix domains (empty for now)
+    config.unix_domains = {}
+
+    -- WSL domains configuration
+    config.wsl_domains = {
+        {
+            name = "WSL:Ubuntu",
+            distribution = "Ubuntu",
+            username = "bmorin",
+            default_cwd = "/home/bmorin/",
+        },
+    }
+end
+
+return M

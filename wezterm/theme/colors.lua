@@ -1,10 +1,13 @@
-local wezterm = require("wezterm")
-local config = {}
+local M = {}
 
-config.colors = {
-	background = "#000000",
-}
+function M.apply(config)
+    -- Color scheme
+    config.color_scheme = "Oceanic-Next"
 
-config.color_scheme = "Oceanic-Next"
+    -- Color overrides
+    config.colors = {
+        background = "#000000",
+    }
+end
 
-return config
+return M
