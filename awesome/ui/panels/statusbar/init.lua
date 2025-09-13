@@ -16,6 +16,7 @@ local layoutbox_widget = require(widgetdir .. "layoutbox")
 local dashboard_widget = require(widgetdir .. "dashboard-toggle")
 local dropdown_widget = require(widgetdir .. "dropdown")
 local osk_widget = require(widgetdir .. "osk-toggle")
+local update_widget = require(widgetdir .. "update-manager")
 
 local separator = wibox.widget({
 	orientation = "vertical",
@@ -27,6 +28,7 @@ local separator = wibox.widget({
 
 local right_widgets = wibox.widget({
 	{
+		update_widget,
 		bluetooth_widget,
 		network_widget,
 		volume_widget,

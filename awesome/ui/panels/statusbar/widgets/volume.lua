@@ -128,43 +128,55 @@ local function update_volume_device()
 	end)
 end
 
--- Event-driven: listen for volume changes from PulseAudio
+-- Store previous state to compare against
+local last_volume = nil
+local last_muted = nil
+local last_device = nil
+
+local function check_and_update_volume()
+	awful.spawn.easy_async("pactl get-sink-volume @DEFAULT_SINK@", function(volume_out)
+		awful.spawn.easy_async("pactl get-sink-mute @DEFAULT_SINK@", function(mute_out)
+			awful.spawn.easy_async("pactl get-default-sink", function(device_out)
+				local current_volume = volume_out:match("(%d+)%%")
+				local current_muted = mute_out:match("Mute: (%w+)")
+				local current_device = device_out:gsub("%s+", "")
+
+				-- Only update if something actually changed
+				if current_volume ~= last_volume or current_muted ~= last_muted or current_device ~= last_device then
+					last_volume = current_volume
+					last_muted = current_muted
+					last_device = current_device
+
+					update_volume_device()
+					update_volume_level()
+					update_volume_muted()
+				end
+			end)
+		end)
+	end)
+end
+
+local volume_timer = nil
+local function debounced_check_and_update_volume()
+	if volume_timer then
+		volume_timer:stop()
+	end
+	volume_timer = gears.timer({
+		timeout = 0.05, -- 50ms debounce
+		single_shot = true,
+		callback = check_and_update_volume,
+	})
+	volume_timer:start()
+end
+
 awful.spawn.with_line_callback("pactl subscribe", {
 	stdout = function(line)
-		-- sink events cover volume, mute, and device changes
-		if
-			line:match("Event 'change' on sink")
-			or line:match("Event 'new' on sink")
-			or line:match("Event 'remove' on sink")
-		then
-			update_volume_level()
-			update_volume_muted()
-			update_volume_device()
-		elseif line:match("Event 'change' on server") then
-			-- default sink changed
-			update_volume_level()
-			update_volume_muted()
-			update_volume_device()
+		-- Only respond to sink changes and server changes (default sink change)
+		if line:match("Event 'change' on sink") or line:match("Event 'change' on server") then
+			debounced_check_and_update_volume()
 		end
 	end,
 })
-
--- Initial refresh on startup
-gears.timer({
-	timeout = 1,
-	autostart = true,
-	single_shot = true,
-	callback = function()
-		update_volume_level()
-		update_volume_muted()
-		update_volume_device()
-	end,
-})
-
--- Click handlers
-widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	awful.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle", false)
-end)))
 
 volume:connect_signal("button::press", function(_, _, _, button)
 	if button == 1 then

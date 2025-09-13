@@ -161,6 +161,14 @@ icons.widgets.server = {
 	server_connected = dir .. "widgets/server/server-connected.svg",
 }
 
+icons.widgets.update = {
+	shield = dir .. "widgets/update-manager/shield.svg",
+	shield_check = dir .. "widgets/update-manager/shield-check.svg",
+	shield_alert = dir .. "widgets/update-manager/shield-alert.svg",
+	shield_x = dir .. "widgets/update-manager/shield-x.svg",
+	shield_off = dir .. "widgets/update-manager/shield-off.svg",
+}
+
 icons.widgets.package = {
 	package_check = dir .. "widgets/package-manager/package-check.svg",
 	package_x = dir .. "widgets/package-manager/package-x.svg",

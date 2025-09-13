@@ -5,8 +5,6 @@ local naughty = require("naughty")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 
-local config_dir = gears.filesystem.get_configuration_dir()
-
 local empty_notifbox = require("ui.panels.infopanel.notif-center.build-notifbox.empty-notifbox")
 local notifbox_scroller = require("ui.panels.infopanel.notif-center.build-notifbox.notifbox-scroller")
 

@@ -19,6 +19,7 @@ copy_config() {
 
 copy_config "nvim"
 copy_config "wezterm"
+copy_config "kitty"
 copy_config "awesome"
 
 echo "All configurations have been synced to $DOTFILES_DIR"

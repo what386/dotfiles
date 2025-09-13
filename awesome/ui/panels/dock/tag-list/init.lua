@@ -7,8 +7,8 @@ local gears = require("gears")
 local rubato = require("dependencies.rubato")
 
 -- Configuration variables for underline and tag calculations
-local UNDERLINE_WIDTH = dpi(45)                                 -- Width of the underline indicator
-local TAG_CALC_WIDTH = dpi(60)                                  -- Expected width for tag positioning calculations (icon + margins)
+local UNDERLINE_WIDTH = dpi(45) -- Width of the underline indicator
+local TAG_CALC_WIDTH = dpi(60) -- Expected width for tag positioning calculations (icon + margins)
 local UNDERLINE_MARGIN = (TAG_CALC_WIDTH - UNDERLINE_WIDTH) / 2 -- Offset to center underline within tag width
 
 --- Common method to create buttons.
@@ -186,10 +186,11 @@ local tag_list = function(s)
 
 	-- Create rubato animation for the underline
 	local underline_anim = rubato.timed({
+		rate = 60,
 		intro = 0.08,
 		outro = 0.12,
 		duration = 0.35,
-		easing = rubato.quadratic,
+		easing = rubato.easing.linear,
 		subscribed = function(pos)
 			-- Update underline position
 			if taglist_container then

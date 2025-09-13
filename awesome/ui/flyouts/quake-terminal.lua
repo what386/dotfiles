@@ -4,7 +4,6 @@ local beautiful = require("beautiful")
 local gears = require("gears")
 local dpi = beautiful.xresources.apply_dpi
 local rubato = require("dependencies.rubato")
-
 local app = require("config.user.preferences").default.quake -- e.g. "kitty --name QuakeTerminal"
 local quake_instance_name = "QuakeTerminal"
 local previous_client = nil
@@ -18,18 +17,15 @@ local function get_screen_geometry()
 	if not focused_screen then
 		return nil
 	end
-
 	local screen_geom = focused_screen.workarea
 	if not screen_geom then
 		return nil
 	end
-
 	local screen_width = screen_geom.width
 	local screen_height = screen_geom.height
 	local panel_width = screen_width - lr_margins * 2
 	local panel_height = dpi(500)
 	local panel_x = screen_geom.x + lr_margins
-
 	return {
 		screen = focused_screen,
 		workarea = screen_geom,
@@ -46,7 +42,7 @@ local function quake_properties()
 		skip_decoration = true,
 		titlebars_enabled = false,
 		switch_to_tags = false,
-		opacity = 0.40,
+		opacity = 0, -- Start with opacity 0 for fade-in effect
 		floating = true,
 		skip_taskbar = true,
 		ontop = true,
@@ -80,11 +76,9 @@ local function update_quake_geometry(c, geom)
 	if not geom then
 		return false
 	end
-
 	if c.screen ~= geom.screen then
 		c:move_to_screen(geom.screen)
 	end
-
 	c:geometry({
 		x = geom.panel_x,
 		y = geom.workarea.y - geom.panel_height - margins,
@@ -94,8 +88,9 @@ local function update_quake_geometry(c, geom)
 	return true
 end
 
--- Rubato animation object (created lazily when terminal spawns)
+-- Rubato animation objects (created lazily when terminal spawns)
 local quake_y_anim = nil
+local quake_opacity_anim = nil
 
 -- Animate quake terminal using rubato
 local function animate_quake_terminal(show)
@@ -119,46 +114,71 @@ local function animate_quake_terminal(show)
 
 	-- Animation target positions
 	local target_y_show = geom.workarea.y + margins
-	local target_y_hide = geom.workarea.y - geom.panel_height - margins - dpi(36)
+	local target_y_hide = geom.workarea.y - ((geom.panel_height / 5) + margins + dpi(36))
 
-	-- Create rubato animator if not already
+	-- Opacity targets
+	local target_opacity_show = 1
+	local target_opacity_hide = 0
+
+	-- Create rubato animators if not already created
 	if not quake_y_anim then
 		quake_y_anim = rubato.timed({
-			intro = 0.15, -- acceleration time
-			outro = 0.15,
-			duration = 0.3,
-			easing = rubato.quadratic,
+			rate = 60,
+			intro = 0.12,
+			outro = 0.12,
+			duration = 0.5,
+			easing = rubato.easing.linear,
 			subscribed = function(pos)
 				if quake_client and quake_client.valid then
-					local g = quake_client:geometry()
-					g.y = pos
-					quake_client:geometry(g)
+					quake_client.y = pos
 				end
 			end,
 		})
 	end
 
-	-- Focus handling
+	if not quake_opacity_anim then
+		quake_opacity_anim = rubato.timed({
+			rate = 60,
+			intro = 0.1,
+			outro = 0.1,
+			duration = 0.25,
+			easing = rubato.easing.zero,
+			subscribed = function(opacity)
+				if quake_client and quake_client.valid then
+					quake_client.opacity = opacity
+				end
+			end,
+		})
+	end
+
+	-- Focus handling and initial setup
 	if show then
 		previous_client = client.focus
 		quake_client.hidden = false
 		quake_client:emit_signal("request::activate", "quake_toggle", { raise = true })
+		-- Start fade in slightly before the slide animation
+		quake_opacity_anim.target = target_opacity_show
 	else
 		if previous_client and previous_client.valid then
 			client.focus = previous_client
 		end
+		-- Start fade out immediately
+		quake_opacity_anim.target = target_opacity_hide
 	end
 
 	quake_client.hidden = false
 	quake_client:raise()
 
-	-- Set rubato target
+	-- Set rubato target for position animation
 	quake_y_anim.target = show and target_y_show or target_y_hide
 
 	-- When animation finishes hiding, mark hidden
 	if not show then
 		gears.timer({
-			timeout = quake_y_anim.duration + quake_y_anim.intro,
+			timeout = math.max(
+				quake_y_anim.duration + quake_y_anim.intro,
+				quake_opacity_anim.duration + quake_opacity_anim.intro
+			),
 			autostart = true,
 			single_shot = true,
 			callback = function()
@@ -192,10 +212,12 @@ client.connect_signal("manage", function(c)
 		local success = update_quake_geometry(c)
 		if success then
 			c.hidden = true
+			c.opacity = 0 -- Ensure it starts invisible
 		else
 			gears.timer.delayed_call(function()
 				update_quake_geometry(c)
 				c.hidden = true
+				c.opacity = 0
 			end)
 		end
 	end
@@ -206,5 +228,6 @@ client.connect_signal("unmanage", function(c)
 	if c == quake_client then
 		quake_client = nil
 		quake_y_anim = nil
+		quake_opacity_anim = nil
 	end
 end)

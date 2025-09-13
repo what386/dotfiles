@@ -6,10 +6,8 @@ run() {
     fi
 }
 
-run "lxpolkit"             # authenticator
-run "mintupdate-launcher"  # update manager
-run "kdeconnect-indicator" # kdeconnect
+run "lxpolkit" # authenticator
 
 # this breaks the run dialogue for some reason
 # picom doesnt duplicate so its probably fine
-picom --config /home/bmorin/.config/awesome/dependencies/picom/picom.conf
+picom --config /home/bmorin/.config/awesome/dependencies/picom/picom.conf &

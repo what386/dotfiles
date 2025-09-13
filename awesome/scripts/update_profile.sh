@@ -4,7 +4,7 @@
 # Written by manilarome
 
 awesome_dir="${HOME}/.config/awesome/"
-user_profile_dir="${awesome_dir}/configuration/user-profile/"
+user_profile_dir="${awesome_dir}/config/user-profile/"
 
 accountsservice_user_icons="/var/lib/AccountsService/icons/${USER}"
 
