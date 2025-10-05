@@ -14,7 +14,7 @@ local script_dir = config_dir .. "scripts/"
 
 awful.spawn.with_shell(script_dir .. "preferences.sh")
 awful.spawn.with_shell(script_dir .. "autorun.sh")
-awful.spawn.with_shell(script_dir .. "screenlock.sh start")
+--awful.spawn.with_shell(script_dir .. "screenlock.sh start")
 
 require("ui.misc.notifications")
 
@@ -32,6 +32,6 @@ require("ui")
 
 require("modules.dynamic-wallpaper")
 require("modules.auto-hibernate")
-require("modules.vpn-auto-tunnel")
+--require("modules.vpn-auto-tunnel")
 require("modules.session-mgr")
 require("modules.window-swallowing")

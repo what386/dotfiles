@@ -108,9 +108,6 @@ return { -- LSP Configuration & Plugins
 		-- Enable the following language servers
 		local servers = {
 			lua_ls = {
-				-- cmd = {...},
-				-- filetypes { ...},
-				-- capabilities = {},
 				settings = {
 					Lua = {
 						runtime = { version = "LuaJIT" },
@@ -133,6 +130,7 @@ return { -- LSP Configuration & Plugins
 					},
 				},
 			},
+
 			pylsp = {
 				settings = {
 					pylsp = {
@@ -151,10 +149,9 @@ return { -- LSP Configuration & Plugins
 			},
 			ruff = {}, --both pylsp and ruff are for python
 
-			arduino_language_server = {},
-			rust_analyzer = {},
+			jdtls = {},
 			csharp_ls = {},
-			gopls = {},
+			clangd = {},
 
 			html = { filetypes = { "html", "twig", "hbs" } },
 			cssls = {},
@@ -167,7 +164,6 @@ return { -- LSP Configuration & Plugins
 			powershell_es = {},
 
 			dockerls = {},
-
 			docker_compose_language_service = {},
 		}
 

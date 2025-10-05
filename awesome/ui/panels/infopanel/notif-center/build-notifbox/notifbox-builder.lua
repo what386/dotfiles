@@ -5,8 +5,8 @@ local beautiful = require("beautiful")
 
 local dpi = beautiful.xresources.apply_dpi
 
-local builder = require("widget.notif-center.build-notifbox.notifbox-ui-elements")
-local notifbox_core = require("widget.notif-center.build-notifbox")
+local builder = require("ui.panels.infopanel.notif-center.build-notifbox.notifbox-ui-elements")
+local notifbox_core = require("ui.panels.infopanel.notif-center.build-notifbox")
 
 local notifbox_layout = notifbox_core.notifbox_layout
 local remove_notifbox_empty = notifbox_core.remove_notifbox_empty

@@ -3,7 +3,7 @@
 # Handles both xss-lock daemon setup and lockscreen/suspend execution
 
 # Configuration
-LOCK_TIMEOUT=120                                                                       # Time before locking (seconds)
+LOCK_TIMEOUT=300                                                                       # Time before locking (seconds)
 SUSPEND_TIMEOUT=120                                                                    # Additional time before suspend after lock (seconds)
 LOCK_SCRIPT='echo "awesome.emit_signal(\"screen::lockscreen:show\")" | awesome-client' # Command to execute for locking
 DAEMON_SCRIPT="$0"                                                                     # This script handles daemon and lock execution

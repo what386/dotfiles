@@ -6,7 +6,8 @@ run() {
     fi
 }
 
-run "lxpolkit" # authenticator
+run "lxpolkit"
+run "caffeine-indicator"
 
 # this breaks the run dialogue for some reason
 # picom doesnt duplicate so its probably fine
