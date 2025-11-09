@@ -6,8 +6,7 @@ run() {
     fi
 }
 
-run "lxpolkit"
-run "caffeine-indicator"
+run "/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1"
 
 # this breaks the run dialogue for some reason
 # picom doesnt duplicate so its probably fine

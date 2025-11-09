@@ -22,5 +22,8 @@ copy_config "wezterm"
 copy_config "kitty"
 copy_config "awesome"
 copy_config "fish"
+copy_config "tmux"
+copy_config "obsidian"
+copy_config "btop"
 
 echo "All configurations have been synced to $DOTFILES_DIR"

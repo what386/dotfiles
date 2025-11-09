@@ -46,12 +46,12 @@ end
 awesome.connect_signal("widget::network:ssid", function(ssid)
 	if is_trusted_network(ssid) then
 		if vpn_connected then
-			awful.spawn("sudo /usr/bin/wg-quick down thinkpad-t480s")
+			awful.spawn("sudo /usr/bin/wg-quick down happycloud")
 			vpn_connected = false
 			notify_vpn_disconnected()
 		end
 	elseif not vpn_connected then
-		awful.spawn("sudo /usr/bin/wg-quick up thinkpad-t480s")
+		awful.spawn("sudo /usr/bin/wg-quick up happycloud")
 		vpn_connected = true
 		notify_vpn_connected()
 	end

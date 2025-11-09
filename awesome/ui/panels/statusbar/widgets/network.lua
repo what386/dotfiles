@@ -99,32 +99,42 @@ local update_wireless = function()
 	-- Get wifi essid and bitrate
 	local update_wireless_data = function(healthy)
 		awful.spawn.easy_async_with_shell([[
-            iw dev ]] .. interfaces.wlan_interface .. [[ link
-            ]], function(stdout)
-			local essid = stdout:match("SSID: (.-)\n") or "N/A"
+		essid=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
+		bitrate=$(iw dev ]] .. interfaces.wlan_interface .. [[ link | grep -oP 'tx bitrate: \K[^\s]+')
+		echo "SSID:${essid}"
+		echo "BITRATE:${bitrate}"
+	    ]], function(stdout)
+			local essid = stdout:match("SSID:(.-)\n") or "N/A"
+			essid = essid ~= "" and essid or "N/A"
+			local bitrate = stdout:match("BITRATE:(.-)\n") or "N/A"
+			bitrate = bitrate ~= "" and bitrate or "N/A"
+
 			awesome.emit_signal("widget::network:ssid", essid)
-			local bitrate = stdout:match("tx bitrate: (.+/s)") or "N/A"
+
 			local message = "SSID: <b>"
-				.. (essid or "Loading...*")
+				.. essid
 				.. "</b>\nInterface: <b>"
 				.. interfaces.wlan_interface
 				.. "</b>\nStrength: <b>"
 				.. tostring(wifi_strength)
 				.. "%"
 				.. "</b>\nBitrate: <b>"
-				.. tostring(bitrate)
+				.. bitrate
 				.. "</b>"
+
 			if healthy then
 				update_tooltip(message)
 			else
 				update_tooltip("<b>Connected but no internet!</b>\n" .. message)
 			end
+
 			if reconnect_startup or startup then
 				notify_connected(essid)
 				update_reconnect_startup(false)
 			end
 		end)
 	end
+
 	local function update_wifi_icon(strength)
 		if strength == 1 then
 			widget.icon:set_image(icons.widgets.wifi.wifi_strength_1)
@@ -306,4 +316,3 @@ local network_updater = gears.timer({
 	end,
 })
 return widget_button
-

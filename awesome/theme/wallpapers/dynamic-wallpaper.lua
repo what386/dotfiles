@@ -17,7 +17,6 @@
 local awful = require("awful")
 local gears = require("gears")
 local beautiful = require("beautiful")
-local filesystem = gears.filesystem
 
 --  ========================================
 -- 				Configuration
@@ -26,8 +25,7 @@ local filesystem = gears.filesystem
 
 local wall_config = {
 	-- Wallpaper directory. The default is:
-	-- local wall_config.wall_dir = os.getenv('HOME') .. 'Pictures/Wallpapers/'
-	wall_dir = filesystem.get_configuration_dir() .. "theme/wallpapers/",
+	wall_dir = gears.filesystem.get_configuration_dir() .. "theme/wallpapers/",
 
 	-- If there's a picture format that awesome accepts and i missed
 	-- (which i probably did) feel free to add it right here
@@ -279,8 +277,8 @@ local manage_timer = function()
 	-- Get current time
 	local time_now = parse_to_seconds(current_time())
 
-	local previous_time = ""   --Scheduled time that should activate now
-	local next_time = ""       --Time that should activate next
+	local previous_time = "" --Scheduled time that should activate now
+	local next_time = "" --Time that should activate next
 
 	local first_time = "24:00:00" --First scheduled time registered (to be found)
 	local last_time = "00:00:00" --Last scheduled time registered (to be found)

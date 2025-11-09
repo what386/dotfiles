@@ -8,6 +8,9 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 
+-- Fallback for notification margin if not defined in theme
+local notification_margin = beautiful.notification_margin or dpi(8)
+
 -- Defaults
 naughty.config.defaults.ontop = true
 naughty.config.defaults.icon_size = dpi(32)
@@ -35,7 +38,6 @@ naughty.config.icon_dirs = {
 naughty.config.icon_formats = { "svg", "png", "jpg", "gif" }
 
 -- Presets / rules
-
 ruled.notification.connect_signal("request::rules", function()
 	-- Critical notifs
 	ruled.notification.append_rule({
@@ -49,7 +51,6 @@ ruled.notification.connect_signal("request::rules", function()
 			implicit_timeout = 0,
 		},
 	})
-
 	-- Normal notifs
 	ruled.notification.append_rule({
 		rule = { urgency = "normal" },
@@ -62,7 +63,6 @@ ruled.notification.connect_signal("request::rules", function()
 			implicit_timeout = 5,
 		},
 	})
-
 	-- Low notifs
 	ruled.notification.append_rule({
 		rule = { urgency = "low" },
@@ -77,25 +77,12 @@ ruled.notification.connect_signal("request::rules", function()
 	})
 end)
 
--- Error handling
---naughty.connect_signal("request::display_error", function(message, startup)
---	naughty.notification({
---		urgency = "critical",
---		title = "Oops, an error happened" .. (startup and " during startup!" or "!"),
---		message = message,
---		app_name = "System Notification",
---		icon = beautiful.awesome_icon,
---	})
---end)
-
 -- XDG icon lookup
 naughty.connect_signal("request::icon", function(n, context, hints)
 	if context ~= "app_icon" then
 		return
 	end
-
 	local path = menubar.utils.lookup_icon(hints.app_icon) or menubar.utils.lookup_icon(hints.app_icon:lower())
-
 	if path then
 		n.icon = path
 	end
@@ -134,7 +121,6 @@ naughty.connect_signal("request::display", function(n)
 		style = { underline_normal = false, underline_selected = true },
 		widget = naughty.list.actions,
 	})
-
 	-- Notifbox Blueprint
 	naughty.layout.box({
 		notification = n,
@@ -158,7 +144,7 @@ naughty.connect_signal("request::display", function(n)
 													valign = "center",
 													widget = wibox.widget.textbox,
 												},
-												margins = beautiful.notification_margin,
+												margins = notification_margin,
 												widget = wibox.container.margin,
 											},
 											bg = beautiful.background,
@@ -170,7 +156,7 @@ naughty.connect_signal("request::display", function(n)
 													resize_strategy = "center",
 													widget = naughty.widget.icon,
 												},
-												margins = beautiful.notification_margin,
+												margins = notification_margin,
 												widget = wibox.container.margin,
 											},
 											{
@@ -191,17 +177,15 @@ naughty.connect_signal("request::display", function(n)
 													},
 													nil,
 												},
-												margins = beautiful.notification_margin,
+												margins = notification_margin,
 												widget = wibox.container.margin,
 											},
 											layout = wibox.layout.fixed.horizontal,
 										},
 										fill_space = true,
-										spacing = beautiful.notification_margin,
+										spacing = notification_margin,
 										layout = wibox.layout.fixed.vertical,
 									},
-									-- Margin between the fake background
-									-- Set to 0 to preserve the 'titlebar' effect
 									margins = dpi(0),
 									widget = wibox.container.margin,
 								},
@@ -215,7 +199,7 @@ naughty.connect_signal("request::display", function(n)
 						},
 						bg = beautiful.transparent,
 						id = "background_role",
-						widget = naughty.container.background,
+						widget = wibox.container.background, -- CHANGED: was naughty.container.background
 					},
 					strategy = "min",
 					width = dpi(250),
@@ -231,7 +215,6 @@ naughty.connect_signal("request::display", function(n)
 			widget = wibox.container.background,
 		},
 	})
-
 	-- Destroy popups if dont_disturb_state mode is on
 	-- Or if the info_center is visible
 	local focused = awful.screen.focused()

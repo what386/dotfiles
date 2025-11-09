@@ -24,20 +24,24 @@ screen.connect_signal("property::geometry", function(s)
 	gears.wallpaper.maximized(wallpaper, s, true)
 end)
 
+-- Set wallpaper when requested
 screen.connect_signal("request::wallpaper", function(s)
+	if not beautiful.wallpaper then
+		return
+	end
+
+	local wallpaper = beautiful.wallpaper
+
 	-- If wallpaper is a function, call it with the screen
-	if beautiful.wallpaper then
-		if type(beautiful.wallpaper) == "string" then
-			-- Check if beautiful.wallpaper is color/image
-			if beautiful.wallpaper:sub(1, #"#") == "#" then
-				-- If beautiful.wallpaper is color
-				gears.wallpaper.set(beautiful.wallpaper)
-			elseif beautiful.wallpaper:sub(1, #"/") == "/" then
-				-- If beautiful.wallpaper is path/image
-				gears.wallpaper.maximized(beautiful.wallpaper, s)
-			end
+	if type(wallpaper) == "function" then
+		wallpaper(s)
+	elseif type(wallpaper) == "string" then
+		-- Check if it's a color (starts with #) or image path
+		if wallpaper:sub(1, 1) == "#" then
+			gears.wallpaper.set(wallpaper)
 		else
-			beautiful.wallpaper(s)
+			-- Assume it's an image path
+			gears.wallpaper.maximized(wallpaper, s, true)
 		end
 	end
 end)
