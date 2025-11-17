@@ -2,27 +2,22 @@ local awful = require("awful")
 local gears = require("gears")
 local naughty = require("naughty")
 local json = require("dependencies.json")
-
 local config_dir = gears.filesystem.get_configuration_dir()
-
 local data_dir = config_dir .. "persistent/settings/"
 local session_file = config_dir .. "persistent/session.json"
 local command_file = config_dir .. "persistent/command_table.json"
-
 local autorestore_allowed = false
+local restore_in_progress = false -- NEW: Prevent multiple simultaneous restores
 
 -- this function is blocking on purpose!!! DO NOT change this behavior
 local check_autorestore_state = function()
 	local filepath = data_dir .. "autorestore_allowed"
-
 	local file = io.open(filepath, "r")
 	if file then
 		local status = file:read("*a") -- Read entire file
 		file:close()
-
 		-- Trim whitespace
 		status = status:gsub("^%s*(.-)%s*$", "%1")
-
 		if status == "true" then
 			autorestore_allowed = true
 		elseif status == "false" then
@@ -47,7 +42,6 @@ local check_autorestore_state = function()
 		end
 	end
 end
-
 check_autorestore_state()
 
 -- Table to store pending applications to restore
@@ -94,7 +88,6 @@ local function resolve_command(c)
 			return nil
 		end
 		command_table[c.class] = cmd
-
 		return cmd
 	end
 end
@@ -116,7 +109,6 @@ local function save()
 			})
 		end
 	end
-
 	local f, err
 	f, err = io.open(session_file, "w")
 	if f then
@@ -169,18 +161,15 @@ local function apply_saved_data(c, app_data)
 			c:move_to_tag(tag)
 		end
 	end
-
 	-- Apply screen
 	if app_data.screen then
 		local target_screen = screen[app_data.screen] or screen.primary
 		c:move_to_screen(target_screen)
 	end
-
 	-- Apply floating state
 	if app_data.floating ~= nil then
 		c.floating = app_data.floating
 	end
-
 	-- Apply geometry (with a small delay to ensure the client is ready)
 	if app_data.geometry then
 		gears.timer.delayed_call(function()
@@ -200,9 +189,21 @@ local function handle_new_client_during_restore(c)
 end
 
 local function restore()
+	-- NEW: Prevent multiple simultaneous restore operations
+	if restore_in_progress then
+		naughty.notify({
+			title = "Restore already in progress",
+			text = "Please wait for the current restore to complete.",
+		})
+		return
+	end
+
+	restore_in_progress = true
+
 	local f = io.open(session_file, "r")
 	if not f then
 		naughty.notify({ title = "No session file found", text = session_file })
+		restore_in_progress = false
 		return
 	end
 	local content = f:read("*a")
@@ -210,20 +211,17 @@ local function restore()
 	local session = json.parse(content)
 	if not session then
 		naughty.notify({ title = "Error", text = "Failed to parse session file." })
+		restore_in_progress = false
 		return
 	end
-
 	-- Clear any previous pending restore data
 	pending_restore = {}
-
 	-- Connect signal to handle new clients during restore
 	client.connect_signal("manage", handle_new_client_during_restore)
-
 	-- Populate pending_restore with session data
 	for _, app in ipairs(session) do
 		table.insert(pending_restore, app)
 	end
-
 	-- Spawn all applications
 	for _, app in ipairs(session) do
 		local cmd = app.command
@@ -237,40 +235,38 @@ local function restore()
 			})
 		end
 	end
-
 	-- Set up a timer to disconnect the signal after a reasonable time
 	-- This prevents the signal from interfering with normal client management
 	gears.timer.start_new(30, function()
 		client.disconnect_signal("manage", handle_new_client_during_restore)
 		-- Clear any remaining pending restore data
 		pending_restore = {}
+		restore_in_progress = false -- NEW: Reset the flag
 		return false -- Don't repeat the timer
 	end)
-
 	naughty.notify({ title = "Session restored", text = session_file })
 end
 
 local modkey = "Mod4"
-
 local existing_keys = root.keys()
-
 local keys = gears.table.join(
 	awful.key({ modkey, "Shift" }, "r", function()
 		restore()
 	end, { description = "restore session", group = "awesome" }),
-
 	awful.key({ modkey, "Shift" }, "s", function()
 		save()
 	end, { description = "save session", group = "awesome" })
 )
-
 root.keys(gears.table.join(existing_keys, keys))
 
-awesome.connect_signal("startup", function()
-	if awesome.startup and autorestore_allowed then
+-- FIXED: Use a timer to run restore once after startup is complete
+-- This avoids the "startup" signal which fires multiple times in newer versions
+if awesome.startup and autorestore_allowed then
+	gears.timer.start_new(1, function()
 		restore()
-	end
-end)
+		return false -- Don't repeat
+	end)
+end
 
 awesome.connect_signal("module::session_manager:save", function()
 	if autorestore_allowed then
@@ -285,6 +281,7 @@ awesome.connect_signal("module::session_manager:restore", function()
 end)
 
 awesome.connect_signal("module::session_manager:autosave_enable", function()
+	autorestore_allowed = true -- ADD THIS
 	awful.spawn.with_shell('echo "true" > ' .. data_dir .. "autorestore_allowed")
 end)
 

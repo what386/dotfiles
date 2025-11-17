@@ -23,7 +23,7 @@ local notif_button = clickable_container(wibox.container.margin(notif_text, dpi(
 
 local wrap_notif = wibox.widget({
 	notif_button,
-	forced_width = dpi(140),
+	forced_width = dpi(120),
 	bg = inactive_button,
 	border_width = dpi(1),
 	border_color = beautiful.groups_title_bg,
@@ -45,7 +45,7 @@ local today_button = clickable_container(wibox.container.margin(today_text, dpi(
 
 local wrap_today = wibox.widget({
 	today_button,
-	forced_width = dpi(140),
+	forced_width = dpi(120),
 	bg = active_button,
 	border_width = dpi(1),
 	border_color = beautiful.groups_title_bg,

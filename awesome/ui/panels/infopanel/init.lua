@@ -7,7 +7,7 @@ panel_visible = false
 
 local infopanel = function(s)
 	-- Set right panel geometry
-	local panel_width = dpi(350)
+	local panel_width = dpi(290)
 	local panel_x = s.geometry.x + s.geometry.width - panel_width
 
 	local panel = wibox({

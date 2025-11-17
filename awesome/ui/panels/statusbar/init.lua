@@ -86,12 +86,12 @@ local function statusbar(s)
 			dashboard_widget,
 			osk_widget,
 			separator,
-			tasklist(s),
+			clock_widget(s),
 			spacing = dpi(8),
 			layout = wibox.layout.fixed.horizontal,
 		},
 		-- middle
-		clock_widget(s),
+		tasklist(s),
 		{ -- right
 			dropdown_widget,
 			right_widgets,

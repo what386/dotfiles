@@ -194,12 +194,12 @@ local reboot_command = function()
 	awesome.emit_signal("screen::exit_screen:hide")
 end
 
-local poweroff = build_power_button("Shutdown", icons.power.power, poweroff_command)
-local reboot = build_power_button("Restart", icons.power.reboot, reboot_command)
-local hibernate = build_power_button("Hibernate", icons.power.hibernate, hibernate_command)
-local suspend = build_power_button("Suspend", icons.power.sleep, suspend_command)
-local logout = build_power_button("Logout", icons.power.logout, logout_command)
-local lock = build_power_button("Lock", icons.power.lock, lock_command)
+local poweroff = build_power_button("[P]ower off", icons.power.power, poweroff_command)
+local reboot = build_power_button("[R]estart", icons.power.reboot, reboot_command)
+local hibernate = build_power_button("[H]ibernate", icons.power.hibernate, hibernate_command)
+local suspend = build_power_button("[S]uspend", icons.power.sleep, suspend_command)
+local logout = build_power_button("[E]xit user", icons.power.logout, logout_command)
+local lock = build_power_button("[L]ock", icons.power.lock, lock_command)
 
 local create_exit_screen = function(s)
 	s.exit_screen = wibox({

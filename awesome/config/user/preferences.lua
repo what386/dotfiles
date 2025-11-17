@@ -11,7 +11,7 @@ return {
 		file_manager = "nemo",
 		multimedia = "vlc",
 		photo_editor = "gimp",
-		sandbox = "virtualbox",
+		sandbox = "virt-manager",
 		network_manager = "cinnamon-settings network",
 		bluetooth_manager = "blueman-manager",
 		power_manager = "gnome-power-statistics",
@@ -19,6 +19,7 @@ return {
 		package_updater = "mintupdate",
 		lock = "",
 		quake = "kitty --name QuakeTerminal",
+		scratchpad = "kitty --name QuakeScratchpad",
 
 		rofi_global = "rofi -dpi "
 			.. screen.primary.dpi

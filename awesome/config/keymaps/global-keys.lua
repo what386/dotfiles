@@ -44,6 +44,10 @@ local keys = gears.table.join(
 		awesome.emit_signal("flyout::quake_terminal:toggle")
 	end, { description = "show terminal", group = "flyouts" }),
 
+	awful.key({ modkey }, "l", function()
+		awesome.emit_signal("flyout::quake_scratchpad:toggle")
+	end, { description = "show scratchpad", group = "flyouts" }),
+
 	awful.key({ modkey }, "k", function()
 		awesome.emit_signal("flyout::osd_keyboard:toggle")
 	end, { description = "show keyboard", group = "flyouts" }),
@@ -123,6 +127,22 @@ local keys = gears.table.join(
 		awful.spawn("amixer set Capture toggle", false)
 		awesome.emit_signal("osd::microphone_osd:show", true)
 	end, { description = "toggle mic", group = "device" }),
+
+	awful.key({}, "XF86AudioPlay", function()
+		awful.spawn("playerctl play-pause", false)
+	end, { description = "play/pause media", group = "media" }),
+
+	awful.key({}, "XF86AudioPause", function()
+		awful.spawn("playerctl play-pause", false)
+	end, { description = "play/pause media", group = "media" }),
+
+	awful.key({}, "XF86AudioNext", function()
+		awful.spawn("playerctl next", false)
+	end, { description = "next track", group = "media" }),
+
+	awful.key({}, "XF86AudioPrev", function()
+		awful.spawn("playerctl previous", false)
+	end, { description = "previous track", group = "media" }),
 
 	awful.key({}, "XF86MonBrightnessUp", function()
 		awful.spawn("brightnessctl s 5%+", false)

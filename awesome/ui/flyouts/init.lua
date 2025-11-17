@@ -1,3 +1,5 @@
-require("ui.flyouts.promptbox")
-require("ui.flyouts.quake-terminal")
 require("ui.flyouts.onscreen-keyboard")
+require("ui.flyouts.prompt-lua")
+require("ui.flyouts.prompt-signal")
+require("ui.flyouts.quake-scratchpad")
+require("ui.flyouts.quake-terminal")
