@@ -35,7 +35,7 @@ return { -- LSP Configuration & Plugins
 		})
 
 		local capabilities = vim.lsp.protocol.make_client_capabilities()
-		capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+		--capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
 		local servers = require("config.lsp.servers")
 		local formatters = require("config.lsp.formatters")

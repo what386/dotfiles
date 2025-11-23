@@ -1,5 +1,8 @@
 -- anything with around 5 lines of config go here
 return {
+	{ -- language icons
+		"nvim-tree/nvim-web-devicons",
+	},
 	{ -- detect tabstop and shiftwidth automatically
 		"tpope/vim-sleuth",
 	},
