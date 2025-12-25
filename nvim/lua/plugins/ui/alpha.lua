@@ -195,7 +195,7 @@ if vim.api.nvim_exec("echo argc()", true) == "0" then
 
 	local header = {
 		type = "text",
-		val = Headers[math.random(#Headers)],
+		val = Headers[math.random(0, #Headers)],
 		opts = {
 			position = "center",
 			hl = "Whitespace",

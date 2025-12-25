@@ -76,7 +76,7 @@ mic_slider:connect_signal("property::value", function()
 
 	-- Update microphone osd
 	awesome.emit_signal("osd::microphone_osd", microphone_level)
-	awesome.emit_signal("widget::microphone:icon", get_microphone_icon(microphone_level, is_muted))
+	--awesome.emit_signal("widget::microphone:icon", get_microphone_icon(microphone_level, is_muted))
 end)
 mic_slider:buttons(gears.table.join(
 	awful.button({}, 4, nil, function()

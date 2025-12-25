@@ -89,6 +89,8 @@ return {
 	jsonls = {},
 	sqlls = {},
 
+	zls = {},
+
 	bashls = {},
 
 	dockerls = {},

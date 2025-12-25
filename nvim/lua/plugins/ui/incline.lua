@@ -3,7 +3,7 @@ return {
 	opts = {},
 	event = "VeryLazy",
 	config = function()
-		local fg = ""
+		local fg = "#ffffff"
 		local bg = "#00000000"
 
 		local devicons = require("nvim-web-devicons")
@@ -28,68 +28,6 @@ return {
 			end
 			return labels
 		end
-
-		incline.setup({
-			render = function(props)
-				if not props.focused then
-					return
-				end
-
-				local mode = vim.api.nvim_get_mode().mode
-				local fmt_mode = ""
-
-				if mode:match("^[vV�]") then
-					fmt_mode = "Visual"
-				elseif mode:match("^[iI�]") then
-					fmt_mode = "Insert"
-				elseif mode:match("^[cC�]") then
-					fmt_mode = "Command"
-				else
-					fmt_mode = "Normal"
-				end
-
-				local reg = vim.fn.reg_recording()
-
-				if reg ~= "" then
-					fmt_mode = string.format("%s  %s", reg, fmt_mode)
-				end
-
-				return {
-					{ get_git_diff(props.buf), guifg = fg, guibg = bg },
-					{ fmt_mode, guifg = fg, guibg = bg },
-				}
-			end,
-			window = {
-				margin = { horizontal = 1, vertical = 1 },
-				placement = { horizontal = "right", vertical = "bottom" },
-			},
-		})
-
-		util.clear_augroup()
-
-		vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave", "ModeChanged", "CursorMoved" }, {
-			callback = function()
-				manager.update({ refresh = true })
-			end,
-		})
-
-		-- Horrible jank to load two panels
-
-		package.loaded["incline"] = false
-		package.loaded["incline.config"] = false
-		package.loaded["incline.debounce"] = false
-		package.loaded["incline.highlight"] = false
-		package.loaded["incline.manager"] = false
-		package.loaded["incline.tabpage"] = false
-		package.loaded["incline.util"] = false
-		package.loaded["incline.winline"] = false
-
-		local incline = require("incline")
-		local manager = require("incline.manager")
-		local util = require("incline.util")
-
-		local fg = "#ffffff"
-		local bg = "#00000000"
 
 		incline.setup({
 			render = function(props)
@@ -127,13 +65,33 @@ return {
 					cursorinfo = string.format("%d⋮%d", c[1], c[2])
 				end
 
+				local mode = vim.api.nvim_get_mode().mode
+				local fmt_mode = ""
+
+				if mode:match("^[vV�]") then
+					fmt_mode = "Visual"
+				elseif mode:match("^[iI�]") then
+					fmt_mode = "Insert"
+				elseif mode:match("^[cC�]") then
+					fmt_mode = "Command"
+				else
+					fmt_mode = "Normal"
+				end
+
+				local reg = vim.fn.reg_recording()
+
+				if reg ~= "" then
+					fmt_mode = string.format("%s  %s", reg, fmt_mode)
+				end
+
 				return {
 					{
 						(ft_icon or "") .. " ",
 						guifg = ft_color,
 						guibg = "none",
 					},
-					{ filename .. " | ", gui = vim.bo[props.buf].modified and "bold,italic" or "bold" },
+					{ filename, gui = vim.bo[props.buf].modified and "bold,italic" or "bold" },
+					{ " | " .. fmt_mode .. " | " },
 					{ cursorinfo },
 				}
 			end,
@@ -145,10 +103,13 @@ return {
 
 		util.clear_augroup()
 
-		vim.api.nvim_create_autocmd({ "CursorMoved", "TextChanged", "ModeChanged" }, {
-			callback = function()
-				manager.update({ refresh = true })
-			end,
-		})
+		vim.api.nvim_create_autocmd(
+			{ "RecordingEnter", "RecordingLeave", "ModeChanged", "CursorMoved", "TextChanged" },
+			{
+				callback = function()
+					manager.update({ refresh = true })
+				end,
+			}
+		)
 	end,
 }

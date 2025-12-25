@@ -1,4 +1,3 @@
 function cd
-    z $argv
+     z $argv
 end
-
