@@ -113,7 +113,8 @@ local create_dock = function(s)
 		autostart = true,
 		callback = function()
 			-- Check if dock should be persistent
-			if not s.dockpanel.hover and not should_always_show_dock() then
+			-- TODO: fix should_always_show_dock for multi-screens
+			if not s.dockpanel.hover then -- and not should_always_show_dock() then
 				s.dockpanel.visible = false
 			end
 		end,
@@ -163,26 +164,30 @@ local create_dock = function(s)
 		end
 	end
 
-	-- Update when tag selection changes
-	tag.connect_signal("property::selected", update_dock_visibility)
-
-	-- Update when tag layout changes
-	tag.connect_signal("property::layout", update_dock_visibility)
+	-- Update when tag selection changes (screen-specific)
+	screen.connect_signal("tag::history::update", function(scr)
+		if scr == s then
+			update_dock_visibility()
+		end
+	end)
 
 	-- Update when clients are added/removed from tags
-	client.connect_signal("tagged", update_dock_visibility)
-	client.connect_signal("untagged", update_dock_visibility)
-	client.connect_signal("manage", update_dock_visibility)
-	client.connect_signal("unmanage", update_dock_visibility)
+	local function client_update_handler(c)
+		-- Only update if the client is on this screen
+		if c.screen == s then
+			update_dock_visibility()
+		end
+	end
 
-	-- Update when client geometry changes (move/resize)
-	client.connect_signal("property::geometry", update_dock_visibility)
-	client.connect_signal("property::hidden", update_dock_visibility)
-	client.connect_signal("property::minimized", update_dock_visibility)
-
-	-- Update when client focus changes (in case of stacking changes)
-	client.connect_signal("focus", update_dock_visibility)
-	client.connect_signal("unfocus", update_dock_visibility)
+	client.connect_signal("tagged", client_update_handler)
+	client.connect_signal("untagged", client_update_handler)
+	client.connect_signal("manage", client_update_handler)
+	client.connect_signal("unmanage", client_update_handler)
+	client.connect_signal("property::geometry", client_update_handler)
+	client.connect_signal("property::hidden", client_update_handler)
+	client.connect_signal("property::minimized", client_update_handler)
+	client.connect_signal("focus", client_update_handler)
+	client.connect_signal("unfocus", client_update_handler)
 
 	return panel
 end

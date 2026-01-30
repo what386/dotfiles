@@ -67,6 +67,7 @@ icons.tags = {
 	vinyl = dir .. "tags/vinyl.svg",
 	music = dir .. "tags/music.svg",
 	mail = dir .. "tags/mail.svg",
+	obsidian = dir .. "tags/obsidian.svg",
 }
 
 icons.layouts = {

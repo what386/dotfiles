@@ -28,9 +28,11 @@ require("lazy").setup({
 	require("plugins.editor.oil"),
 	require("plugins.editor.multicursor"),
 
-	require("plugins.lsp.language-server"),
+	require("plugins.lsp.lsp-setup"),
 	require("plugins.lsp.blink-cmp"),
 	require("plugins.lsp.none-ls"),
+	--require("plugins.lsp.autocompletion"),
+	require("plugins.lsp.trouble"),
 
 	require("plugins.ui.alpha"),
 	require("plugins.ui.colortheme"),
@@ -58,5 +60,7 @@ require("lazy").setup({
 		lazy = "💤 ",
 	},
 })
+
+require("plugins.lsp.manual")
 
 print("config loaded!")

@@ -39,7 +39,6 @@ local update_tooltip = awful.tooltip({
 local function parse_apt_updates(stdout)
 	local packages = {}
 	local count = 0
-
 	for line in stdout:gmatch("[^\r\n]+") do
 		-- Match lines like: "package-name/repository version [size]"
 		local package_name = line:match("^([^/]+)/")
@@ -48,14 +47,12 @@ local function parse_apt_updates(stdout)
 			count = count + 1
 		end
 	end
-
 	return count, packages
 end
 
 local function parse_flatpak_updates(stdout)
 	local packages = {}
 	local count = 0
-
 	for line in stdout:gmatch("[^\r\n]+") do
 		-- Flatpak output format: "app-id	version	arch	branch	remote"
 		local app_name = line:match("^([^\t]+)")
@@ -66,16 +63,43 @@ local function parse_flatpak_updates(stdout)
 			count = count + 1
 		end
 	end
+	return count, packages
+end
+
+local function parse_upstream_updates(stdout)
+	local packages = {}
+	local count = 0
+	local in_summary = false
+
+	for line in stdout:gmatch("[^\r\n]+") do
+		-- Look for the summary section that starts with "X updates available:"
+		if line:match("^%d+ updates? available:") then
+			in_summary = true
+		elseif in_summary then
+			-- Parse lines like "  Obsidian 1.10.6 → 1.11.4"
+			local pkg_name, old_ver, new_ver = line:match("%s+(%S+)%s+([%d%.]+)%s+→%s+([%d%.]+)")
+			if pkg_name then
+				table.insert(packages, string.format("%s (%s → %s)", pkg_name, old_ver, new_ver))
+				count = count + 1
+			end
+		end
+	end
 
 	return count, packages
 end
 
-local function update_widget_state(apt_count, apt_packages, flatpak_count, flatpak_packages)
-	local total_updates = apt_count + flatpak_count
+local function update_widget_state(
+	apt_count,
+	apt_packages,
+	flatpak_count,
+	flatpak_packages,
+	upstream_count,
+	upstream_packages
+)
+	local total_updates = apt_count + flatpak_count + upstream_count
 
 	if total_updates > 0 then
 		widget.icon:set_image(icons.widgets.update.shield_alert)
-
 		local tooltip_text = string.format("Updates available: %d total\n", total_updates)
 
 		if apt_count > 0 then
@@ -101,8 +125,18 @@ local function update_widget_state(apt_count, apt_packages, flatpak_count, flatp
 			end
 		end
 
+		if upstream_count > 0 then
+			tooltip_text = tooltip_text .. string.format("\nUpstream (%d):\n", upstream_count)
+			for i, pkg in ipairs(upstream_packages) do
+				tooltip_text = tooltip_text .. "• " .. pkg .. "\n"
+				if i >= 10 and #upstream_packages > 10 then
+					tooltip_text = tooltip_text .. string.format("• ... and %d more\n", #upstream_packages - 10)
+					break
+				end
+			end
+		end
+
 		update_tooltip.markup = tooltip_text
-		--widget_button.visible = true
 	else
 		widget.icon:set_image(icons.widgets.update.shield_check)
 		update_tooltip.markup = "System is up to date"
@@ -116,12 +150,20 @@ local function check_updates()
 
 	local apt_count, apt_packages = 0, {}
 	local flatpak_count, flatpak_packages = 0, {}
+	local upstream_count, upstream_packages = 0, {}
 	local checks_completed = 0
 
 	local function on_check_complete()
 		checks_completed = checks_completed + 1
-		if checks_completed == 2 then
-			update_widget_state(apt_count, apt_packages, flatpak_count, flatpak_packages)
+		if checks_completed == 3 then
+			update_widget_state(
+				apt_count,
+				apt_packages,
+				flatpak_count,
+				flatpak_packages,
+				upstream_count,
+				upstream_packages
+			)
 		end
 	end
 
@@ -140,6 +182,17 @@ local function check_updates()
 		end
 		on_check_complete()
 	end)
+
+	-- Check Upstream updates
+	awful.spawn.easy_async(
+		os.getenv("HOME") .. "/.upstream/symlinks/upstream upgrade --check",
+		function(stdout, stderr, exit_reason, exit_code)
+			if exit_code == 0 then
+				upstream_count, upstream_packages = parse_upstream_updates(stdout)
+			end
+			on_check_complete()
+		end
+	)
 end
 
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()

@@ -26,7 +26,7 @@ local tags = {
 	},
 	{
 		type = "text",
-		icon = icons.tags.text_editor,
+		icon = icons.tags.obsidian,
 		default_app = apps.default.text_editor,
 		gap = beautiful.useless_gap,
 	},

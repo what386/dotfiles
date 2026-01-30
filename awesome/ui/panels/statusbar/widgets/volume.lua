@@ -4,7 +4,6 @@ local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-
 local icons = require("theme.icons")
 
 local volume = wibox.widget.textbox()
@@ -40,14 +39,12 @@ local volume_tooltip = awful.tooltip({
 	margin_topbottom = dpi(8),
 })
 
-local update_tooltip = function(message)
-	volume_tooltip:set_markup(message)
-end
-
+-- State
 local volume_level = 0
 local is_muted = false
 local device = "speakers"
 
+-- Helper functions
 local function get_volume_icon(level)
 	if tonumber(level) >= 75 then
 		return icons.widgets.volume.volume_high
@@ -62,18 +59,17 @@ end
 
 local function update_volume_display()
 	local icon
-
 	if device == "headphones" then
 		icon = is_muted and icons.widgets.volume.headphones_muted or icons.widgets.volume.headphones
 	else
 		icon = is_muted and icons.widgets.volume.volume_muted or get_volume_icon(volume_level)
 	end
 
-	-- this is so that other widgets can share this logic
+	-- Broadcast icon to other widgets
 	awesome.emit_signal("widget::volume:icon", icon)
 	widget.icon:set_image(icon)
 
-	update_tooltip(
+	volume_tooltip:set_markup(
 		"Volume: <b>"
 			.. volume_level
 			.. "%</b>"
@@ -91,9 +87,8 @@ local function update_volume_level()
 		local new_level = tonumber(stdout:match("Volume: front.- (%d+)%%") or "0")
 		if new_level ~= volume_level then
 			volume_level = new_level
-
-			-- broadcast to any listener (OSD, notifications, etc.)
-			awesome.emit_signal("widget::volume:level", volume_level)
+			-- Broadcast to all listeners
+			awesome.emit_signal("volume::update", volume_level)
 		end
 		update_volume_display()
 	end)
@@ -105,10 +100,8 @@ local function update_volume_muted()
 		local new_muted = (is_muted_string == "yes")
 		if new_muted ~= is_muted then
 			is_muted = new_muted
-			-- re-broadcast full state
-			awesome.emit_signal("widget::volume:level", volume_level)
+			update_volume_display()
 		end
-		update_volume_display()
 	end)
 end
 
@@ -128,7 +121,7 @@ local function update_volume_device()
 	end)
 end
 
--- Store previous state to compare against
+-- State tracking for change detection
 local last_volume = nil
 local last_muted = nil
 local last_device = nil
@@ -141,7 +134,7 @@ local function check_and_update_volume()
 				local current_muted = mute_out:match("Mute: (%w+)")
 				local current_device = device_out:gsub("%s+", "")
 
-				-- Only update if something actually changed
+				-- Only update if something changed
 				if current_volume ~= last_volume or current_muted ~= last_muted or current_device ~= last_device then
 					last_volume = current_volume
 					last_muted = current_muted
@@ -156,32 +149,44 @@ local function check_and_update_volume()
 	end)
 end
 
+-- Debounce timer for pactl events
 local volume_timer = nil
 local function debounced_check_and_update_volume()
 	if volume_timer then
 		volume_timer:stop()
 	end
 	volume_timer = gears.timer({
-		timeout = 0.05, -- 50ms debounce
+		timeout = 0.05,
 		single_shot = true,
 		callback = check_and_update_volume,
 	})
 	volume_timer:start()
 end
 
+-- Subscribe to pulseaudio events
 awful.spawn.with_line_callback("pactl subscribe", {
 	stdout = function(line)
-		-- Only respond to sink changes and server changes (default sink change)
+		-- Only respond to sink changes and server changes
 		if line:match("Event 'change' on sink") or line:match("Event 'change' on server") then
 			debounced_check_and_update_volume()
 		end
 	end,
 })
 
+-- Click to toggle mute
 volume:connect_signal("button::press", function(_, _, _, button)
 	if button == 1 then
 		awful.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle")
 	end
 end)
+
+widget_button:connect_signal("button::press", function(_, _, _, button)
+	if button == 1 then
+		awful.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle")
+	end
+end)
+
+-- Initialize on startup
+check_and_update_volume()
 
 return widget_button

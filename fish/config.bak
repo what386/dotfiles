@@ -1,4 +1,3 @@
-source $HOME/.upstream/metadata/paths.sh
 
 if status is-interactive
     # Commands to run in interactive sessions can go here
@@ -25,10 +24,5 @@ zoxide init fish | source
 # PATH additions
 
 set -gx PATH $PATH /opt/zen
-set -gx PATH $PATH /opt/zig-x86_64-linux-0.16.0
 
 direnv hook fish | source
-
-set -U fish_user_paths /nix/var/nix/profiles/default/bin $fish_user_paths
-
-starship init fish | source

@@ -11,6 +11,17 @@ local themes_path = gfs.get_themes_dir()
 -- Modkey: Mod4 (Super key) or Mod1 (Alt key)
 local modkey = "Mod4"
 
+-- Helper function to read and broadcast volume
+local function update_and_broadcast_volume()
+	awful.spawn.easy_async_with_shell(
+		[[pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '\d+(?=%)' | head -n 1]],
+		function(stdout)
+			local volume_level = tonumber(stdout) or 0
+			awesome.emit_signal("volume::update", volume_level)
+		end
+	)
+end
+
 -- AwesomeWM
 local keys = gears.table.join(
 
@@ -80,15 +91,15 @@ local keys = gears.table.join(
 		--awful.spawn("rofi -show window -show-icons")
 	end, { description = "search windows", group = "launcher" }),
 
-	awful.key({ modkey }, "Print", function()
-		local home = os.getenv("HOME")
-		local filepath = home .. "/Pictures/Screenshots/"
-		awful.spawn.with_shell("flameshot full --path " .. filepath)
-	end, { description = "full-screen screenshot", group = "launcher" }),
 	awful.key({ modkey, "Shift" }, "Print", function()
 		local home = os.getenv("HOME")
 		local filepath = home .. "/Pictures/Screenshots/"
 		awful.spawn.with_shell("flameshot full --path " .. filepath)
+	end, { description = "full-screen screenshot", group = "launcher" }),
+	awful.key({ modkey }, "Print", function()
+		local home = os.getenv("HOME")
+		local filepath = home .. "/Pictures/Screenshots/"
+		awful.spawn.with_shell("flameshot gui --path " .. filepath)
 	end, { description = "screenshot area (gui)", group = "launcher" }),
 	awful.key({ modkey, "Control" }, "Print", function()
 		local home = os.getenv("HOME")
@@ -105,22 +116,28 @@ local keys = gears.table.join(
 	end, { description = "focus previous screen", group = "screen" }),
 
 	-- System
+
+	-- Volume Up
 	awful.key({}, "XF86AudioRaiseVolume", function()
-		awful.spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%", false)
-		awesome.emit_signal("volume::changed:level")
-		awesome.emit_signal("osd::volume_osd:show", true)
+		awful.spawn.easy_async("pactl set-sink-volume @DEFAULT_SINK@ +5%", function()
+			update_and_broadcast_volume()
+		end)
 	end, { description = "raise volume", group = "device" }),
 
+	-- Volume Down
 	awful.key({}, "XF86AudioLowerVolume", function()
-		awful.spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%", false)
-		awesome.emit_signal("osd::volume_osd:show", true)
-		awesome.emit_signal("volume::changed:level")
+		awful.spawn.easy_async("pactl set-sink-volume @DEFAULT_SINK@ -5%", function()
+			update_and_broadcast_volume()
+		end)
 	end, { description = "lower volume", group = "device" }),
 
+	-- Mute Toggle
 	awful.key({}, "XF86AudioMute", function()
-		awful.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle", false)
-		awesome.emit_signal("osd::volume_osd:show", true)
-		awesome.emit_signal("volume::changed:muted")
+		awful.spawn.easy_async("pactl set-sink-mute @DEFAULT_SINK@ toggle", function()
+			-- The widget's pactl subscribe will handle the icon update
+			-- Just show the OSD
+			update_and_broadcast_volume()
+		end)
 	end, { description = "toggle volume", group = "device" }),
 
 	awful.key({}, "XF86AudioMicMute", function()

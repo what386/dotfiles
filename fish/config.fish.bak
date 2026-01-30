@@ -1,0 +1,14 @@
+if status is-interactive
+    # Commands to run in interactive sessions can go here
+end
+
+zoxide init fish | source
+
+# PATH additions
+
+set -gx PATH $PATH /opt/zen
+
+
+if test -f ~/upstream/path.sh
+    source ~/upstream/path.sh
+end

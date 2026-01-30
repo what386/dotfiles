@@ -1,5 +1,8 @@
+local lspconfig = require("lspconfig")
+
 -- Enable the following language servers
 return {
+	-- Lua
 	lua_ls = {
 		settings = {
 			Lua = {
@@ -7,7 +10,7 @@ return {
 				workspace = {
 					checkThirdParty = false,
 					-- Tells lua_ls where to find all the Lua files that you have loaded
-					-- for your neovim configuration.
+					-- for your Neovim configuration.
 					library = {
 						"${3rd}/luv/library",
 						unpack(vim.api.nvim_get_runtime_file("", true)),
@@ -15,15 +18,14 @@ return {
 					-- If lua_ls is really slow on your computer, you can try this instead:
 					-- library = { vim.env.VIMRUNTIME },
 				},
-				completion = {
-					callSnippet = "Replace",
-				},
+				completion = { callSnippet = "Replace" },
 				telemetry = { enable = false },
 				diagnostics = { disable = { "missing-fields" } },
 			},
 		},
 	},
 
+	-- Python
 	pylsp = {
 		settings = {
 			pylsp = {
@@ -40,12 +42,9 @@ return {
 			},
 		},
 	},
-	ruff = {}, --both pylsp and ruff are for python
+	ruff = {}, -- Complimentary Python LSP
 
-	jdtls = {},
-	csharp_ls = {},
-	rust_analyzer = {},
-
+	-- C / C++
 	clangd = {
 		keys = {
 			{ "<leader>ch", "<cmd>LspClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
@@ -53,9 +52,8 @@ return {
 		root_markers = {
 			"compile_commands.json",
 			"compile_flags.txt",
-			"configure.ac", -- AutoTools
 			"Makefile",
-			"configure.ac",
+			"configure.ac", -- AutoTools
 			"configure.in",
 			"config.h.in",
 			"meson.build",
@@ -63,9 +61,7 @@ return {
 			"build.ninja",
 			".git",
 		},
-		capabilities = {
-			offsetEncoding = { "utf-16" },
-		},
+		capabilities = { offsetEncoding = { "utf-16" } },
 		cmd = {
 			"clangd",
 			"--background-index",
@@ -82,17 +78,35 @@ return {
 		},
 	},
 
+	-- Java / C#
+	jdtls = {},
+	csharp_ls = {},
+
+	-- Rust
+	rust_analyzer = {},
+
+	-- Web / Frontend
 	html = { filetypes = { "html", "twig", "hbs" } },
 	tailwindcss = {},
 	ts_ls = {},
 
+	-- Ruby
+	ruby_lsp = {},
+
+	-- JSON / SQL
 	jsonls = {},
 	sqlls = {},
 
+	-- Zig
 	zls = {},
 
+	-- Go
+	gopls = {},
+
+	-- Shell
 	bashls = {},
 
+	-- Docker
 	dockerls = {},
 	docker_compose_language_service = {},
 }

@@ -9,12 +9,6 @@ return {
 	-- C++
 	"clang-format",
 
-	-- Rust
-	"rustfmt",
-
-	-- Shell/Bash
-	"shfmt",
-
 	-- CMake
 	"cmakelang",
 
@@ -32,7 +26,7 @@ return {
 	"ruff",
 
 	-- Ruby
-	--"rubocop",
+	"rubocop",
 
 	-- XML
 	"xmlformatter",

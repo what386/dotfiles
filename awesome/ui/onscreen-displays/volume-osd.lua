@@ -5,6 +5,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local icons = require("theme.icons")
 
+-- Header and value display
 local osd_header = wibox.widget({
 	text = "Volume",
 	font = "Inter Bold 12",
@@ -21,6 +22,7 @@ local osd_value = wibox.widget({
 	widget = wibox.widget.textbox,
 })
 
+-- Slider widget
 local slider_osd = wibox.widget({
 	nil,
 	{
@@ -44,11 +46,23 @@ local slider_osd = wibox.widget({
 
 local vol_osd_slider = slider_osd.vol_osd_slider
 
--- Dragging the slider changes volume, but still uses the signals to update UI
+-- Flag to prevent circular updates
+local updating_from_signal = false
+
+-- When user drags the OSD slider
 vol_osd_slider:connect_signal("property::value", function()
+	if updating_from_signal then
+		return
+	end
+
 	local volume_level = vol_osd_slider:get_value()
 	awful.spawn("pactl set-sink-volume @DEFAULT_SINK@ " .. volume_level .. "%", false)
-	awesome.emit_signal("volume::update:level", volume_level)
+
+	-- Update text locally
+	osd_value.text = tostring(math.floor(volume_level)) .. "%"
+
+	-- Broadcast to other widgets
+	awesome.emit_signal("volume::update", volume_level)
 
 	if awful.screen.focused().show_vol_osd then
 		awesome.emit_signal("osd::volume_osd:show", true)
@@ -63,13 +77,17 @@ vol_osd_slider:connect_signal("mouse::enter", function()
 	awful.screen.focused().show_vol_osd = true
 end)
 
--- 📡 Passive updates: only respond to signals
-awesome.connect_signal("volume::update:level", function(level)
+-- Listen for volume updates from other sources (keybinds, other sliders, pactl events)
+awesome.connect_signal("volume::update", function(level)
+	updating_from_signal = true
 	vol_osd_slider:set_value(level)
-	osd_value.text = tostring(level) .. "%"
-	awesome.emit_signal("osd::volume_osd:show", true) -- show OSD on level change
+	osd_value.text = tostring(math.floor(level)) .. "%"
+	updating_from_signal = false
+
+	awesome.emit_signal("osd::volume_osd:show", true)
 end)
 
+-- Icon widget
 local widget = wibox.widget({
 	{
 		id = "icon",
@@ -82,11 +100,12 @@ local widget = wibox.widget({
 	widget = wibox.container.margin,
 })
 
+-- Update icon when it changes
 awesome.connect_signal("widget::volume:icon", function(newicon)
 	widget.icon:set_image(newicon)
-	awesome.emit_signal("osd::volume_osd:show", true) -- show OSD on mute/unmute change
 end)
 
+-- Main volume slider layout
 local volume_slider_osd = wibox.widget({
 	widget,
 	slider_osd,
@@ -94,13 +113,14 @@ local volume_slider_osd = wibox.widget({
 	layout = wibox.layout.fixed.horizontal,
 })
 
+-- OSD dimensions
 local osd_height = dpi(100)
 local osd_width = dpi(300)
 local osd_margin = dpi(25)
 
+-- Create the OSD popup for each screen
 screen.connect_signal("request::desktop_decoration", function(s)
 	s.show_vol_osd = false
-
 	s.volume_osd_overlay = awful.popup({
 		widget = {},
 		ontop = true,
@@ -150,6 +170,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	end)
 end)
 
+-- Auto-hide timer
 local hide_osd = gears.timer({
 	timeout = 2,
 	autostart = true,
