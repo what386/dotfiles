@@ -1,31 +1,64 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-BRIGHTNESS_FILE="/tmp/current_brightness"
-STREAM_PID_FILE="/tmp/brightness_stream.pid"
+set -u
 
-start_v4l2_stream() {
-    # Use v4l2-ctl to continuously read camera brightness/exposure
+RUNTIME_DIR="/tmp/awesomewm-${USER:-user}"
+BRIGHTNESS_FILE="${RUNTIME_DIR}/current_brightness"
+STREAM_PID_FILE="${RUNTIME_DIR}/brightness_stream.pid"
+DEVICE="${AUTO_BACKLIGHT_DEVICE:-/dev/video0}"
+POLL_SECONDS="${AUTO_BACKLIGHT_POLL_SECONDS:-3}"
+
+mkdir -p "$RUNTIME_DIR"
+
+is_running() {
+    [ -f "$STREAM_PID_FILE" ] || return 1
+    local pid
+    pid="$(cat "$STREAM_PID_FILE" 2>/dev/null || true)"
+    [ -n "$pid" ] || return 1
+    kill -0 "$pid" 2>/dev/null
+}
+
+normalize_brightness() {
+    local raw="$1"
+    awk -v value="$raw" 'BEGIN {
+        if (value < 0) value = 0;
+        if (value > 255) value = 255;
+        printf "%.4f\n", value / 255.0;
+    }'
+}
+
+stream_loop() {
     while true; do
-        # Get hardware brightness value directly
-        brightness=$(v4l2-ctl -d /dev/video0 --get-ctrl=brightness 2>/dev/null | awk -F': ' '{print $2/255}')
-        
-        # If hardware brightness not available, fall back to frame analysis
-        if [ -z "$brightness" ] || [ "$brightness" = "/255" ]; then
-            # Quick frame grab and analysis
-            brightness=$(timeout 1 ffmpeg -f v4l2 -i /dev/video0 -vframes 1 \
-                        -vf scale=40:30 -f image2 pipe:1 2>/dev/null | \
-                        convert - -resize 1x1 -format "%[fx:mean]" info: 2>/dev/null)
+        local raw normalized
+        raw="$(v4l2-ctl -d "$DEVICE" --get-ctrl=brightness 2>/dev/null | awk -F': ' '/brightness/ {print $2}' | tr -d '[:space:]')"
+        if [[ "$raw" =~ ^[0-9]+$ ]]; then
+            normalized="$(normalize_brightness "$raw")"
+            printf "%s\n" "$normalized" > "${BRIGHTNESS_FILE}.tmp"
+            mv "${BRIGHTNESS_FILE}.tmp" "$BRIGHTNESS_FILE"
         fi
-        
-        if [ -n "$brightness" ]; then
-            echo "$brightness" > "$BRIGHTNESS_FILE"
-            echo "$(date '+%H:%M:%S') $brightness"
-        fi
-        
-        sleep 2  # Adjust polling rate as needed
-    done &
-    
-    echo $! > "$STREAM_PID_FILE"
+        sleep "$POLL_SECONDS"
+    done
+}
+
+start_stream() {
+    if is_running; then
+        echo "Running"
+        return 0
+    fi
+
+    if ! command -v v4l2-ctl >/dev/null 2>&1; then
+        echo "v4l2-ctl not found" >&2
+        return 1
+    fi
+
+    if [ ! -e "$DEVICE" ]; then
+        echo "Device not found: $DEVICE" >&2
+        return 1
+    fi
+
+    stream_loop >/dev/null 2>&1 &
+    echo "$!" > "$STREAM_PID_FILE"
+    echo "Started"
 }
 
 read_brightness() {
@@ -33,16 +66,25 @@ read_brightness() {
 }
 
 stop_stream() {
-    if [ -f "$STREAM_PID_FILE" ]; then
-        kill $(cat "$STREAM_PID_FILE") 2>/dev/null
-        rm -f "$STREAM_PID_FILE" "$BRIGHTNESS_FILE"
+    if is_running; then
+        kill "$(cat "$STREAM_PID_FILE")" 2>/dev/null || true
+    fi
+    rm -f "$STREAM_PID_FILE" "${BRIGHTNESS_FILE}.tmp" "$BRIGHTNESS_FILE"
+    echo "Stopped"
+}
+
+status_stream() {
+    if is_running; then
+        echo "Running"
+    else
+        echo "Stopped"
     fi
 }
 
-case "$1" in
-    start)   start_v4l2_stream ;;
+case "${1:-}" in
+    start)   start_stream ;;
     stop)    stop_stream ;;
     read)    read_brightness ;;
-    status)  [ -f "$STREAM_PID_FILE" ] && echo "Running" || echo "Stopped" ;;
+    status)  status_stream ;;
     *)       echo "Usage: $0 {start|stop|read|status}" ;;
 esac

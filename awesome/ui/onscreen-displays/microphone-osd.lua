@@ -44,11 +44,23 @@ local slider_osd = wibox.widget({
 })
 
 local mic_osd_slider = slider_osd.mic_osd_slider
+local updating_from_signal = false
+local mic_apply_timer = gears.timer({
+	timeout = 0.08,
+	single_shot = true,
+	autostart = false,
+	callback = function()
+		local microphone_level = mic_osd_slider:get_value()
+		awful.spawn("pactl set-source-volume $(pactl get-default-source) " .. microphone_level .. "%", false)
+	end,
+})
 
 mic_osd_slider:connect_signal("property::value", function()
+	if updating_from_signal then
+		return
+	end
 	local microphone_level = mic_osd_slider:get_value()
-
-	awful.spawn("pactl set-source-volume $(pactl get-default-source) " .. microphone_level .. "%", false)
+	mic_apply_timer:again()
 	-- Update textbox widget text
 	osd_value.text = microphone_level .. "%"
 
@@ -70,7 +82,9 @@ end)
 
 -- The emit will come from microphone slider
 awesome.connect_signal("osd::microphone_osd", function(microphone)
+	updating_from_signal = true
 	mic_osd_slider:set_value(microphone)
+	updating_from_signal = false
 end)
 
 local widget = wibox.widget({

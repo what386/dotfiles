@@ -7,7 +7,7 @@ local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 
 local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local icons = require("theme.icons")
 
 local action_name = wibox.widget({
 	text = "Brightness",
@@ -21,7 +21,7 @@ local icon = wibox.widget({
 	expand = "none",
 	nil,
 	{
-		image = widget_icon_dir .. "brightness.svg",
+		image = icons.dashboard.settings.brightness,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},
@@ -67,11 +67,23 @@ local slider = wibox.widget({
 })
 
 local brightness_slider = slider.brightness_slider
+local updating_from_signal = false
+local brightness_apply_timer = gears.timer({
+	timeout = 0.08,
+	single_shot = true,
+	autostart = false,
+	callback = function()
+		local brightness_level = brightness_slider:get_value()
+		spawn("brightnessctl s " .. math.max(brightness_level, 5) .. "%", false)
+	end,
+})
 
 brightness_slider:connect_signal("property::value", function()
+	if updating_from_signal then
+		return
+	end
 	local brightness_level = brightness_slider:get_value()
-
-	spawn("brightnessctl s " .. math.max(brightness_level, 5) .. "%", false)
+	brightness_apply_timer:again()
 
 	-- Update brightness osd
 	awesome.emit_signal("osd::brightness_osd", brightness_level)
@@ -98,7 +110,9 @@ local update_slider = function()
 	awful.spawn.easy_async_with_shell(
 		[[brightnessctl -m | awk -F, '{print substr($4, 0, length($4)-1)}']],
 		function(stdout)
+			updating_from_signal = true
 			brightness_slider:set_value(tonumber(stdout))
+			updating_from_signal = false
 		end
 	)
 end
@@ -131,7 +145,9 @@ end)
 
 -- The emit will come from the OSD
 awesome.connect_signal("widget::brightness:update", function(value)
+	updating_from_signal = true
 	brightness_slider:set_value(tonumber(value))
+	updating_from_signal = false
 end)
 
 local brightness_setting = wibox.widget({

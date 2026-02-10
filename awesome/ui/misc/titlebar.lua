@@ -6,6 +6,19 @@ local dpi = beautiful.xresources.apply_dpi
 
 awful.titlebar.enable_tooltip = true
 awful.titlebar.fallback_name = "Client"
+local titlebar_position = "left"
+
+local function should_hide_titlebar(c)
+	return c.fullscreen or c.maximized
+end
+
+local function update_titlebar_visibility(c)
+	if should_hide_titlebar(c) then
+		awful.titlebar.hide(c, titlebar_position)
+	else
+		awful.titlebar.show(c, titlebar_position)
+	end
+end
 
 local double_click_event_handler = function(double_click_event)
 	if double_click_timer then
@@ -202,4 +215,9 @@ client.connect_signal("request::titlebars", function(c)
 	else
 		create_vertical_bar(c, "left", beautiful.background, beautiful.titlebar_size)
 	end
+
+	update_titlebar_visibility(c)
 end)
+
+client.connect_signal("property::fullscreen", update_titlebar_visibility)
+client.connect_signal("property::maximized", update_titlebar_visibility)

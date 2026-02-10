@@ -7,7 +7,7 @@ local clickable_container = require("ui.clickable-container")
 local blur_status = true
 
 local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local icons = require("theme.icons")
 
 local action_name = wibox.widget({
 	text = "Blur Effects",
@@ -32,7 +32,7 @@ local action_info = wibox.widget({
 local button_widget = wibox.widget({
 	{
 		id = "icon",
-		image = widget_icon_dir .. "effects.svg",
+		image = icons.dashboard.settings.effects,
 		widget = wibox.widget.imagebox,
 		resize = true,
 	},
@@ -59,11 +59,11 @@ local update_widget = function()
 	if blur_status then
 		action_status_text:set_text("On")
 		widget_button.bg = beautiful.system_magenta_dark
-		button_widget.icon:set_image(widget_icon_dir .. "effects.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.effects)
 	else
 		action_status_text:set_text("Off")
 		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(widget_icon_dir .. "effects-off.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.effects_off)
 	end
 end
 

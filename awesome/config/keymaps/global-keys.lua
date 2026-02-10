@@ -10,6 +10,7 @@ local themes_path = gfs.get_themes_dir()
 
 -- Modkey: Mod4 (Super key) or Mod1 (Alt key)
 local modkey = "Mod4"
+local altkey = "Mod1"
 
 -- Helper function to read and broadcast volume
 local function update_and_broadcast_volume()
@@ -63,6 +64,22 @@ local keys = gears.table.join(
 		awesome.emit_signal("flyout::osd_keyboard:toggle")
 	end, { description = "show keyboard", group = "flyouts" }),
 
+	awful.key({ modkey }, "v", function()
+		awesome.emit_signal("flyout::clipboard_history:toggle")
+	end, { description = "show clipboard history", group = "flyouts" }),
+
+	awful.key({ modkey }, "w", function()
+		awesome.emit_signal("flyout::window_overview:toggle")
+	end, { description = "show window overview", group = "flyouts" }),
+
+	awful.key({ modkey }, "Tab", function()
+		awesome.emit_signal("flyout::alt_tab:next")
+	end, { description = "switch window forward", group = "flyouts" }),
+
+	awful.key({ modkey, "Shift" }, "Tab", function()
+		awesome.emit_signal("flyout::alt_tab:prev")
+	end, { description = "switch window backward", group = "flyouts" }),
+
 	--awesome
 
 	awful.key({ modkey }, "Escape", function()
@@ -80,8 +97,14 @@ local keys = gears.table.join(
 		awesome.quit()
 	end, { description = "force quit", group = "awesome" }),
 
-	-- Launcher
+	-- Utils
+	awful.key({ modkey, "Shift" }, "v", function()
+		awful.spawn.with_shell(
+			[[xclip -o -selection clipboard | xargs -0 -I {} xdotool type --clearmodifiers --delay 12 "{}"]]
+		)
+	end, { description = "paste clipboard as text", group = "utils" }),
 
+	-- Launcher
 	awful.key({ modkey }, "o", function()
 		awful.spawn(apps.default.rofi_appmenu)
 	end, { description = "open program", group = "launcher" }),

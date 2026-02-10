@@ -1,3 +1,0 @@
--- i cant get this to work
--- i will subsequently give up
--- until there is a revelation

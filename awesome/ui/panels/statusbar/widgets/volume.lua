@@ -43,6 +43,7 @@ local volume_tooltip = awful.tooltip({
 local volume_level = 0
 local is_muted = false
 local device = "speakers"
+local last_default_sink = nil
 
 -- Helper functions
 local function get_volume_icon(level)
@@ -82,85 +83,54 @@ local function update_volume_display()
 	)
 end
 
-local function update_volume_level()
-	awful.spawn.easy_async_with_shell("pactl get-sink-volume @DEFAULT_SINK@", function(stdout)
-		local new_level = tonumber(stdout:match("Volume: front.- (%d+)%%") or "0")
-		if new_level ~= volume_level then
-			volume_level = new_level
-			-- Broadcast to all listeners
-			awesome.emit_signal("volume::update", volume_level)
+local function refresh_sink_device()
+	awful.spawn.easy_async("pactl get-default-sink", function(stdout)
+		local sink_name = stdout:gsub("%s+", "")
+		if sink_name == "" then
+			return
+		end
+		if sink_name ~= last_default_sink then
+			last_default_sink = sink_name
+		end
+
+		if sink_name:lower():find("headphone") then
+			device = "headphones"
+		else
+			device = "speakers"
 		end
 		update_volume_display()
 	end)
 end
-
-local function update_volume_muted()
-	awful.spawn.easy_async_with_shell("pactl get-sink-mute @DEFAULT_SINK@", function(stdout)
-		local is_muted_string = stdout:match("Mute: (%a+)")
-		local new_muted = (is_muted_string == "yes")
-		if new_muted ~= is_muted then
-			is_muted = new_muted
-			update_volume_display()
-		end
-	end)
-end
-
-local function update_volume_device()
-	awful.spawn.easy_async("pactl list sinks", function(stdout)
-		for line in stdout:gmatch("[^\r\n]+") do
-			if line:find("Active Port:") then
-				local port = line:match("Active Port: (.+)")
-				if port and port:find("headphones") then
-					device = "headphones"
-				else
-					device = "speakers"
-				end
-			end
-		end
-		update_volume_display()
-	end)
-end
-
--- State tracking for change detection
-local last_volume = nil
-local last_muted = nil
-local last_device = nil
 
 local function check_and_update_volume()
-	awful.spawn.easy_async("pactl get-sink-volume @DEFAULT_SINK@", function(volume_out)
-		awful.spawn.easy_async("pactl get-sink-mute @DEFAULT_SINK@", function(mute_out)
-			awful.spawn.easy_async("pactl get-default-sink", function(device_out)
-				local current_volume = volume_out:match("(%d+)%%")
-				local current_muted = mute_out:match("Mute: (%w+)")
-				local current_device = device_out:gsub("%s+", "")
+	awful.spawn.easy_async_with_shell(
+		"pactl get-sink-volume @DEFAULT_SINK@; pactl get-sink-mute @DEFAULT_SINK@",
+		function(stdout)
+			local new_level = tonumber(stdout:match("(%d+)%%") or "0")
+			local muted_value = stdout:match("Mute:%s*(%a+)")
+			local new_muted = (muted_value == "yes")
 
-				-- Only update if something changed
-				if current_volume ~= last_volume or current_muted ~= last_muted or current_device ~= last_device then
-					last_volume = current_volume
-					last_muted = current_muted
-					last_device = current_device
+			local changed = (new_level ~= volume_level) or (new_muted ~= is_muted)
+			volume_level = new_level
+			is_muted = new_muted
 
-					update_volume_device()
-					update_volume_level()
-					update_volume_muted()
-				end
-			end)
-		end)
-	end)
+			if changed then
+				awesome.emit_signal("volume::update", volume_level)
+				update_volume_display()
+			end
+		end
+	)
+	refresh_sink_device()
 end
 
 -- Debounce timer for pactl events
-local volume_timer = nil
+local volume_timer = gears.timer({
+	timeout = 0.08,
+	single_shot = true,
+	callback = check_and_update_volume,
+})
 local function debounced_check_and_update_volume()
-	if volume_timer then
-		volume_timer:stop()
-	end
-	volume_timer = gears.timer({
-		timeout = 0.05,
-		single_shot = true,
-		callback = check_and_update_volume,
-	})
-	volume_timer:start()
+	volume_timer:again()
 end
 
 -- Subscribe to pulseaudio events

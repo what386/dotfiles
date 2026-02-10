@@ -1,8 +1,7 @@
 local beautiful = require("beautiful")
 local gears = require("gears")
 
-local config_dir = gears.filesystem.get_configuration_dir()
-local icon_dir = config_dir .. "ui/layouts/icons/"
+local icons = require("theme.icons")
 
 local function get_icon(icon_path)
 	if icon_path ~= nil then
@@ -20,7 +19,7 @@ local function load_layouts(layouts)
 		local layout_module = require("ui.layouts.custom." .. layout_name)
 
 		-- Set up the icon
-		local icon_path = icon_dir .. layout_name .. ".png"
+		local icon_path = icons.layout_icons[layout_name]
 		if beautiful["layout_" .. layout_name] == nil then
 			beautiful["layout_" .. layout_name] = get_icon(icon_path)
 		end

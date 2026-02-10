@@ -6,7 +6,7 @@ local spawn = awful.spawn
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local icons = require("theme.icons")
 
 local action_name = wibox.widget({
 	text = "Microphone",
@@ -20,7 +20,7 @@ local icon = wibox.widget({
 	expand = "none",
 	nil,
 	{
-		image = widget_icon_dir .. "volume-medium.svg",
+		image = icons.dashboard.settings.volume_medium,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},
@@ -66,11 +66,24 @@ local slider = wibox.widget({
 })
 
 local mic_slider = slider.mic_slider
+local updating_from_signal = false
+local mic_apply_timer = gears.timer({
+	timeout = 0.08,
+	single_shot = true,
+	autostart = false,
+	callback = function()
+		local microphone_level = mic_slider:get_value()
+		awful.spawn("pactl set-source-volume $(pactl get-default-source) " .. microphone_level .. "%", false)
+	end,
+})
 
 mic_slider:connect_signal("property::value", function()
+	if updating_from_signal then
+		return
+	end
 	local microphone_level = mic_slider:get_value()
 
-	awful.spawn("pactl set-source-volume $(pactl get-default-source) " .. microphone_level .. "%", false)
+	mic_apply_timer:again()
 
 	local is_muted = false
 
@@ -100,7 +113,9 @@ local update_slider = function()
 		[[pactl get-source-volume $(pactl get-default-source) | grep -Po '\d+(?=%)' | head -n 1]],
 		function(stdout)
 			local level = tonumber(stdout)
+			updating_from_signal = true
 			mic_slider:set_value(tonumber(level))
+			updating_from_signal = false
 		end
 	)
 end
@@ -133,7 +148,9 @@ end)
 
 -- The emit will come from the OSD
 awesome.connect_signal("widget::microphone:update", function(value)
+	updating_from_signal = true
 	mic_slider:set_value(tonumber(value))
+	updating_from_signal = false
 end)
 
 local volume_setting = wibox.widget({

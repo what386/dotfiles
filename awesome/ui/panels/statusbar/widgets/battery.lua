@@ -213,7 +213,7 @@ end
 
 -- Regular polling as fallback (every 5 seconds)
 gears.timer({
-	timeout = 10,
+	timeout = 30,
 	call_now = true,
 	autostart = true,
 	callback = update_battery_widget,
@@ -222,8 +222,7 @@ gears.timer({
 -- Event-driven updates using acpi_listen
 awful.spawn.with_line_callback("acpi_listen", {
 	stdout = function(line)
-		if line:match("ac_adapter") then
-			-- Charger state changed -> refresh immediately
+		if line:match("ac_adapter") or line:match("battery") then
 			update_battery_widget()
 		end
 	end,

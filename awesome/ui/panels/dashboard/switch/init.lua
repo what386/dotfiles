@@ -3,8 +3,7 @@ local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/switch/icons/"
+local icons = require("theme.icons")
 local clickable_container = require("ui.clickable-container")
 local monitor_mode = false
 
@@ -12,7 +11,7 @@ local return_button = function()
 	local widget = wibox.widget({
 		{
 			id = "icon",
-			image = widget_icon_dir .. "chart.svg",
+			image = icons.dashboard.switch.chart,
 			widget = wibox.widget.imagebox,
 			resize = true,
 		},
@@ -34,15 +33,18 @@ local return_button = function()
 	})
 
 	local control_center_switch_mode = function()
-		local cc_widget = awful.screen.focused().dashboard.widget
+		local controlcenter = awful.screen.focused().dashboard
+		local cc_widget = controlcenter.widget
 		if monitor_mode then
-			widget.icon:set_image(widget_icon_dir .. "chart.svg")
+			widget.icon:set_image(icons.dashboard.switch.chart)
 			cc_widget:get_children_by_id("main_control")[1].visible = true
 			cc_widget:get_children_by_id("monitor_control")[1].visible = false
+			controlcenter.stop_monitors()
 		else
-			widget.icon:set_image(widget_icon_dir .. "gear.svg")
+			widget.icon:set_image(icons.dashboard.switch.gear)
 			cc_widget:get_children_by_id("main_control")[1].visible = false
 			cc_widget:get_children_by_id("monitor_control")[1].visible = true
+			controlcenter.start_monitors()
 		end
 		monitor_mode = not monitor_mode
 	end

@@ -2,8 +2,7 @@ local gears = require("gears")
 local awful = require("awful")
 local wibox = require("wibox")
 local dpi = require("beautiful").xresources.apply_dpi
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "widget/mpd/icons/"
+local icons = require("theme.icons")
 local clickable_container = require("widget.clickable-container")
 local music_box = require("widget.mpd.music-box")
 local toggle_music_box = music_box.toggle_music_box
@@ -12,7 +11,7 @@ local return_button = function()
 	local widget = wibox.widget({
 		{
 			id = "icon",
-			image = widget_icon_dir .. "music.svg",
+			image = icons.applets.media.music,
 			widget = wibox.widget.imagebox,
 			resize = true,
 		},

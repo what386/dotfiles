@@ -71,12 +71,6 @@ client.connect_signal("request::default_keybindings", function()
 			c.maximized_horizontal = not c.maximized_horizontal
 			c:raise()
 		end, { description = "(un)maximize horizontally", group = "client" }),
-		awful.key({ modkey }, "Tab", function()
-			awful.client.focus.history.previous()
-			if client.focus then
-				client.focus:raise()
-			end
-		end, { description = "go back", group = "client" }),
 		awful.key({ modkey, "Control" }, "n", function()
 			local c = awful.client.restore()
 			-- Focus restored client

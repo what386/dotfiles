@@ -43,11 +43,23 @@ local slider_osd = wibox.widget({
 })
 
 local bri_osd_slider = slider_osd.bri_osd_slider
+local updating_from_signal = false
+local brightness_apply_timer = gears.timer({
+	timeout = 0.08,
+	single_shot = true,
+	autostart = false,
+	callback = function()
+		local brightness_level = bri_osd_slider:get_value()
+		awful.spawn("brightnessctl s " .. math.max(brightness_level, 5) .. "%", false)
+	end,
+})
 
 bri_osd_slider:connect_signal("property::value", function()
+	if updating_from_signal then
+		return
+	end
 	local brightness_level = bri_osd_slider:get_value()
-
-	awful.spawn("brightnessctl s " .. math.max(brightness_level, 5) .. "%", false)
+	brightness_apply_timer:again()
 
 	-- Update textbox widget text
 	osd_value.text = brightness_level .. "%"
@@ -70,7 +82,9 @@ end)
 
 -- The emit will come from brightness slider
 awesome.connect_signal("osd::brightness_osd", function(brightness)
+	updating_from_signal = true
 	bri_osd_slider:set_value(brightness)
+	updating_from_signal = false
 end)
 
 local icon = wibox.widget({

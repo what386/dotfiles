@@ -1,5 +1,6 @@
---vim.filetype.add({
---	extension = {
---axaml = "xml", -- treats .axaml as XML for syntax
---	},
---})
+vim.filetype.add({
+	extension = {
+		axaml = "xml",
+		bsh = "brash",
+	},
+})

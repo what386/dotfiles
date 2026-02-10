@@ -2,10 +2,12 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
+local naughty = require("naughty")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local settings = require("modules.settings-store")
+local icons = require("theme.icons")
 local script_dir = config_dir .. "/scripts/"
 
 local action_name = wibox.widget({
@@ -31,7 +33,7 @@ local action_info = wibox.widget({
 local button_widget = wibox.widget({
 	{
 		id = "icon",
-		image = widget_icon_dir .. "brightness-off.svg",
+		image = icons.dashboard.settings.brightness_off,
 		widget = wibox.widget.imagebox,
 		resize = true,
 	},
@@ -54,36 +56,43 @@ local widget_button = wibox.widget({
 	widget = wibox.container.background,
 })
 
+local auto_brightness = {}
+auto_brightness.enabled = settings.get_bool("auto_backlight_enabled", false)
+auto_brightness.timer = nil
+auto_brightness.stream_running = false
+auto_brightness.last_percent = nil
+
 local update_widget = function()
-	if blue_light_state then
+	if auto_brightness.enabled then
 		action_status:set_text("On")
 		widget_button.bg = beautiful.accent
-		button_widget.icon:set_image(widget_icon_dir .. "brightness.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.brightness)
 	else
 		action_status:set_text("Off")
 		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(widget_icon_dir .. "brightness-off.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.brightness_off)
 	end
 end
-
-local auto_brightness = {}
-auto_brightness.enabled = false
-auto_brightness.timer = nil
-auto_brightness.stream_running = false
 
 -- Start brightness stream
 local function start_brightness_stream()
 	if auto_brightness.stream_running then
-		return
+		return true
 	end
 
-	awful.spawn.with_shell("bash " .. script_dir .. "v4l2_brightness_stream.sh start")
-	auto_brightness.stream_running = true
-
-	-- Give stream time to start
-	gears.timer.start_new(2, function()
-		return false -- don't repeat
+	awful.spawn.easy_async_with_shell("bash " .. script_dir .. "v4l2_brightness_stream.sh start", function(_, _, _, exit_code)
+		auto_brightness.stream_running = exit_code == 0
+		if not auto_brightness.stream_running then
+			auto_brightness.enabled = false
+			settings.set_bool("auto_backlight_enabled", false)
+			update_widget()
+			naughty.notification({
+				title = "Auto Backlight",
+				message = "Unable to start brightness stream (camera/v4l2 unavailable).",
+			})
+		end
 	end)
+	return true
 end
 
 -- Stop brightness stream
@@ -101,6 +110,9 @@ local function read_brightness_from_stream(callback)
 	awful.spawn.easy_async_with_shell(
 		"bash " .. script_dir .. "v4l2_brightness_stream.sh read",
 		function(stdout, stderr, reason, exit_code)
+			if exit_code ~= 0 then
+				return
+			end
 			local brightness = tonumber(stdout:match("([%d%.]+)"))
 			if brightness then
 				callback(brightness)
@@ -111,8 +123,12 @@ end
 
 -- Set screen brightness
 local function set_screen_brightness(brightness)
-	local percent = math.floor(brightness * 120)
+	local percent = math.floor(brightness * 100)
 	percent = math.max(5, math.min(100, percent))
+	if auto_brightness.last_percent and math.abs(percent - auto_brightness.last_percent) < 3 then
+		return
+	end
+	auto_brightness.last_percent = percent
 
 	awful.spawn("brightnessctl s " .. percent .. "%", false)
 
@@ -134,6 +150,7 @@ local function start_auto_brightness()
 	end
 
 	auto_brightness.enabled = true
+	settings.set_bool("auto_backlight_enabled", true)
 	start_brightness_stream()
 
 	if not auto_brightness.timer then
@@ -153,6 +170,8 @@ local function stop_auto_brightness()
 	end
 
 	auto_brightness.enabled = false
+	settings.set_bool("auto_backlight_enabled", false)
+	auto_brightness.last_percent = nil
 	if auto_brightness.timer then
 		auto_brightness.timer:stop()
 	end
@@ -197,6 +216,13 @@ end)
 
 awesome.connect_signal("setting::auto_backlight:toggle", function()
 	toggle_action()
+	update_widget()
 end)
+
+if auto_brightness.enabled then
+	start_auto_brightness()
+end
+
+update_widget()
 
 return action_widget

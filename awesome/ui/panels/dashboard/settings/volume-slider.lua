@@ -6,7 +6,7 @@ local spawn = awful.spawn
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local icons = require("theme.icons")
 
 -- Header
 local action_name = wibox.widget({
@@ -22,7 +22,7 @@ local icon = wibox.widget({
 	expand = "none",
 	nil,
 	{
-		image = widget_icon_dir .. "volume-medium.svg",
+		image = icons.dashboard.settings.volume_medium,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},

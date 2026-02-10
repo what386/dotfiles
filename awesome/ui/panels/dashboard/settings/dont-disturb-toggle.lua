@@ -5,9 +5,7 @@ local naughty = require("naughty")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-local config_dir = gears.filesystem.get_configuration_dir()
-local data_dir = config_dir .. "persistent/settings/"
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local settings = require("modules.settings-store")
 local icons = require("theme.icons")
 
 _G.dont_disturb_state = false
@@ -35,7 +33,7 @@ local action_info = wibox.widget({
 local button_widget = wibox.widget({
 	{
 		id = "icon",
-		image = widget_icon_dir .. "notify.svg",
+		image = icons.dashboard.settings.notify,
 		widget = wibox.widget.imagebox,
 		resize = true,
 	},
@@ -62,29 +60,17 @@ local update_widget = function()
 	if dont_disturb_state then
 		action_status:set_text("On")
 		widget_button.bg = beautiful.system_cyan_dark
-		button_widget.icon:set_image(widget_icon_dir .. "dont-disturb.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.dont_disturb)
 	else
 		action_status:set_text("Off")
 		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(widget_icon_dir .. "notify.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.notify)
 	end
 end
 
 local check_disturb_status = function()
-	awful.spawn.easy_async_with_shell("cat " .. data_dir .. "disturb_status", function(stdout)
-		local status = stdout
-
-		if status:match("true") then
-			dont_disturb_state = true
-		elseif status:match("false") then
-			dont_disturb_state = false
-		else
-			dont_disturb_state = false
-			awful.spawn.with_shell("echo 'false' > " .. data_dir .. "disturb_status")
-		end
-
-		update_widget()
-	end)
+	dont_disturb_state = settings.get_bool("disturb_status", false)
+	update_widget()
 end
 
 check_disturb_status()
@@ -95,12 +81,8 @@ local toggle_action = function()
 	else
 		dont_disturb_state = true
 	end
-	awful.spawn.easy_async_with_shell(
-		"echo " .. tostring(dont_disturb_state) .. " > " .. data_dir .. "disturb_status",
-		function()
-			update_widget()
-		end
-	)
+	settings.set_bool("disturb_status", dont_disturb_state)
+	update_widget()
 end
 
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()

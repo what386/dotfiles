@@ -6,13 +6,12 @@ local gears = require("gears")
 local clickable_container = require("widget.clickable-container")
 local dpi = require("beautiful").xresources.apply_dpi
 
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "widget/xdg-folders/icons/"
+local icons = require("theme.icons")
 
 local create_widget = function()
 	local home_widget = wibox.widget({
 		{
-			image = widget_icon_dir .. "user-home.svg",
+			image = icons.folders.home,
 			resize = true,
 			widget = wibox.widget.imagebox,
 		},

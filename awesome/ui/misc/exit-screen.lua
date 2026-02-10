@@ -4,6 +4,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local icons = require("theme.icons")
+local sounds = require("theme.sounds")
 local userprefs = require("config.user.preferences")
 local clickable_container = require("ui.clickable-container")
 
@@ -146,6 +147,7 @@ local suspend_command = function()
 end
 
 local logout_command = function()
+	sounds.play("logout")
 	awesome.emit_signal("module::session_manager:save")
 	gears.timer({
 		timeout = 0.5,

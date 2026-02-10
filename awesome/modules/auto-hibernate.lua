@@ -59,7 +59,7 @@ local function check_battery_status(status, charge, time)
 	end
 end
 
-awful.widget.watch("acpi -i", 10, function(_, stdout)
+awful.widget.watch("acpi -i", 30, function(_, stdout)
 	local status, charge_str, time = string.match(stdout, ".+: (%a+), (%d+)%%, (%d+:%d+:%d+)")
 	local charge = tonumber(charge_str)
 

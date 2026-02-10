@@ -3,15 +3,12 @@ local naughty = require("naughty")
 local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
+local settings = require("modules.settings-store")
 
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 
-local config_dir = gears.filesystem.get_configuration_dir()
-
 local icons = require("theme.icons")
-
-local widget_dir = config_dir .. "ui/panels/infopanel/notif-center/dont-disturb/"
 
 _G.dont_disturb = false
 
@@ -41,20 +38,8 @@ local function update_icon()
 end
 
 local check_disturb_status = function()
-	awful.spawn.easy_async_with_shell("cat " .. widget_dir .. "disturb_status", function(stdout)
-		local status = stdout
-
-		if status:match("true") then
-			dont_disturb = true
-		elseif status:match("false") then
-			dont_disturb = false
-		else
-			dont_disturb = false
-			awful.spawn.with_shell('echo "false" > ' .. widget_dir .. "disturb_status")
-		end
-
-		update_icon()
-	end)
+	dont_disturb = settings.get_bool("disturb_status", false)
+	update_icon()
 end
 
 check_disturb_status()
@@ -65,7 +50,7 @@ local toggle_disturb = function()
 	else
 		dont_disturb = true
 	end
-	awful.spawn.with_shell('echo "' .. tostring(dont_disturb) .. '" > ' .. widget_dir .. "disturb_status")
+	settings.set_bool("disturb_status", dont_disturb)
 	update_icon()
 end
 

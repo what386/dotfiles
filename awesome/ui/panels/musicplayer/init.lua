@@ -3,8 +3,7 @@ local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/musicplayer/icons/"
+local icons = require("theme.icons")
 local media_buttons = require("ui.panels.musicplayer.media-buttons")
 local music_updater = require("ui.panels.musicplayer.updater")
 
@@ -69,7 +68,7 @@ local create_musicplayer = function(s)
 	local album_art = wibox.widget({
 		{
 			id = "cover",
-			image = widget_icon_dir .. "vinyl.svg",
+			image = icons.tags.vinyl,
 			resize = true,
 			clip_shape = gears.shape.rounded_rect,
 			widget = wibox.widget.imagebox,

@@ -4,26 +4,7 @@ return {
 	main = "nvim-treesitter.configs",
 
 	config = function()
-		-- Register the Hydrogen parser BEFORE setting up treesitter
-		--local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-
-		--parser_config.hydrogen = {
-		--	install_info = {
-		--		url = vim.fn.expand("~/.config/nvim/treesitter/hydrogen"),
-		--		files = { "src/parser.c" },
-		--		branch = "main",
-		--		generate_requires_npm = false,
-		--		requires_generate_from_grammar = false,
-		--	},
-		--	filetype = "hydrogen",
-		--}
-
-		-- Register the .hy file extension
-		--vim.filetype.add({
-		--	extension = {
-		--		hy = "hydrogen",
-		--	},
-		--})
+		require("config.treesitter.manual").register()
 
 		-- Configure treesitter
 		require("nvim-treesitter.configs").setup({
@@ -49,7 +30,6 @@ return {
 				"vimdoc",
 				"vim",
 				"regex",
-				-- Note: Don't add "hydrogen" here, it's a local parser
 			},
 			auto_install = true,
 			highlight = {

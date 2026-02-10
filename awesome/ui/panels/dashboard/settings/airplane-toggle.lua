@@ -4,9 +4,8 @@ local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-local config_dir = gears.filesystem.get_configuration_dir()
-local data_dir = config_dir .. "persistent/settings/"
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local settings = require("modules.settings-store")
+local icons = require("theme.icons")
 local ap_state = false
 
 local action_name = wibox.widget({
@@ -32,7 +31,7 @@ local action_info = wibox.widget({
 local button_widget = wibox.widget({
 	{
 		id = "icon",
-		image = widget_icon_dir .. "airplane-mode-off.svg",
+		image = icons.dashboard.settings.airplane_mode_off,
 		widget = wibox.widget.imagebox,
 		resize = true,
 	},
@@ -59,30 +58,17 @@ local update_widget = function()
 	if ap_state then
 		action_status:set_text("On")
 		widget_button.bg = beautiful.accent
-		button_widget.icon:set_image(widget_icon_dir .. "airplane-mode.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.airplane_mode)
 	else
 		action_status:set_text("Off")
 		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(widget_icon_dir .. "airplane-mode-off.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.airplane_mode_off)
 	end
 end
 
 local check_airplane_mode_state = function()
-	local cmd = "cat " .. data_dir .. "airplane_mode"
-
-	awful.spawn.easy_async_with_shell(cmd, function(stdout)
-		local status = stdout
-
-		if status:match("true") then
-			ap_state = true
-		elseif status:match("false") then
-			ap_state = false
-		else
-			ap_state = false
-			awful.spawn.easy_async_with_shell('echo "false" > ' .. data_dir .. "airplane_mode", function(stdout) end)
-		end
-		update_widget()
-	end)
+	ap_state = settings.get_bool("airplane_mode", false)
+	update_widget()
 end
 
 check_airplane_mode_state()
@@ -98,10 +84,9 @@ local ap_off_cmd = [[
 		app_name = 'Network Manager',
 		title = '<b>Airplane mode disabled!</b>',
 		message = 'Initializing network devices',
-		icon = ']] .. widget_icon_dir .. "airplane-mode-off" .. ".svg" .. [['
+		icon = ']] .. icons.dashboard.settings.airplane_mode_off .. [['
 	})
 	"
-	]] .. "echo false > " .. data_dir .. "airplane_mode" .. [[
 ]]
 
 local ap_on_cmd = [[
@@ -115,21 +100,22 @@ local ap_on_cmd = [[
 		app_name = 'Network Manager',
 		title = '<b>Airplane mode enabled!</b>',
 		message = 'Disabling radio devices',
-		icon = ']] .. widget_icon_dir .. "airplane-mode" .. ".svg" .. [['
+		icon = ']] .. icons.dashboard.settings.airplane_mode .. [['
 	})
 	"
-	]] .. "echo true > " .. data_dir .. "airplane_mode" .. [[
 ]]
 
 local toggle_action = function()
 	if ap_state then
 		awful.spawn.easy_async_with_shell(ap_off_cmd, function(stdout)
 			ap_state = false
+			settings.set_bool("airplane_mode", false)
 			update_widget()
 		end)
 	else
 		awful.spawn.easy_async_with_shell(ap_on_cmd, function(stdout)
 			ap_state = true
+			settings.set_bool("airplane_mode", true)
 			update_widget()
 		end)
 	end
@@ -143,12 +129,16 @@ action_info:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	toggle_action()
 end)))
 
-gears.timer({
-	timeout = 5,
-	autostart = true,
-	callback = function()
+awful.spawn.with_line_callback("rfkill event", {
+	stdout = function(_)
 		check_airplane_mode_state()
 	end,
+})
+
+gears.timer({
+	timeout = 120,
+	autostart = true,
+	callback = check_airplane_mode_state,
 })
 
 local action_widget = wibox.widget({

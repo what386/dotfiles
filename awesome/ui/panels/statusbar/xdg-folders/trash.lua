@@ -6,14 +6,13 @@ local gears = require("gears")
 local clickable_container = require("widget.clickable-container")
 local dpi = require("beautiful").xresources.apply_dpi
 
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "widget/xdg-folders/icons/"
+local icons = require("theme.icons")
 
 local create_widget = function()
 	local trash_widget = wibox.widget({
 		{
 			id = "trash_icon",
-			image = widget_icon_dir .. "user-trash-empty.svg",
+			image = icons.folders.trash_empty,
 			resize = true,
 			widget = wibox.widget.imagebox,
 		},
@@ -27,7 +26,7 @@ local create_widget = function()
 				function()
 					awful.spawn.easy_async_with_shell("gio open trash:///", function(stdout) end, 1)
 				end,
-				widget_icon_dir .. "open-folder.svg",
+				icons.folders.open_folder,
 			},
 			{
 				"Delete forever",
@@ -37,18 +36,51 @@ local create_widget = function()
 						function()
 							awful.spawn.easy_async_with_shell("gio trash --empty", function(stdout) end, 1)
 						end,
-						widget_icon_dir .. "yes.svg",
+						icons.system.yes,
 					},
 					{
 						"No",
 						"",
-						widget_icon_dir .. "no.svg",
+						icons.system.no,
 					},
 				},
-				widget_icon_dir .. "user-trash-empty.svg",
+				icons.folders.trash_empty,
 			},
 		},
 	})
+
+	local function show_trash_menu_clamped()
+		local coords = mouse.coords()
+		trash_menu:show({ coords = { x = coords.x, y = coords.y } })
+
+		gears.timer.delayed_call(function()
+			if not trash_menu.wibox then
+				return
+			end
+
+			local s = mouse.screen or awful.screen.focused()
+			if not s then
+				return
+			end
+
+			local sg = s.geometry
+			local mw = trash_menu.wibox.width or 0
+			local mh = trash_menu.wibox.height or 0
+			local max_x = sg.x + sg.width - mw
+			local max_y = sg.y + sg.height - mh
+
+			trash_menu.wibox.x = math.max(sg.x, math.min(coords.x, max_x))
+			trash_menu.wibox.y = math.max(sg.y, math.min(coords.y, max_y))
+		end)
+	end
+
+	local function toggle_trash_menu_clamped()
+		if trash_menu.wibox and trash_menu.wibox.visible then
+			trash_menu:hide()
+		else
+			show_trash_menu_clamped()
+		end
+	end
 
 	local trash_button = wibox.widget({
 		{
@@ -76,7 +108,7 @@ local create_widget = function()
 			awful.spawn({ "gio", "open", "trash:///" }, false)
 		end),
 		awful.button({}, 3, nil, function()
-			trash_menu:toggle()
+			toggle_trash_menu_clamped()
 			trash_tooltip.visible = not trash_tooltip.visible
 		end)
 	))
@@ -85,13 +117,13 @@ local create_widget = function()
 	local check_trash_list = function()
 		awful.spawn.easy_async_with_shell("gio list trash:/// | wc -l", function(stdout)
 			if tonumber(stdout) > 0 then
-				trash_widget.trash_icon:set_image(widget_icon_dir .. "user-trash-full.svg")
+				trash_widget.trash_icon:set_image(icons.folders.trash_full)
 
 				awful.spawn.easy_async_with_shell("gio list trash:///", function(stdout)
 					trash_tooltip.markup = "<b>Trash contains:</b>\n" .. stdout:gsub("\n$", "")
 				end)
 			else
-				trash_widget.trash_icon:set_image(widget_icon_dir .. "user-trash-empty.svg")
+				trash_widget.trash_icon:set_image(icons.folders.trash_empty)
 				trash_tooltip.markup = "Trash empty"
 			end
 		end)

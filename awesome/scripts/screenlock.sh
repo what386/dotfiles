@@ -1,205 +1,217 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Handles both xss-lock daemon setup and lockscreen/suspend execution
+# Manage xss-lock daemon and lock/suspend flow for AwesomeWM lockscreen.
 
-# Configuration
-LOCK_TIMEOUT=300                                                                       # Time before locking (seconds)
-SUSPEND_TIMEOUT=120                                                                    # Additional time before suspend after lock (seconds)
-LOCK_SCRIPT='echo "awesome.emit_signal(\"screen::lockscreen:show\")" | awesome-client' # Command to execute for locking
-DAEMON_SCRIPT="$0"                                                                     # This script handles daemon and lock execution
-PID_FILE="/tmp/xss-lock-awesome-$USER.pid"
+set -u
 
-# Lock the screen using configurable command
+LOCK_TIMEOUT="${LOCK_TIMEOUT:-300}"          # idle seconds before lock
+SUSPEND_TIMEOUT="${SUSPEND_TIMEOUT:-120}"    # seconds after lock before suspend
+PID_FILE="/tmp/xss-lock-awesome-${USER}.pid"
+
+SCRIPT_PATH="$(readlink -f "$0" 2>/dev/null || printf '%s' "$0")"
+AWESOME_LOCK_CMD='awesome.emit_signal("screen::lockscreen:show")'
+AWESOME_QUERY_CMD='if awesome and awesome._lockscreen_is_locked then return 1 else return 0 end'
+
+log() {
+    printf '[screenlock] %s\n' "$*" >&2
+}
+
+require_cmd() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+is_pid_ours() {
+    local pid="$1"
+    [ -n "$pid" ] || return 1
+    [ -d "/proc/$pid" ] || return 1
+    tr '\0' ' ' </proc/"$pid"/cmdline 2>/dev/null | grep -q "xss-lock"
+}
+
+query_locked() {
+    local output
+
+    if ! require_cmd awesome-client; then
+        return 1
+    fi
+
+    output="$(awesome-client "$AWESOME_QUERY_CMD" 2>/dev/null | tr -d '[:space:]')"
+    [ "$output" = "1" ]
+}
+
 lock_screen() {
-    if ! eval "$LOCK_SCRIPT"; then
+    if ! require_cmd awesome-client; then
+        log "awesome-client not found"
         return 1
     fi
+
+    if ! awesome-client "$AWESOME_LOCK_CMD" >/dev/null 2>&1; then
+        log "failed to emit lockscreen signal"
+        return 1
+    fi
+
+    # Wait briefly for Awesome to report lock state.
+    local i=0
+    while [ "$i" -lt 30 ]; do
+        if query_locked; then
+            return 0
+        fi
+        sleep 0.1
+        i=$((i + 1))
+    done
+
+    log "lockscreen signal sent, but lock state was not confirmed"
+    return 1
 }
 
-# Suspend the system
 suspend_system() {
-    if ! systemctl suspend; then
+    if ! require_cmd systemctl; then
+        log "systemctl not found"
         return 1
     fi
+
+    systemctl suspend
 }
 
-# Check if screen is still locked by checking if awesome lockscreen is active
-is_screen_locked() {
-    # Query awesome to see if lockscreen is still active
-    local result
-    result=$(echo "return awesome.emit_signal and awesome.emit_signal('screen::lockscreen:query') or 'unlocked'" | awesome-client 2>/dev/null)
-
-    # If awesome-client fails or returns unlocked, screen is not locked
-    if [[ $? -ne 0 ]] || [[ "$result" == *"unlocked"* ]]; then
-        return 1
-    fi
-
-    # Additional check: if awesome process is gone, screen is not locked
-    if ! pgrep -f "awesome" >/dev/null; then
-        return 1
-    fi
-
-    return 0
-}
-
-# Handle screen lock with optional suspend
 handle_lock() {
     if ! lock_screen; then
-        exit 1
+        return 1
     fi
 
-    if [ "$1" = "suspend" ]; then
-        # Instead of sleeping unconditionally, check periodically if screen is still locked
+    if [ "${1:-}" = "suspend" ]; then
         local elapsed=0
-        local check_interval=10 # Check every 5 seconds
+        local check_interval=5
 
-        while [ $elapsed -lt $SUSPEND_TIMEOUT ]; do
-            sleep $check_interval
+        while [ "$elapsed" -lt "$SUSPEND_TIMEOUT" ]; do
+            sleep "$check_interval"
             elapsed=$((elapsed + check_interval))
 
-            # If screen is no longer locked, user became active - exit without suspending
-            if ! is_screen_locked; then
-                exit 0
+            # User unlocked before timeout, so skip suspend.
+            if ! query_locked; then
+                return 0
             fi
         done
 
-        # Only suspend if screen is still locked after timeout
-        if is_screen_locked && pgrep -f "awesome" >/dev/null; then
+        if query_locked; then
             suspend_system
         fi
     fi
 }
 
-# Start the xss-lock daemon
 start_daemon() {
-    # Kill any existing xss-lock processes for this user
-    if [ -f "$PID_FILE" ]; then
-        local old_pid
-        old_pid=$(cat "$PID_FILE")
-        if kill -0 "$old_pid" 2>/dev/null; then
-            kill "$old_pid"
-            sleep 1
-        fi
-        rm -f "$PID_FILE"
-    fi
-
-    # Configure X11 screensaver settings
-    xset s "$LOCK_TIMEOUT" "$SUSPEND_TIMEOUT"
-
-    # Start xss-lock daemon
-    xss-lock -l -- "$DAEMON_SCRIPT" lock suspend &
-    local xss_pid=$!
-
-    # Save PID for cleanup
-    echo "$xss_pid" >"$PID_FILE"
-
-    # Verify xss-lock started successfully
-    sleep 1
-    if ! kill -0 "$xss_pid" 2>/dev/null; then
-        rm -f "$PID_FILE"
+    if ! require_cmd xss-lock; then
+        log "xss-lock not found"
         return 1
     fi
-}
 
-# Stop the xss-lock daemon
-stop_daemon() {
+    if ! require_cmd xset; then
+        log "xset not found"
+        return 1
+    fi
+
     if [ -f "$PID_FILE" ]; then
-        local pid
-        pid=$(cat "$PID_FILE")
-        if kill -0 "$pid" 2>/dev/null; then
-            kill "$pid"
+        local old_pid
+        old_pid="$(cat "$PID_FILE" 2>/dev/null || true)"
+        if is_pid_ours "$old_pid"; then
+            log "daemon already running (PID: $old_pid)"
+            return 0
         fi
         rm -f "$PID_FILE"
     fi
 
-    # Also kill any xss-lock processes that might be running
-    if pgrep -f "xss-lock.*$DAEMON_SCRIPT" >/dev/null; then
-        pkill -f "xss-lock.*$DAEMON_SCRIPT"
+    xset s "$LOCK_TIMEOUT" "$SUSPEND_TIMEOUT"
+
+    # -l locks before suspend, command after -- is invoked by xss-lock.
+    xss-lock -l -- "$SCRIPT_PATH" lock suspend &
+    local xss_pid=$!
+    echo "$xss_pid" >"$PID_FILE"
+
+    sleep 0.5
+    if ! is_pid_ours "$xss_pid"; then
+        rm -f "$PID_FILE"
+        log "failed to start xss-lock daemon"
+        return 1
     fi
+
+    log "daemon started (PID: $xss_pid)"
+    return 0
 }
 
-# Check daemon status
+stop_daemon() {
+    local pid=""
+    if [ -f "$PID_FILE" ]; then
+        pid="$(cat "$PID_FILE" 2>/dev/null || true)"
+        if is_pid_ours "$pid"; then
+            kill "$pid" 2>/dev/null || true
+        fi
+        rm -f "$PID_FILE"
+    fi
+
+    # Cleanup any stale instances for this user/script.
+    pkill -u "$USER" -f "xss-lock.*$SCRIPT_PATH" 2>/dev/null || true
+
+    log "daemon stopped"
+}
+
 status_daemon() {
     if [ -f "$PID_FILE" ]; then
         local pid
-        pid=$(cat "$PID_FILE")
-        if kill -0 "$pid" 2>/dev/null; then
+        pid="$(cat "$PID_FILE" 2>/dev/null || true)"
+        if is_pid_ours "$pid"; then
             echo "xss-lock daemon is running (PID: $pid)"
             return 0
-        else
-            rm -f "$PID_FILE"
-            return 1
         fi
-    else
-        echo "xss-lock daemon is not running"
-        return 1
+        rm -f "$PID_FILE"
     fi
+
+    echo "xss-lock daemon is not running"
+    return 1
 }
 
-# Restart the daemon
 restart_daemon() {
     stop_daemon
-    sleep 1
     start_daemon
 }
 
-# Show usage information
 show_usage() {
-    cat <<EOF
-
+    cat <<USAGE
 USAGE:
-    $0 <command> [options]
+  $0 <command>
 
 COMMANDS:
-    start           Start the lockscreen daemon with xss-lock
-    stop            Stop the lockscreen daemon
-    restart         Restart the lockscreen daemon  
-    status          Show daemon status
-    lock            Lock the screen immediately
-    lock suspend    Lock the screen and suspend after timeout
-    
-CONFIGURATION:
-    Edit the variables at the top of this script to customize:
-    - LOCK_TIMEOUT: Time before auto-lock (currently ${LOCK_TIMEOUT}s)
-    - SUSPEND_TIMEOUT: Time from lock to suspend (currently ${SUSPEND_TIMEOUT}s)
-    - LOCK_SCRIPT: Command to execute for locking
-
-EXAMPLES:
-    $0 start                    # Start auto-lock daemon
-    $0 lock                     # Lock screen now
-    $0 status                   # Check if daemon is running
-
-EOF
+  start            Start xss-lock daemon
+  stop             Stop xss-lock daemon
+  restart          Restart xss-lock daemon
+  status           Show daemon status
+  lock             Lock immediately
+  lock suspend     Lock and suspend after timeout if still locked
+USAGE
 }
 
-# Main command handling
 case "${1:-}" in
-"start")
+start)
     start_daemon
     ;;
-"stop")
+stop)
     stop_daemon
     ;;
-"restart")
+restart)
     restart_daemon
     ;;
-"status")
+status)
     status_daemon
     ;;
-"lock")
-    if [ "$2" = "suspend" ]; then
+lock)
+    if [ "${2:-}" = "suspend" ]; then
         handle_lock suspend
     else
         handle_lock
     fi
     ;;
-"help" | "--help" | "-h")
+help|--help|-h)
     show_usage
     ;;
-"")
-    exit 1
-    ;;
 *)
+    show_usage
     exit 1
     ;;
 esac

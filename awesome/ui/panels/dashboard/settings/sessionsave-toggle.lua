@@ -4,10 +4,8 @@ local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
-local data_dir = config_dir .. "persistent/"
+local icons = require("theme.icons")
+local settings = require("modules.settings-store")
 
 local action_name = wibox.widget({
 	text = "Session Autosave",
@@ -32,7 +30,7 @@ local action_info = wibox.widget({
 local button_widget = wibox.widget({
 	{
 		id = "icon",
-		image = widget_icon_dir .. "effects.svg",
+		image = icons.dashboard.settings.effects,
 		widget = wibox.widget.imagebox,
 		resize = true,
 	},
@@ -61,30 +59,17 @@ local update_widget = function()
 	if save_status then
 		action_status_text:set_text("On")
 		widget_button.bg = beautiful.system_magenta_dark
-		button_widget.icon:set_image(widget_icon_dir .. "effects.svg")
-		awful.spawn("echo false > " .. data_dir .. "autosave")
+		button_widget.icon:set_image(icons.dashboard.settings.effects)
 	else
 		action_status_text:set_text("Off")
 		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(widget_icon_dir .. "effects-off.svg")
-		awful.spawn("echo true > " .. data_dir .. "autosave")
+		button_widget.icon:set_image(icons.dashboard.settings.effects_off)
 	end
 end
 
 local check_save_mode = function()
-	local cmd = "cat " .. data_dir .. "airplane_mode"
-
-	awful.spawn.easy_async_with_shell(cmd, function(stdout)
-		local status = stdout
-
-		if status:match("true") then
-			save_status = true
-		elseif status:match("false") then
-			save_status = false
-		end
-
-		update_widget()
-	end)
+	save_status = settings.get_bool("autorestore_allowed", true)
+	update_widget()
 end
 
 check_save_mode()
@@ -108,21 +93,8 @@ local toggle_session_save = function()
 end
 
 local check_autosave_state = function()
-	local cmd = "cat " .. data_dir .. "autosave"
-
-	awful.spawn.easy_async_with_shell(cmd, function(stdout)
-		local status = stdout
-
-		if status:match("true") then
-			save_status = true
-		elseif status:match("false") then
-			save_status = false
-		else
-			save_status = true
-			awful.spawn('echo "true" > ' .. data_dir .. "autosave", function(stdout) end)
-		end
-		update_widget()
-	end)
+	save_status = settings.get_bool("autorestore_allowed", true)
+	update_widget()
 end
 
 check_autosave_state()

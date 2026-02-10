@@ -47,6 +47,39 @@ local trash_menu = awful.menu({
 	},
 })
 
+local function show_trash_menu_clamped()
+	local coords = mouse.coords()
+	trash_menu:show({ coords = { x = coords.x, y = coords.y } })
+
+	gears.timer.delayed_call(function()
+		if not trash_menu.wibox then
+			return
+		end
+
+		local s = mouse.screen or awful.screen.focused()
+		if not s then
+			return
+		end
+
+		local sg = s.geometry
+		local mw = trash_menu.wibox.width or 0
+		local mh = trash_menu.wibox.height or 0
+		local max_x = sg.x + sg.width - mw
+		local max_y = sg.y + sg.height - mh
+
+		trash_menu.wibox.x = math.max(sg.x, math.min(coords.x, max_x))
+		trash_menu.wibox.y = math.max(sg.y, math.min(coords.y, max_y))
+	end)
+end
+
+local function toggle_trash_menu_clamped()
+	if trash_menu.wibox and trash_menu.wibox.visible then
+		trash_menu:hide()
+	else
+		show_trash_menu_clamped()
+	end
+end
+
 local trash_button = wibox.widget({
 	{
 		trash_widget,
@@ -73,7 +106,7 @@ trash_button:buttons(gears.table.join(
 		awful.spawn({ "gio", "open", "trash:///" }, false)
 	end),
 	awful.button({}, 3, nil, function()
-		trash_menu:toggle()
+		toggle_trash_menu_clamped()
 		trash_tooltip.visible = not trash_tooltip.visible
 	end)
 ))

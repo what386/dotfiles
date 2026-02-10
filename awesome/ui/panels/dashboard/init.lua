@@ -136,22 +136,30 @@ local main_control_row_sliders = wibox.widget({
 		widget = wibox.container.margin,
 	}),
 })
-
-local monitor_control_row_progressbars = wibox.widget({
-	layout = wibox.layout.fixed.vertical,
-	spacing = dpi(10),
-	format_item(require("ui.panels.dashboard.sys-monitor.cpu-usage")),
-	format_item(require("ui.panels.dashboard.sys-monitor.gpu-usage")),
-	format_item(require("ui.panels.dashboard.sys-monitor.ram-usage")),
-	format_item(require("ui.panels.dashboard.sys-monitor.disk-usage")),
-	format_item(require("ui.panels.dashboard.sys-monitor.fan-meter")),
-	format_item(require("ui.panels.dashboard.sys-monitor.temp-meter")),
-})
-
 local dashboard = function(s)
 	-- Set the control center geometry
 	local panel_width = dpi(550)
 	local panel_margins = dpi(15)
+
+	local cpu = require("ui.panels.dashboard.sys-monitor.cpu-usage")()
+	local gpu = require("ui.panels.dashboard.sys-monitor.gpu-usage")()
+	local ram = require("ui.panels.dashboard.sys-monitor.ram-usage")()
+	local disk = require("ui.panels.dashboard.sys-monitor.disk-usage")()
+	local fan = require("ui.panels.dashboard.sys-monitor.fan-meter")()
+	local temp = require("ui.panels.dashboard.sys-monitor.temp-meter")()
+
+	local monitors = { cpu, gpu, ram, disk, fan, temp }
+
+	local monitor_control_row_progressbars = wibox.widget({
+		layout = wibox.layout.fixed.vertical,
+		spacing = dpi(10),
+		format_item(cpu),
+		format_item(gpu),
+		format_item(ram),
+		format_item(disk),
+		format_item(fan),
+		format_item(temp),
+	})
 
 	local panel = awful.popup({
 		widget = {
@@ -223,6 +231,22 @@ local dashboard = function(s)
 		height = s.geometry.height,
 	})
 
+	panel.start_monitors = function()
+		for _, m in ipairs(monitors) do
+			if m.start then
+				m:start()
+			end
+		end
+	end
+
+	panel.stop_monitors = function()
+		for _, m in ipairs(monitors) do
+			if m.stop then
+				m:stop()
+			end
+		end
+	end
+
 	local open_panel = function()
 		local focused = awful.screen.focused()
 		panel_visible = true
@@ -243,6 +267,14 @@ local dashboard = function(s)
 		panel:emit_signal("closed")
 	end
 
+	panel:connect_signal("opened", function()
+		panel:start_monitors()
+	end)
+
+	panel:connect_signal("closed", function()
+		panel:stop_monitors()
+	end)
+
 	-- Hide this panel when app dashboard is called.
 	function panel:hide_dashboard()
 		close_panel()
@@ -260,6 +292,8 @@ local dashboard = function(s)
 	s.backdrop_dashboard:buttons(awful.util.table.join(awful.button({}, 1, nil, function()
 		panel:toggle()
 	end)))
+
+	panel:stop_monitors()
 
 	return panel
 end

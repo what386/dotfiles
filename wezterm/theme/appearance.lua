@@ -45,7 +45,7 @@ function M.apply(config)
 	-- Pane settings
 	config.inactive_pane_hsb = {
 		saturation = 0.9,
-		brightness = 0.65,
+		brightness = 0.5,
 	}
 
 	-- Visual bell

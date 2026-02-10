@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 CONFIG_DIR="$HOME/.config"
-DOTFILES_DIR="$HOME/source/dotfiles"
+DOTFILES_DIR="$HOME/dev/dotfiles"
 
 copy_config() {
     local app_name=$1

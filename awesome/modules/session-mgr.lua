@@ -2,47 +2,12 @@ local awful = require("awful")
 local gears = require("gears")
 local naughty = require("naughty")
 local json = require("dependencies.json")
+local settings = require("modules.settings-store")
 local config_dir = gears.filesystem.get_configuration_dir()
-local data_dir = config_dir .. "persistent/settings/"
 local session_file = config_dir .. "persistent/session.json"
 local command_file = config_dir .. "persistent/command_table.json"
-local autorestore_allowed = false
+local autorestore_allowed = settings.get_bool("autorestore_allowed", true)
 local restore_in_progress = false -- NEW: Prevent multiple simultaneous restores
-
--- this function is blocking on purpose!!! DO NOT change this behavior
-local check_autorestore_state = function()
-	local filepath = data_dir .. "autorestore_allowed"
-	local file = io.open(filepath, "r")
-	if file then
-		local status = file:read("*a") -- Read entire file
-		file:close()
-		-- Trim whitespace
-		status = status:gsub("^%s*(.-)%s*$", "%1")
-		if status == "true" then
-			autorestore_allowed = true
-		elseif status == "false" then
-			autorestore_allowed = false
-		else
-			-- Invalid content: set to false to avoid
-			-- restoring from a broken state
-			autorestore_allowed = false
-			local write_file = io.open(filepath, "w")
-			if write_file then
-				write_file:write("false")
-				write_file:close()
-			end
-		end
-	else
-		-- File doesn't exist, create it with default value
-		autorestore_allowed = true
-		local write_file = io.open(filepath, "w")
-		if write_file then
-			write_file:write("true")
-			write_file:close()
-		end
-	end
-end
-check_autorestore_state()
 
 -- Table to store pending applications to restore
 local pending_restore = {}
@@ -281,11 +246,11 @@ awesome.connect_signal("module::session_manager:restore", function()
 end)
 
 awesome.connect_signal("module::session_manager:autosave_enable", function()
-	autorestore_allowed = true -- ADD THIS
-	awful.spawn.with_shell('echo "true" > ' .. data_dir .. "autorestore_allowed")
+	autorestore_allowed = true
+	settings.set_bool("autorestore_allowed", true)
 end)
 
 awesome.connect_signal("module::session_manager:autosave_disable", function()
 	autorestore_allowed = false
-	awful.spawn.with_shell('echo "false" > ' .. data_dir .. "autorestore_allowed")
+	settings.set_bool("autorestore_allowed", false)
 end)

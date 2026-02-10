@@ -2,7 +2,6 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
 local naughty = require("naughty")
-local watch = awful.widget.watch
 local dpi = require("beautiful").xresources.apply_dpi
 
 local userprefs = require("config.user.preferences")
@@ -44,7 +43,7 @@ local bluetooth_tooltip = awful.tooltip({
 	preferred_positions = { "right", "left", "top", "bottom" },
 })
 
-watch("rfkill list bluetooth", 2, function(_, stdout)
+local function apply_state(stdout)
 	if stdout:match("Soft blocked: yes") then
 		widget.icon:set_image(icons.widgets.bluetooth.bluetooth_off)
 		bluetooth_tooltip.markup = "Bluetooth is off"
@@ -52,7 +51,25 @@ watch("rfkill list bluetooth", 2, function(_, stdout)
 		widget.icon:set_image(icons.widgets.bluetooth.bluetooth_on)
 		bluetooth_tooltip.markup = "Bluetooth is on"
 	end
-	collectgarbage("collect")
-end, widget)
+end
+
+local function refresh_state()
+	awful.spawn.easy_async_with_shell("rfkill list bluetooth", function(stdout)
+		apply_state(stdout)
+	end)
+end
+
+awful.spawn.with_line_callback("rfkill event", {
+	stdout = function(_)
+		refresh_state()
+	end,
+})
+
+gears.timer({
+	timeout = 120,
+	autostart = true,
+	call_now = true,
+	callback = refresh_state,
+})
 
 return widget_button

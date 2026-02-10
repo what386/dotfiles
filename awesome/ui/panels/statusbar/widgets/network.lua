@@ -19,6 +19,15 @@ local notify_no_access_quota = 0
 local startup = true
 local reconnect_startup = true
 local notify_new_wifi_conn = false
+local wifi_strength = 0
+local internet_healthy = true
+local last_health_check = 0
+local HEALTH_TTL_SECONDS = 30
+local mode_update_debounce = gears.timer({
+	timeout = 0.25,
+	single_shot = true,
+	autostart = false,
+})
 local widget = wibox.widget({
 	{
 		id = "icon",
@@ -50,19 +59,35 @@ local network_tooltip = awful.tooltip({
 	margin_topbottom = dpi(8),
 })
 local check_internet_health = [=[
-status_ping=0
-packets="$(ping -q -w2 -c2 1.1.1.1 | grep -o "100% packet loss")"
-if [ ! -z "${packets}" ];
-then
-    status_ping=0
-else
-    status_ping=1
-fi
-if [ $status_ping -eq 0 ];
-then
-    echo 'Connected but no internet'
-fi
+ping -q -w1 -c1 1.1.1.1 >/dev/null 2>&1 && echo "ok" || echo "no"
 ]=]
+
+local function read_file(path)
+	local f = io.open(path, "r")
+	if not f then
+		return nil
+	end
+	local v = f:read("*a")
+	f:close()
+	if not v then
+		return nil
+	end
+	return v:gsub("%s+$", "")
+end
+
+local function check_internet_health_async(callback, force)
+	local now = os.time()
+	if not force and (now - last_health_check) < HEALTH_TTL_SECONDS then
+		callback(internet_healthy)
+		return
+	end
+
+	awful.spawn.easy_async_with_shell(check_internet_health, function(stdout)
+		internet_healthy = stdout:match("ok") ~= nil
+		last_health_check = os.time()
+		callback(internet_healthy)
+	end)
+end
 -- Awesome/System startup
 local update_startup = function()
 	if startup then
@@ -165,8 +190,8 @@ local update_wireless = function()
 	end
 	-- Update wifi icon based on wifi strength and health
 	local update_wireless_icon = function(strength)
-		awful.spawn.easy_async_with_shell(check_internet_health, function(stdout)
-			if not stdout:match("Connected but no internet") then
+		check_internet_health_async(function(healthy)
+			if healthy then
 				if startup or reconnect_startup then
 					awesome.emit_signal("system::network_connected")
 				end
@@ -180,19 +205,17 @@ local update_wireless = function()
 	end
 	-- Get wifi strength
 	local update_wireless_strength = function()
-		awful.spawn.easy_async_with_shell(
-			[[
-            awk 'NR==3 {printf "%3.0f" ,($3/70)*100}' /proc/net/wireless
-            ]],
-			function(stdout)
-				if not tonumber(stdout) then
-					return
-				end
-				wifi_strength = tonumber(stdout)
-				local wifi_strength_rounded = math.floor(wifi_strength / 25 + 0.5)
-				update_wireless_icon(wifi_strength_rounded)
-			end
-		)
+		local wireless_data = read_file("/proc/net/wireless")
+		if not wireless_data then
+			return
+		end
+		local quality = wireless_data:match("\n.-:%s*[%d%.]+%s+([%d%.]+)")
+		if not quality then
+			return
+		end
+		wifi_strength = tonumber(quality) or 0
+		local wifi_strength_rounded = math.floor(wifi_strength / 25 + 0.5)
+		update_wireless_icon(wifi_strength_rounded)
 	end
 	update_wireless_strength()
 	update_startup()
@@ -206,10 +229,8 @@ local update_wired = function()
 		local icon = icons.widgets.ethernet.eth_connected
 		network_notify(message, title, app_name, icon)
 	end
-	awful.spawn.easy_async_with_shell(check_internet_health, function(stdout)
-		local widget_icon_name = "wired"
-		if stdout:match("Connected but no internet") then
-			widget_icon_name = widget_icon_name .. "-alert"
+	check_internet_health_async(function(healthy)
+		if not healthy then
 			update_tooltip(
 				"<b>Connected but no internet!</b>" .. "\nEthernet Interface: <b>" .. interfaces.lan_interface .. "</b>"
 			)
@@ -257,58 +278,32 @@ local update_disconnected = function()
 	update_tooltip("Network is currently disconnected")
 end
 local check_network_mode = function()
-	awful.spawn.easy_async_with_shell([=[
-        wireless="]=] .. tostring(interfaces.wlan_interface) .. [=["
-        wired="]=] .. tostring(interfaces.lan_interface) .. [=["
-        net="/sys/class/net/"
-        wired_state="down"
-        wireless_state="down"
-        network_mode=""
-        # Check network state based on interface's operstate value
-        function check_network_state() {
-            # Check what interface is up - ETHERNET HAS PRIORITY OVER WIFI
-            if [[ "${wired_state}" == "up" ]];
-            then
-                network_mode='wired'
-            elif [[ "${wireless_state}" == "up" ]];
-            then
-                network_mode='wireless'
-            else
-                network_mode='No internet connection'
-            fi
-        }
-        # Check if network directory exist
-        function check_network_directory() {
-            if [[ -n "${wireless}" && -d "${net}${wireless}" ]];
-            then
-                wireless_state="$(cat "${net}${wireless}/operstate")"
-            fi
-            if [[ -n "${wired}" && -d "${net}${wired}" ]]; then
-                wired_state="$(cat "${net}${wired}/operstate")"
-            fi
-            check_network_state
-        }
-        # Start script
-        function print_network_mode() {
-            # Call to check network dir
-            check_network_directory
-            # Print network mode
-            printf "${network_mode}"
-        }
-        print_network_mode
-        ]=], function(stdout)
-		local mode = stdout:gsub("%\n", "")
-		if stdout:match("No internet connection") then
-			update_disconnected()
-		elseif stdout:match("wireless") then
-			update_wireless()
-		elseif stdout:match("wired") then
-			update_wired()
-		end
-	end)
+	local wireless_state = read_file("/sys/class/net/" .. tostring(interfaces.wlan_interface) .. "/operstate")
+	local wired_state = read_file("/sys/class/net/" .. tostring(interfaces.lan_interface) .. "/operstate")
+
+	if wired_state == "up" then
+		update_wired()
+	elseif wireless_state == "up" then
+		update_wireless()
+	else
+		update_disconnected()
+	end
 end
+
+mode_update_debounce:connect_signal("timeout", function()
+	check_network_mode()
+end)
+
+awful.spawn.with_line_callback("nmcli monitor", {
+	stdout = function(_)
+		-- Trigger health check again after network events
+		last_health_check = 0
+		mode_update_debounce:again()
+	end,
+})
+
 local network_updater = gears.timer({
-	timeout = 5,
+	timeout = 60,
 	autostart = true,
 	call_now = true,
 	callback = function()

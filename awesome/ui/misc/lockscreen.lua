@@ -3,10 +3,11 @@ local gears = require("gears")
 local awful = require("awful")
 local naughty = require("naughty")
 local beautiful = require("beautiful")
+local sounds = require("theme.sounds")
 local config_dir = gears.filesystem.get_configuration_dir()
 local dpi = beautiful.xresources.apply_dpi
 local apps = require("config.user.preferences")
-local widget_icon_dir = config_dir .. "configuration/user-profile/"
+local icons = require("theme.icons")
 
 -- Add PAM library path
 package.cpath = package.cpath .. ";" .. config_dir .. "/library/?.so;" .. "/usr/lib/lua-pam/?.so;"
@@ -26,6 +27,10 @@ local config = {
 	max_password_length = 256,
 }
 
+local function shell_quote(text)
+	return "'" .. tostring(text):gsub("'", [['"'"']]) .. "'"
+end
+
 -- ============================================================================
 -- AUTHENTICATION MANAGER
 -- ============================================================================
@@ -37,6 +42,9 @@ function AuthManager:new()
 	self.is_authenticating = false
 	self.password_grabber = nil
 	self.fingerprint_active = false
+	self.fingerprint_pid = nil
+	self.fingerprint_retry_timer = nil
+	self.fingerprint_success = false
 	self.authenticated = false -- Prevent double-unlock
 	self:_init_pam()
 	return self
@@ -122,6 +130,10 @@ function AuthManager:stop()
 
 	-- Stop password grabber
 	if self.password_grabber then
+		-- Prefer instance stop to ensure this exact grabber is released.
+		pcall(function()
+			self.password_grabber:stop()
+		end)
 		awful.keygrabber.stop(self.password_grabber)
 		self.password_grabber = nil
 	end
@@ -145,7 +157,7 @@ function AuthManager:_start_password_grabber(password_widget, capslock_widget)
 	end
 
 	self.password_grabber = awful.keygrabber({
-		auto_start = true,
+		auto_start = false,
 		stop_event = "release",
 		mask_event_callback = true,
 		keypressed_callback = function(_, _, key)
@@ -204,47 +216,81 @@ function AuthManager:_start_fingerprint()
 	end
 
 	self.fingerprint_active = true
+	self.fingerprint_success = false
 
 	-- Start fingerprint verification
-	self.fingerprint_pid = awful.spawn.with_line_callback("fprintd-verify 2>&1", function(stdout, _, _, code)
-		-- Check if we're still authenticating
-		if not self.fingerprint_active or not self.is_authenticating then
-			return
-		end
-
-		self.fingerprint_active = false
-
-		-- Check for success
-		local success = code == 0
-			or stdout:match("verify%-match")
-			or stdout:match("Match!")
-			or stdout:lower():match("success")
-
-		if success then
-			self:_handle_success("fingerprint")
-		else
-			self:_handle_failure("fingerprint")
-			-- Retry fingerprint
-			if self.is_authenticating then
-				gears.timer.start_new(1, function()
-					if self.is_authenticating then
-						self:_start_fingerprint()
-					end
-				end)
+	self.fingerprint_pid = awful.spawn.with_line_callback("fprintd-verify", {
+		stdout = function(line)
+			if not self.fingerprint_active or not self.is_authenticating or not line then
+				return
 			end
-		end
-	end)
+			local lowered = line:lower()
+			if lowered:match("verify%-match") or lowered:match("match") or lowered:match("success") then
+				self.fingerprint_success = true
+			end
+		end,
+		stderr = function(line)
+			if not self.fingerprint_active or not self.is_authenticating or not line then
+				return
+			end
+			local lowered = line:lower()
+			if lowered:match("verify%-match") or lowered:match("match") or lowered:match("success") then
+				self.fingerprint_success = true
+			end
+		end,
+		exit = function(_, code)
+			if not self.fingerprint_active or not self.is_authenticating then
+				return
+			end
+
+			self.fingerprint_active = false
+			self.fingerprint_pid = nil
+
+			local success = self.fingerprint_success or code == 0
+			self.fingerprint_success = false
+
+			if success then
+				self:_handle_success("fingerprint")
+			else
+				self:_handle_failure("fingerprint")
+				if self.is_authenticating then
+					if self.fingerprint_retry_timer then
+						self.fingerprint_retry_timer:stop()
+					end
+					self.fingerprint_retry_timer = gears.timer({
+						timeout = 1,
+						single_shot = true,
+						callback = function()
+							if self.is_authenticating then
+								self:_start_fingerprint()
+							end
+						end,
+					})
+					self.fingerprint_retry_timer:start()
+				end
+			end
+		end,
+	})
 end
 
 function AuthManager:_stop_fingerprint()
 	self.fingerprint_active = false
 
+	if self.fingerprint_retry_timer then
+		self.fingerprint_retry_timer:stop()
+		self.fingerprint_retry_timer = nil
+	end
+
 	if self.fingerprint_pid then
-		-- pid found, kill by that
-		awful.spawn.with_shell("kill -9 " .. tostring(self.fingerprint_pid))
+		awful.spawn.with_shell("kill -TERM " .. tostring(self.fingerprint_pid) .. " 2>/dev/null")
+		self.fingerprint_pid = nil
 	else
-		-- Fallback to prevent zombie fprintd process
-		awful.spawn.with_shell("pkill -n fprintd-verify")
+		local user = os.getenv("USER")
+		if user and user ~= "" then
+			awful.spawn.with_shell("pkill -u " .. shell_quote(user) .. " -x fprintd-verify 2>/dev/null")
+		else
+			awful.spawn.with_shell("pkill -x fprintd-verify 2>/dev/null")
+		end
 	end
 end
 
@@ -291,9 +337,11 @@ function LockscreenUI:new(s)
 end
 
 function LockscreenUI:_create_widgets()
+	self.password_default_border_color = "#00000045"
+
 	-- Username
 	self.username = wibox.widget({
-		markup = "$USER",
+		markup = os.getenv("USER") or "user",
 		font = "Inter Bold 12",
 		align = "center",
 		valign = "center",
@@ -321,7 +369,7 @@ function LockscreenUI:_create_widgets()
 
 	-- Profile image
 	self.profile_image = wibox.widget({
-		image = widget_icon_dir .. "default.svg",
+		image = icons.system.default_user,
 		resize = true,
 		forced_height = dpi(130),
 		forced_width = dpi(130),
@@ -361,11 +409,11 @@ function LockscreenUI:_create_widgets()
 		},
 		bg = "#00000032",
 		fg = beautiful.fg_normal,
-		forced_width = 100,
-		forced_height = 36,
+		forced_width = dpi(300),
+		forced_height = dpi(36),
 		shape = gears.shape.rounded_rect,
 		border_width = dpi(2),
-		border_color = "#00000045",
+		border_color = self.password_default_border_color,
 		widget = wibox.container.background,
 	})
 end
@@ -415,8 +463,16 @@ function LockscreenUI:_create_lockscreen()
 				{
 					layout = wibox.layout.fixed.vertical,
 					spacing = dpi(5),
-					self.clock,
-					self.date,
+					{
+						self.clock,
+						halign = "center",
+						widget = wibox.container.place,
+					},
+					{
+						self.date,
+						halign = "center",
+						widget = wibox.container.place,
+					},
 				},
 			},
 			{
@@ -425,16 +481,36 @@ function LockscreenUI:_create_lockscreen()
 				{
 					layout = wibox.layout.fixed.vertical,
 					spacing = dpi(15),
-					self.profile_image,
-					self.username,
+					{
+						self.profile_image,
+						halign = "center",
+						widget = wibox.container.place,
+					},
+					{
+						self.username,
+						halign = "center",
+						widget = wibox.container.place,
+					},
 				},
 				{
 					layout = wibox.layout.fixed.vertical,
 					spacing = dpi(5),
-					self.password_container,
-					self.status,
+					{
+						self.password_container,
+						halign = "center",
+						widget = wibox.container.place,
+					},
+					{
+						self.status,
+						halign = "center",
+						widget = wibox.container.place,
+					},
 				},
-				self.capslock,
+				{
+					self.capslock,
+					halign = "center",
+					widget = wibox.container.place,
+				},
 			},
 			nil,
 		},
@@ -452,9 +528,10 @@ function LockscreenUI:show_failure(method)
 	end
 
 	gears.timer.start_new(1, function()
-		self.password_container.border_color = "#00000045"
+		self.password_container.border_color = self.password_default_border_color
 		self.password_container:emit_signal("widget::redraw_needed")
 		self.status:set_markup('<span color="#ffffff" font="Inter 10">Touch sensor or enter password</span>')
+		return false
 	end)
 end
 
@@ -474,7 +551,7 @@ function LockscreenUI:hide()
 end
 
 function LockscreenUI:reset()
-	self.password_container.border_color = "#00000045"
+	self.password_container.border_color = self.password_default_border_color
 	self.password_container:emit_signal("widget::redraw_needed")
 	self.password_display:set_markup("")
 	self.status:set_markup('<span color="#ffffff" font="Inter 10">Touch sensor or enter password</span>')
@@ -514,52 +591,66 @@ function LockscreenController:new()
 	self.auth = AuthManager:new()
 	self.ui_instances = {}
 	self.is_locked = false
-	self.locked_tag = nil
 
 	self:_init_screens()
 	self:_setup_signals()
 	self:_setup_backgrounds()
+	self:_set_locked_state(false)
 
 	return self
 end
 
+function LockscreenController:_set_locked_state(locked)
+	self.is_locked = locked and true or false
+	awesome._lockscreen_is_locked = self.is_locked
+end
+
+function LockscreenController:_create_screen_ui(s)
+	if self.ui_instances[s] then
+		return
+	end
+
+	if s == screen.primary then
+		self.ui_instances[s] = LockscreenUI:new(s)
+		self.ui_instances[s]:update_user_info()
+	else
+		local extended = wibox({
+			screen = s,
+			visible = false,
+			ontop = true,
+			type = "splash",
+			x = s.geometry.x,
+			y = s.geometry.y,
+			width = s.geometry.width,
+			height = s.geometry.height,
+			bg = beautiful.background,
+		})
+
+		self.ui_instances[s] = {
+			lockscreen = extended,
+			show = function()
+				extended.visible = true
+			end,
+			hide = function()
+				extended.visible = false
+			end,
+			reset = function() end,
+		}
+	end
+end
+
 function LockscreenController:_init_screens()
 	for s in screen do
-		if s.index == 1 then
-			-- Primary screen with full UI
-			self.ui_instances[s] = LockscreenUI:new(s)
-			self.ui_instances[s]:update_user_info()
-		else
-			-- Secondary screens with simple blank screen
-			local extended = wibox({
-				screen = s,
-				visible = false,
-				ontop = true,
-				type = "splash",
-				x = s.geometry.x,
-				y = s.geometry.y,
-				width = s.geometry.width,
-				height = s.geometry.height,
-				bg = beautiful.background,
-			})
-
-			self.ui_instances[s] = {
-				lockscreen = extended,
-				show = function()
-					extended.visible = true
-				end,
-				hide = function()
-					extended.visible = false
-				end,
-				reset = function() end,
-			}
-		end
+		self:_create_screen_ui(s)
 	end
 end
 
 function LockscreenController:_setup_signals()
 	awesome.connect_signal("screen::lockscreen:show", function()
 		self:lock()
+	end)
+	awesome.connect_signal("screen::lockscreen:hide", function()
+		self:unlock("signal")
 	end)
 
 	-- Cleanup on exit
@@ -575,9 +666,15 @@ function LockscreenController:_setup_signals()
 	end)
 
 	-- Handle screen changes
-	screen.connect_signal("request::desktop_decoration", function(s)
-		self:_init_screens()
+	screen.connect_signal("added", function(s)
+		self:_create_screen_ui(s)
 		self:_apply_background(s)
+		if self.is_locked and self.ui_instances[s] then
+			self.ui_instances[s]:show()
+		end
+	end)
+	screen.connect_signal("removed", function(s)
+		self.ui_instances[s] = nil
 	end)
 end
 
@@ -626,7 +723,8 @@ function LockscreenController:lock()
 		return
 	end
 
-	self.is_locked = true
+	self:_set_locked_state(true)
+	sounds.play("lock")
 
 	-- Close any open menus
 	awful.spawn.with_shell("pkill rofi 2>/dev/null")
@@ -635,16 +733,6 @@ function LockscreenController:lock()
 	local current_grabber = awful.keygrabber.current_instance
 	if current_grabber then
 		current_grabber:stop()
-	end
-
-	-- Minimize focused client and unselect tags
-	if client.focus then
-		client.focus.minimized = true
-	end
-
-	for _, t in ipairs(mouse.screen.selected_tags) do
-		self.locked_tag = t
-		t.selected = false
 	end
 
 	-- Show all lockscreens
@@ -669,9 +757,13 @@ function LockscreenController:unlock(method)
 		return
 	end
 
+	-- Ensure all auth input handlers (including keygrabber) are released.
+	self.auth:stop()
+
 	-- Show success animation
 	local primary_ui = self.ui_instances[screen.primary or screen[1]]
 	primary_ui:show_success()
+	sounds.play("unlock")
 
 	-- Unlock after brief delay
 	gears.timer.start_new(0.5, function()
@@ -681,19 +773,14 @@ function LockscreenController:unlock(method)
 			ui:hide()
 		end
 
-		self.is_locked = false
-
-		-- Restore tag and client
-		if self.locked_tag then
-			self.locked_tag.selected = true
-			self.locked_tag = nil
-		end
+		self:_set_locked_state(false)
 
 		local c = awful.client.restore()
 		if c then
 			c:emit_signal("request::activate")
 			c:raise()
 		end
+		return false
 	end)
 end
 

@@ -5,14 +5,13 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("widget.clickable-container")
 
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/end-session/icons/"
+local icons = require("theme.icons")
 
 local return_button = function()
 	local widget = wibox.widget({
 		{
 			id = "icon",
-			image = widget_icon_dir .. "logout.svg",
+			image = icons.power.logout,
 			resize = true,
 			widget = wibox.widget.imagebox,
 		},

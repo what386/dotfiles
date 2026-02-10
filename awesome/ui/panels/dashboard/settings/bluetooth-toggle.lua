@@ -2,11 +2,10 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
-local watch = awful.widget.watch
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local icons = require("theme.icons")
 local device_state = false
 
 local action_name = wibox.widget({
@@ -32,7 +31,7 @@ local action_info = wibox.widget({
 local button_widget = wibox.widget({
 	{
 		id = "icon",
-		image = widget_icon_dir .. "bluetooth-off.svg",
+		image = icons.dashboard.settings.bluetooth_off,
 		widget = wibox.widget.imagebox,
 		resize = true,
 	},
@@ -59,23 +58,26 @@ local update_widget = function()
 	if device_state then
 		action_status:set_text("On")
 		widget_button.bg = beautiful.accent
-		button_widget.icon:set_image(widget_icon_dir .. "bluetooth.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.bluetooth)
 	else
 		action_status:set_text("Off")
 		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(widget_icon_dir .. "bluetooth-off.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.bluetooth_off)
 	end
+end
+
+local function apply_device_state(stdout)
+	if stdout:match("Soft blocked: yes") then
+		device_state = false
+	else
+		device_state = true
+	end
+	update_widget()
 end
 
 local check_device_state = function()
 	awful.spawn.easy_async_with_shell("rfkill list bluetooth", function(stdout)
-		if stdout:match("Soft blocked: yes") then
-			device_state = false
-		else
-			device_state = true
-		end
-
-		update_widget()
+		apply_device_state(stdout)
 	end)
 end
 
@@ -90,7 +92,7 @@ local power_on_cmd = [[
 		app_name = 'Bluetooth Manager',
 		title = 'System Notification',
 		message = 'Initializing bluetooth device...',
-		icon = ']] .. widget_icon_dir .. "loading" .. ".svg" .. [['
+		icon = ']] .. icons.dashboard.settings.loading .. [['
 	})
 	"
 
@@ -111,7 +113,7 @@ local power_off_cmd = [[
 		app_name = 'Bluetooth Manager',
 		title = 'System Notification',
 		message = 'The bluetooth device has been disabled.',
-		icon = ']] .. widget_icon_dir .. "bluetooth-off" .. ".svg" .. [['
+		icon = ']] .. icons.dashboard.settings.bluetooth_off .. [['
 	})
 	"
 ]]
@@ -138,10 +140,17 @@ action_info:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	toggle_action()
 end)))
 
-watch("rfkill list bluetooth", 5, function(_, stdout)
-	check_device_state()
-	collectgarbage("collect")
-end)
+awful.spawn.with_line_callback("rfkill event", {
+	stdout = function(_)
+		check_device_state()
+	end,
+})
+
+gears.timer({
+	timeout = 120,
+	autostart = true,
+	callback = check_device_state,
+})
 
 local action_widget = wibox.widget({
 	layout = wibox.layout.fixed.horizontal,

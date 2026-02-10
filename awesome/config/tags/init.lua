@@ -101,6 +101,7 @@ end)
 local update_gap_and_shape = function(t)
 	-- Get current tag layout
 	local current_layout = awful.tag.getproperty(t, "layout")
+
 	-- If the current layout is awful.layout.suit.max
 	if current_layout == awful.layout.suit.max then
 		-- Set clients gap to 0 and shape to rectangle if maximized

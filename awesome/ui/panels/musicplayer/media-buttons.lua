@@ -4,14 +4,13 @@ local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/musicplayer/icons/"
+local icons = require("theme.icons")
 local media_buttons = {}
 
 media_buttons.play_button_image = wibox.widget({
 	{
 		id = "play",
-		image = widget_icon_dir .. "play.svg",
+		image = icons.applets.media.play,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},
@@ -21,7 +20,7 @@ media_buttons.play_button_image = wibox.widget({
 media_buttons.next_button_image = wibox.widget({
 	{
 		id = "next",
-		image = widget_icon_dir .. "next.svg",
+		image = icons.applets.media.next,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},
@@ -31,7 +30,7 @@ media_buttons.next_button_image = wibox.widget({
 media_buttons.prev_button_image = wibox.widget({
 	{
 		id = "prev",
-		image = widget_icon_dir .. "prev.svg",
+		image = icons.applets.media.prev,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},
@@ -41,7 +40,7 @@ media_buttons.prev_button_image = wibox.widget({
 media_buttons.repeat_button_image = wibox.widget({
 	{
 		id = "rep",
-		image = widget_icon_dir .. "repeat-on.svg",
+		image = icons.applets.media.repeat_on,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},
@@ -51,7 +50,7 @@ media_buttons.repeat_button_image = wibox.widget({
 media_buttons.random_button_image = wibox.widget({
 	{
 		id = "rand",
-		image = widget_icon_dir .. "random-on.svg",
+		image = icons.applets.media.random_on,
 		resize = true,
 		widget = wibox.widget.imagebox,
 	},
@@ -129,10 +128,10 @@ local playpause_status = false
 media_buttons.play_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	if playpause_status then
 		awful.spawn.with_shell("playerctl pause")
-		media_buttons.play_button_image.play:set_image(widget_icon_dir .. "play.svg")
+		media_buttons.play_button_image.play:set_image(icons.applets.media.play)
 	else
 		awful.spawn.with_shell("playerctl play")
-		media_buttons.play_button_image.play:set_image(widget_icon_dir .. "pause.svg")
+		media_buttons.play_button_image.play:set_image(icons.applets.media.pause)
 	end
 	playpause_status = not playpause_status
 end)))
@@ -156,10 +155,10 @@ local shuffle_status = false
 media_buttons.random_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	if shuffle_status then
 		awful.spawn.with_shell("playerctl shuffle Off")
-		media_buttons.repeat_button_image.rep:set_image(widget_icon_dir .. "random-off.svg")
+		media_buttons.repeat_button_image.rep:set_image(icons.applets.media.random_off)
 	else
 		awful.spawn.with_shell("playerctl shuffle On")
-		media_buttons.repeat_button_image.rep:set_image(widget_icon_dir .. "random-on.svg")
+		media_buttons.repeat_button_image.rep:set_image(icons.applets.media.random_on)
 	end
 	shuffle_status = not shuffle_status
 end)))

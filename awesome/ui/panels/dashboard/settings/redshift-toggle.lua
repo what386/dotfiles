@@ -5,7 +5,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local config_dir = gears.filesystem.get_configuration_dir()
-local widget_icon_dir = config_dir .. "ui/panels/dashboard/settings/icons/"
+local icons = require("theme.icons")
 
 local action_name = wibox.widget({
 	text = "Redshift",
@@ -30,7 +30,7 @@ local action_info = wibox.widget({
 local button_widget = wibox.widget({
 	{
 		id = "icon",
-		image = widget_icon_dir .. "blue-light-off.svg",
+		image = icons.dashboard.settings.blue_light_off,
 		widget = wibox.widget.imagebox,
 		resize = true,
 	},
@@ -57,11 +57,11 @@ local update_widget = function()
 	if blue_light_state then
 		action_status:set_text("On")
 		widget_button.bg = beautiful.accent
-		button_widget.icon:set_image(widget_icon_dir .. "blue-light.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.blue_light)
 	else
 		action_status:set_text("Off")
 		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(widget_icon_dir .. "blue-light-off.svg")
+		button_widget.icon:set_image(icons.dashboard.settings.blue_light_off)
 	end
 end
 

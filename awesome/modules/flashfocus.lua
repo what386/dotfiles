@@ -17,7 +17,7 @@ local flashfocus = function(c)
 		end
 
 		local old = c.opacity
-		local op = c.opacity * 0.6
+		local op = c.opacity * 0.75
 		c.opacity = op
 		local q = op
 
