@@ -3,13 +3,7 @@ return {
 	opts = {},
 	event = "VeryLazy",
 	config = function()
-		local fg = "#ffffff"
-		local bg = "#00000000"
-
 		local devicons = require("nvim-web-devicons")
-		local incline = require("incline")
-		local manager = require("incline.manager")
-		local util = require("incline.util")
 
 		local function get_git_diff(buf)
 			local icons = { removed = "", changed = "", added = "" }
@@ -29,86 +23,190 @@ return {
 			return labels
 		end
 
-		incline.setup({
-			render = function(props)
-				local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
-				if filename == "" then
-					filename = "[No Name]"
+		local function current_mode_label()
+			local mode = vim.api.nvim_get_mode().mode
+			if mode:match("^[vV\22]") then
+				return "Visual"
+			elseif mode:match("^[iI]") then
+				return "Insert"
+			elseif mode:match("^[cC]") then
+				return "Command"
+			end
+			return "Normal"
+		end
+
+		local function current_cursor_info()
+			local cursorinfo = ""
+			local mode = vim.api.nvim_get_mode().mode
+
+			if mode:match("^[vV\22]") then
+				local start = vim.fn.getpos("v")
+				local c = vim.api.nvim_win_get_cursor(0)
+				local row = math.abs(start[2] - c[1]) + 1
+				local column
+
+				if c[2] >= start[3] then
+					column = c[2] - start[3] + 2
+				else
+					column = start[3] - c[2]
 				end
-				local ft_icon, ft_color = devicons.get_icon_color(filename)
 
-				if not props.focused then
-					return
+				cursorinfo = string.format("%d⋮%d", row, column)
+			end
+
+			if cursorinfo == "" then
+				local c = vim.api.nvim_win_get_cursor(0)
+				cursorinfo = string.format("%d⋮%d", c[1], c[2])
+			end
+
+			return cursorinfo
+		end
+
+		local function render_bufferline(props)
+			if not props.focused then
+				return
+			end
+
+			local current_buf = vim.api.nvim_win_get_buf(props.win)
+			local bufs = vim.fn.getbufinfo({ buflisted = 1 })
+			local items = {}
+			local max_items = 9
+			local added = 0
+
+			for _, buf in ipairs(bufs) do
+				if added >= max_items then
+					break
 				end
 
-				local cursorinfo = ""
-				local mode = vim.api.nvim_get_mode().mode
+				if vim.api.nvim_buf_is_valid(buf.bufnr) then
+					local name = vim.fn.fnamemodify(buf.name, ":t")
+					if name == "" then
+						name = "[No Name]"
+					end
+					local ft_icon, ft_color = devicons.get_icon_color(name)
+					local icon_text = ft_icon and (ft_icon .. " ") or ""
 
-				if mode:match("^[vV�]") then
-					local start = vim.fn.getpos("v")
-					local c = vim.api.nvim_win_get_cursor(0)
-
-					local row = math.abs(start[2] - c[1]) + 1
-					local column = 0
-
-					if c[2] >= start[3] then
-						column = c[2] - start[3] + 2
-					else
-						column = start[3] - c[2]
+					if #name > 20 then
+						name = name:sub(1, 17) .. "..."
 					end
 
-					cursorinfo = string.format("%d⋮%d", row, column)
+					local modified = vim.bo[buf.bufnr].modified and " ●" or ""
+					local is_current = buf.bufnr == current_buf
+					table.insert(items, {
+						is_current and "[" or "",
+						{
+							icon_text,
+							guifg = ft_color,
+							guibg = "none",
+						},
+						name .. modified,
+						is_current and "]" or "",
+						gui = is_current and "bold" or "none",
+					})
+					table.insert(items, { "  " })
+					added = added + 1
 				end
+			end
 
-				if cursorinfo == "" then
-					local c = vim.api.nvim_win_get_cursor(0)
-					cursorinfo = string.format("%d⋮%d", c[1], c[2])
-				end
+			if #bufs > max_items then
+				table.insert(items, { "…" })
+			elseif #items > 0 then
+				table.remove(items, #items) -- remove trailing spacer
+			end
 
-				local mode = vim.api.nvim_get_mode().mode
-				local fmt_mode = ""
+			return items
+		end
 
-				if mode:match("^[vV�]") then
-					fmt_mode = "Visual"
-				elseif mode:match("^[iI�]") then
-					fmt_mode = "Insert"
-				elseif mode:match("^[cC�]") then
-					fmt_mode = "Command"
-				else
-					fmt_mode = "Normal"
-				end
+		local function create_panel(placement, render, events)
+			local incline = require("incline")
+			local manager = require("incline.manager")
+			local util = require("incline.util")
 
-				local reg = vim.fn.reg_recording()
+			incline.setup({
+				render = render,
+				window = {
+					margin = { horizontal = 1, vertical = 1 },
+					placement = { horizontal = placement, vertical = "bottom" },
+				},
+			})
 
-				if reg ~= "" then
-					fmt_mode = string.format("%s  %s", reg, fmt_mode)
-				end
-
-				return {
-					{
-						(ft_icon or "") .. " ",
-						guifg = ft_color,
-						guibg = "none",
-					},
-					{ filename, gui = vim.bo[props.buf].modified and "bold,italic" or "bold" },
-					{ " | " .. fmt_mode .. " | " },
-					{ cursorinfo },
+			util.clear_augroup()
+			vim.api.nvim_create_autocmd(
+				events
+					or { "RecordingEnter", "RecordingLeave", "ModeChanged", "CursorMoved", "TextChanged" },
+				{
+					callback = function()
+						manager.update({ refresh = true })
+					end,
 				}
+			)
+		end
+
+		create_panel("left", function(props)
+			if not props.focused then
+				return
+			end
+
+			local mode = current_mode_label()
+			local reg = vim.fn.reg_recording()
+
+			if reg ~= "" then
+				mode = string.format("%s  %s", reg, mode)
+			end
+
+			return {
+				{ mode .. " | " },
+				{ current_cursor_info() },
+			}
+		end)
+
+		local function reset_incline()
+			-- Incline supports one setup() call, so we reload modules to run another panel.
+			for _, module_name in ipairs({
+				"incline",
+				"incline.config",
+				"incline.debounce",
+				"incline.highlight",
+				"incline.manager",
+				"incline.tabpage",
+				"incline.util",
+				"incline.winline",
+			}) do
+				package.loaded[module_name] = false
+			end
+		end
+
+		reset_incline()
+
+		create_panel("right", function(props)
+			if not props.focused then
+				return
+			end
+
+			return {
+				{ get_git_diff(props.buf) },
+			}
+		end)
+
+		reset_incline()
+
+		create_panel(
+			"center",
+			function(props)
+				return render_bufferline(props)
 			end,
-			window = {
-				margin = { horizontal = 1, vertical = 1 },
-				placement = { horizontal = "left", vertical = "bottom" },
-			},
-		})
-
-		util.clear_augroup()
-
-		vim.api.nvim_create_autocmd(
-			{ "RecordingEnter", "RecordingLeave", "ModeChanged", "CursorMoved", "TextChanged" },
 			{
-				callback = function()
-					manager.update({ refresh = true })
-				end,
+				"BufAdd",
+				"BufDelete",
+				"BufEnter",
+				"BufModifiedSet",
+				"WinEnter",
+				"WinLeave",
+				"RecordingEnter",
+				"RecordingLeave",
+				"ModeChanged",
+				"CursorMoved",
+				"TextChanged",
 			}
 		)
 	end,

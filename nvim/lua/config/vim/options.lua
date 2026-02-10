@@ -31,6 +31,7 @@ vim.o.splitright = true -- force all vertical splits to right of cursor
 vim.o.fileencoding = "utf-8" -- set filetype encoding
 vim.o.autoindent = true -- copy indent from previous line
 vim.opt.laststatus = 0 -- disable statusline
+vim.opt.showtabline = 0 -- hide top tabline (bufferline is replaced by bottom incline panels)
 vim.opt.iskeyword:append("-") -- allow hyphenated words to work in searches
 vim.opt.runtimepath:remove("/usr/share/vim/vimfiles") -- dont allow neovim to read vim plugins
 vim.o.shell = "/usr/bin/bash"

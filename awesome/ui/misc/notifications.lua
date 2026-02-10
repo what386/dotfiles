@@ -89,9 +89,15 @@ naughty.connect_signal("request::icon", function(n, context, hints)
 end)
 
 -- Connect to naughty on display signal
+local handling_notification_display = false
 naughty.connect_signal("request::display", function(n)
-	-- Actions Blueprint
-	local actions_template = wibox.widget({
+	if handling_notification_display then
+		return
+	end
+	handling_notification_display = true
+	local ok, err = pcall(function()
+		-- Actions Blueprint
+		local actions_template = wibox.widget({
 		notification = n,
 		base_layout = wibox.widget({
 			spacing = dpi(0),
@@ -220,5 +226,10 @@ naughty.connect_signal("request::display", function(n)
 	local focused = awful.screen.focused()
 	if _G.dont_disturb_state or (focused.info_center and focused.info_center.visible) then
 		naughty.destroy_all_notifications(nil, 1)
+	end
+	end)
+	handling_notification_display = false
+	if not ok then
+		gears.debug.print_error("notification display handler failed: " .. tostring(err))
 	end
 end)

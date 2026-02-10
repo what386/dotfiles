@@ -47,6 +47,10 @@ local notifbox_add_expired = function(n, notif_icon, notifbox_color)
 end
 
 naughty.connect_signal("request::display", function(n)
+	if n._in_notif_center then
+		return
+	end
+	n._in_notif_center = true
 	local notifbox_color = beautiful.groups_bg
 	if n.urgency == "critical" then
 		notifbox_color = n.bg .. "66"
@@ -59,6 +63,7 @@ naughty.connect_signal("request::display", function(n)
 	end
 
 	notifbox_add_expired(n, notif_icon, notifbox_color)
+	n._in_notif_center = nil
 end)
 
 return notif_core
