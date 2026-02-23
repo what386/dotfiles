@@ -1,0 +1,8 @@
+require("ui.flyouts.onscreen-keyboard")
+require("ui.flyouts.prompt-lua")
+require("ui.flyouts.prompt-signal")
+require("ui.flyouts.quake-scratchpad")
+require("ui.flyouts.quake-terminal")
+require("ui.flyouts.clipboard-history")
+require("ui.flyouts.alt-tab")
+require("ui.flyouts.window-overview")

@@ -1,0 +1,31 @@
+local paths = require("theme.icons.paths")
+local dir = paths.theme_icons_dir
+
+return {
+	awesome = dir .. "system/awesome.svg",
+	toggled_on = dir .. "system/toggled-on.svg",
+	toggled_off = dir .. "system/toggled-off.svg",
+	left_arrow = dir .. "system/left-arrow.svg",
+	right_arrow = dir .. "system/right-arrow.svg",
+	plus = dir .. "system/plus.svg",
+	effects = dir .. "system/effects.svg",
+	search = dir .. "system/magnify.svg",
+	remove = dir .. "system/remove.svg",
+	close = dir .. "system/close.svg",
+	refresh = dir .. "system/refresh.svg",
+	settings = dir .. "system/settings.svg",
+	loading = dir .. "system/loading.svg",
+	no = dir .. "system/no.svg",
+	yes = dir .. "system/yes.svg",
+	floppy_disk = dir .. "system/floppy.svg",
+	compact_disk = dir .. "system/cd.svg",
+	usb = dir .. "system/usb.svg",
+	menu = dir .. "system/menu.svg",
+	kb_on = dir .. "system/kb-on.svg",
+	kb_off = dir .. "system/kb-off.svg",
+	default_user = dir .. "system/default-user.svg",
+	launcher = dir .. "system/launcher.svg",
+	up_chevron = dir .. "system/up-chevron.svg",
+	down_chevron = dir .. "system/down-chevron.svg",
+	left_chevron = dir .. "system/left-chevron.svg",
+}
