@@ -1,0 +1,27 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  format-and-analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "{{sdk_version}}"
+
+      - name: Verify formatting
+        run: dotnet format --verify-no-changes --verbosity minimal
+
+      - name: Build with warnings as errors
+        run: dotnet build --configuration Release --verbosity minimal --nologo -warnaserror

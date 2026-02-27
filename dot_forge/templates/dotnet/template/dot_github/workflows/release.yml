@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  guard:
+    name: Resolve Tag
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.resolve.outputs.should_release }}
+      tag_name: ${{ steps.resolve.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Resolve release tag
+        id: resolve
+        shell: bash
+        run: |
+          TAG_NAME="$(git tag --points-at "${{ github.event.workflow_run.head_sha }}" | grep -E '^v' | head -n1 || true)"
+          if [[ -n "${TAG_NAME}" ]]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "tag_name=" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
+    name: Create GitHub Release
+    needs: guard
+    if: github.event.workflow_run.conclusion == 'success' && needs.guard.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Read changelog section for tag
+        id: release_notes
+        shell: bash
+        run: |
+          chmod +x ./scripts/release/changelog_for_tag.bash
+          RELEASE_NOTES="$(./scripts/release/changelog_for_tag.bash "${{ needs.guard.outputs.tag_name }}")"
+          {
+            echo "body<<__RELEASE_NOTES__"
+            printf '%s\n' "$RELEASE_NOTES"
+            echo "__RELEASE_NOTES__"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.guard.outputs.tag_name }}
+          body: ${{ steps.release_notes.outputs.body }}

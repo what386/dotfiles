@@ -1,0 +1,8 @@
+name = "rust"
+version = "0.1.0"
+description = "Minimal Cargo binary template with CI and release automation"
+
+[requirements]
+allow_execution = true
+escape_cwd = false
+allow_network = false

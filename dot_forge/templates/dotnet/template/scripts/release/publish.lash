@@ -1,0 +1,81 @@
+#!/bin/env -S lash run
+
+set -euo pipefail
+
+// Configure for your repo
+const REMOTES = {{remotes}}
+const PACKAGE_PROJECT = "src/{{primary_project}}/{{primary_project}}.csproj"
+
+// Channels
+@define GIT true
+@define NUGET false
+
+fn add_if_exists(path)
+    let exists = $sh $"if [ -e \"{path}\" ]; then echo 1; else echo 0; fi"
+    if exists == "1"
+        git add "$path"
+    end
+end
+
+if #argv == 0 || #argv > 1
+    echo "Usage: scripts/release/publish.lash <version-or-tag>"
+    exit 1
+end
+
+const raw_version = argv[0]
+const version = $sh $"printf '%s' '{raw_version}' | sed 's/^v//'"
+const tag = $"v{version}"
+
+git checkout dev
+
+tally semver $version --auto
+tally changelog --auto > CHANGELOG.md
+
+add_if_exists("CHANGELOG.md")
+add_if_exists("TODO.md")
+add_if_exists(".tally/history.json")
+
+const staged = $sh "git diff --cached --name-only"
+if staged != ""
+    git commit -m $"release: {tag}"
+else
+    echo "No release metadata changes to commit."
+end
+
+for remote in REMOTES
+    git push $remote dev
+end
+
+git checkout main
+git merge dev -m "Merge dev into main"
+
+for remote in REMOTES
+    git push $remote main
+end
+
+git tag $tag
+
+
+@if defined(GIT) && GIT == "true"
+for remote in REMOTES
+    git push $remote $tag
+end
+@end
+
+@if defined(NUGET) && NUGET == "true"
+if $sh "printenv NUGET_SOURCE >/dev/null 2>&1 && printenv NUGET_API_KEY >/dev/null 2>&1 && echo 1 || echo 0" != "1"
+    echo "Error: NUGET_SOURCE and NUGET_API_KEY must be set when NUGET publish is enabled."
+    exit 1
+end
+
+dotnet pack $PACKAGE_PROJECT -c Release --nologo
+const package_file = $sh "find . -type f -name '*.nupkg' ! -name '*.symbols.nupkg' -print -quit"
+if package_file == ""
+    echo "Error: no .nupkg file found after dotnet pack."
+    exit 1
+end
+
+dotnet nuget push "$package_file" --api-key "$NUGET_API_KEY" --source "$NUGET_SOURCE"
+@end
+
+git checkout dev

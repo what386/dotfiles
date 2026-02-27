@@ -1,0 +1,8 @@
+name = "dotnet"
+version = "0.1.0"
+description = "Generic .NET project template backed by dotnet new"
+
+[requirements]
+allow_execution = true
+escape_cwd = false
+allow_network = false

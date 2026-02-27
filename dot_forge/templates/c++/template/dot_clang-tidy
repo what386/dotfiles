@@ -1,0 +1,22 @@
+---
+Checks: >
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-naming,
+  -readability-magic-numbers
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '^(src|tests)/'
+AnalyzeTemporaryDtors: false
+FormatStyle: file
+UseColor: true
+
+ExtraArgs:
+  - -std=c++23
+  - -stdlib=libc++
+...

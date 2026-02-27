@@ -1,0 +1,58 @@
+#!/bin/env -S lash run
+
+set -euo pipefail
+
+// Configure for your repo
+const REMOTES = {{remotes}}
+
+// Channels
+@define GIT true
+@define PUBLISH_CRATE true
+
+if #argv == 0 || #argv > 1
+    echo "Usage: scripts/release/publish.lash <version-or-tag>"
+    exit 1
+end
+
+const raw_version = argv[0]
+const version = $sh $"printf '%s' '{raw_version}' | sed 's/^v//'"
+const tag = $"v{version}"
+
+git checkout dev
+
+tally semver $version --auto
+tally changelog --auto > CHANGELOG.md
+
+git add CHANGELOG.md Cargo.toml Cargo.lock TODO.md .tally/history.json
+
+const staged = $sh "git diff --cached --name-only"
+if staged != ""
+    git commit -m $"release: {tag}"
+else
+    echo "No release metadata changes to commit."
+end
+
+for remote in REMOTES
+    git push $remote dev
+end
+
+git checkout main
+git merge dev -m "Merge dev into main"
+
+for remote in REMOTES
+    git push $remote main
+end
+
+git tag $tag
+
+@if defined(GIT) && GIT == "true"
+for remote in REMOTES
+    git push $remote $tag
+end
+@end
+
+@if defined(PUBLISH_CRATE) && PUBLISH_CRATE == "true"
+cargo publish
+@end
+
+git checkout dev
