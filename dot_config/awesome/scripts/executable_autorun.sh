@@ -8,6 +8,7 @@ run() {
 
 run "/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1"
 run "${HOME}/.upstream/archives/ollama-linux-amd64/bin/ollama" serve
+run "caffeine-indicator"
 
 # this breaks the run dialogue for some reason
 # picom doesnt duplicate so its probably fine

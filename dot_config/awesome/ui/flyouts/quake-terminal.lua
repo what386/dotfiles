@@ -9,7 +9,7 @@ local quake_instance_name = "QuakeTerminal"
 local previous_client = nil
 local quake_client = nil
 local margins = dpi(2.5)
-local lr_margins = dpi(300)
+local lr_margins = dpi(600)
 
 -- Function to get current screen dimensions and calculate positioning
 local function get_screen_geometry()
