@@ -1,0 +1,8 @@
+name = "c++"
+version = "0.1.0"
+description = "Minimal C++23 xmake starter with clang tooling files"
+
+[requirements]
+allow_execution = false
+escape_cwd = false
+allow_network = false

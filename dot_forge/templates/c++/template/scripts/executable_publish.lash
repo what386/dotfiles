@@ -1,0 +1,62 @@
+#!/bin/env -S lash run
+
+set -euo pipefail
+
+// Configure for your repo
+const REMOTES = {{remotes}}
+
+// Channels
+@define GIT true
+
+fn add_if_exists(path)
+    const exists = $(test $"-e \"{path}\"")
+    if $exists == 1
+        git add "$path"
+    end
+end
+
+if #$argv == 0 || #$argv > 1
+    echo "Usage: scripts/publish.lash <version-or-tag>"
+    exit 1
+end
+
+const raw_version = $argv[0]
+const version = $(printf '%s' $raw_version | sed 's/^v//')
+const tag = $"v{version}"
+
+git checkout dev
+
+tally semver $version --auto
+tally changelog --auto > CHANGELOG.md
+
+add_if_exists("CHANGELOG.md")
+add_if_exists("TODO.md")
+add_if_exists(".tally/history.json")
+
+const staged = $(git diff --cached --name-only)
+if $staged != ""
+    git commit -m $"release: {tag}"
+else
+    echo "No release metadata changes to commit."
+end
+
+for remote in $REMOTES
+    git push $remote dev
+end
+
+git checkout main
+git merge dev -m "Merge dev into main"
+
+for remote in $REMOTES
+    git push $remote main
+end
+
+git tag $tag
+
+@if defined(GIT) && GIT == "true"
+for remote in $REMOTES
+    git push $remote $tag
+end
+@end
+
+git checkout dev

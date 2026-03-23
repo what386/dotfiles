@@ -1,6 +1,6 @@
 name = "dotnet"
 version = "0.1.0"
-description = "Generic .NET project template backed by dotnet new"
+description = "C# .NET-10 starter"
 
 [requirements]
 allow_execution = true

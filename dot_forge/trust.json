@@ -1,3 +1,16 @@
 {
-  "records": []
+  "records": [
+    {"template_path":"/home/bmorin/.forge/templates/esp32","template_hash":"fb87d999395c29dc","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/esp32-c","template_hash":"0158fff59e4ea00c","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/esp32-c","template_hash":"ea3da137c7b13b0a","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/esp32-c","template_hash":"435dae71d83ef768","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/esp32-c","template_hash":"f83b35563a303c6a","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/esp32-c","template_hash":"29a4995b0e99c8a2","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/esp32-c","template_hash":"55ea6686f3d633e3","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/rust","template_hash":"678e3d3408052885","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/rust","template_hash":"b31f461fd4a645b5","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/rust","template_hash":"29582d2fd7d6f551","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/rust","template_hash":"a6d053507b77f8ab","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true},
+    {"template_path":"/home/bmorin/.forge/templates/rust","template_hash":"33ea115e6a0d67d2","requirements":"allow_execution=1;escape_cwd=0;allow_network=0","allowed":true}
+  ]
 }

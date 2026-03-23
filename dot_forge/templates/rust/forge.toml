@@ -1,6 +1,6 @@
 name = "rust"
 version = "0.1.0"
-description = "Minimal Cargo binary template with CI and release automation"
+description = "Rust starter"
 
 [requirements]
 allow_execution = true

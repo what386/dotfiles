@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_suffix: linux-x64
+            binary_ext: ""
+          - os: macos-latest
+            asset_suffix: macos-x64
+            binary_ext: ""
+          - os: windows-latest
+            asset_suffix: windows-x64
+            binary_ext: ".exe"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Configure
+        run: xmake f -m release
+
+      - name: Build
+        run: xmake -v
+
+      - name: Archive binary
+        shell: bash
+        run: |
+          mkdir -p dist
+          BIN_PATH="$(find build -type f \( -name '*.exe' -o -perm -u+x \) ! -name '*-tests*' | head -n1)"
+          if [[ -z "$BIN_PATH" ]]; then
+            echo "Failed to find built binary."
+            find build -type f || true
+            exit 1
+          fi
+          cp "$BIN_PATH" "dist/${{ github.event.repository.name }}-${{ matrix.asset_suffix }}${{ matrix.binary_ext }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ matrix.asset_suffix }}
+          path: dist/${{ github.event.repository.name }}-${{ matrix.asset_suffix }}${{ matrix.binary_ext }}
+
+  checksum:
+    name: Generate Checksums
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd dist
+          find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+
+      - name: Upload checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums
+          path: dist/SHA256SUMS.txt
+
+  release:
+    name: Create GitHub Release
+    needs:
+      - checksum
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: dist/**/*

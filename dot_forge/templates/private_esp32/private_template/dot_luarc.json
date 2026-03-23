@@ -1,0 +1,18 @@
+{
+  "Lua.workspace.checkThirdParty": "Disable",
+  "Lua.diagnostics.globals": [
+    "target",
+    "set_kind",
+    "set_policy",
+    "add_files",
+    "add_rules",
+    "set_languages",
+    "add_cxxflags",
+    "add_ldflags",
+    "add_defines",
+    "set_symbols",
+    "set_optimize",
+    "set_strip",
+    "is_mode"
+  ]
+}

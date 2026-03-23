@@ -1,0 +1,7 @@
+target/
+
+src/*/obj/
+src/*/bin/
+tests/*/obj/
+tests/*/bin/
+

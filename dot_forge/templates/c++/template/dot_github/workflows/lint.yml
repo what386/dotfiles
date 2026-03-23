@@ -1,0 +1,48 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format clang-tidy
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          FILES="$(find src tests -type f \( -name '*.cpp' -o -name '*.cc' -o -name '*.cxx' -o -name '*.hpp' -o -name '*.hh' -o -name '*.hxx' -o -name '*.h' \) || true)"
+          if [[ -z "$FILES" ]]; then
+            echo "No C/C++ source files found for format checking."
+            exit 0
+          fi
+          echo "$FILES" | xargs clang-format --dry-run --Werror
+
+      - name: Run clang-tidy
+        shell: bash
+        run: |
+          xmake f -m release
+          xmake project -k compile_commands
+          CPP_FILES="$(find src tests -type f -name '*.cpp' || true)"
+          if [[ -z "$CPP_FILES" ]]; then
+            echo "No C++ implementation files found for clang-tidy."
+            exit 0
+          fi
+          echo "$CPP_FILES" | xargs -r clang-tidy -p .
