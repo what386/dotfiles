@@ -26,6 +26,7 @@ zoxide init fish | source
 
 set -gx PATH $PATH /opt/zen
 set -gx PATH $PATH /opt/zig-x86_64-linux-0.16.0
+set -gx PATH $PATH /opt/chntpw-140201/bin/
 
 direnv hook fish | source
 
