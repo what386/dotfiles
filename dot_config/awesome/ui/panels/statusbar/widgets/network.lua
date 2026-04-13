@@ -4,30 +4,26 @@ local gears = require("gears")
 local naughty = require("naughty")
 local dpi = require("beautiful").xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-local config_dir = gears.filesystem.get_configuration_dir()
 local config = require("config.user.machine")
 local userprefs = require("config.user.preferences")
 local icons = require("theme.icons")
--- Configuration
+
+-- Interfaces
 local interfaces = {
 	wlan_interface = config.network_interface.wireless,
 	lan_interface = config.network_interface.wired,
 }
+
+-- State
 local network_mode = nil
-local update_notify_no_access = true
-local notify_no_access_quota = 0
 local startup = true
 local reconnect_startup = true
-local notify_new_wifi_conn = false
 local wifi_strength = 0
 local internet_healthy = true
 local last_health_check = 0
 local HEALTH_TTL_SECONDS = 30
-local mode_update_debounce = gears.timer({
-	timeout = 0.25,
-	single_shot = true,
-	autostart = false,
-})
+
+-- Widget
 local widget = wibox.widget({
 	{
 		id = "icon",
@@ -37,6 +33,7 @@ local widget = wibox.widget({
 	},
 	layout = wibox.layout.align.horizontal,
 })
+
 local widget_button = wibox.widget({
 	{
 		widget,
@@ -45,36 +42,32 @@ local widget_button = wibox.widget({
 	},
 	widget = clickable_container,
 })
+
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	awful.spawn(userprefs.default.network_manager, false)
 end)))
+
 local network_tooltip = awful.tooltip({
 	text = "Loading...",
 	objects = { widget_button },
 	delay_show = 0.15,
-	mode = "outside",
-	align = "right",
-	preferred_positions = { "left", "right", "top", "bottom" },
-	margin_leftright = dpi(8),
-	margin_topbottom = dpi(8),
 })
-local check_internet_health = [=[
-ping -q -w1 -c1 1.1.1.1 >/dev/null 2>&1 && echo "ok" || echo "no"
-]=]
 
-local function read_file(path)
-	local f = io.open(path, "r")
-	if not f then
-		return nil
-	end
-	local v = f:read("*a")
-	f:close()
-	if not v then
-		return nil
-	end
-	return v:gsub("%s+$", "")
+-- Helpers
+
+local function update_tooltip(message)
+	network_tooltip:set_markup(message)
 end
 
+local function notify(message, title, icon)
+	naughty.notification({
+		message = message,
+		title = title,
+		icon = icon,
+	})
+end
+
+-- Internet health check
 local function check_internet_health_async(callback, force)
 	local now = os.time()
 	if not force and (now - last_health_check) < HEALTH_TTL_SECONDS then
@@ -82,232 +75,165 @@ local function check_internet_health_async(callback, force)
 		return
 	end
 
-	awful.spawn.easy_async_with_shell(check_internet_health, function(stdout)
+	awful.spawn.easy_async_with_shell("ping -q -w1 -c1 1.1.1.1 >/dev/null 2>&1 && echo ok || echo no", function(stdout)
 		internet_healthy = stdout:match("ok") ~= nil
 		last_health_check = os.time()
 		callback(internet_healthy)
 	end)
 end
--- Awesome/System startup
-local update_startup = function()
-	if startup then
-		startup = false
-	end
-end
--- Consider reconnecting a startup
-local update_reconnect_startup = function(status)
-	reconnect_startup = status
-end
--- Update tooltip
-local update_tooltip = function(message)
-	network_tooltip:set_markup(message)
-end
-local network_notify = function(message, title, app_name, icon)
-	naughty.notification({
-		message = message,
-		title = title,
-		app_name = app_name,
-		icon = icon,
-	})
-end
--- Wireless mode / Update
-local update_wireless = function()
+
+-- Wireless update (iwd-safe)
+local function update_wireless()
 	network_mode = "wireless"
-	-- Create wireless connection notification
-	local notify_connected = function(essid)
-		local message = 'You are now connected to <b>"' .. essid .. '"</b>'
-		local title = "Connection Established"
-		local app_name = "System Notification"
-		local icon = icons.widgets.wifi.wifi_on
-		network_notify(message, title, app_name, icon)
-	end
-	-- Get wifi essid and bitrate
-	local update_wireless_data = function(healthy)
-		awful.spawn.easy_async_with_shell([[
-		essid=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
-		bitrate=$(iw dev ]] .. interfaces.wlan_interface .. [[ link | grep -oP 'tx bitrate: \K[^\s]+')
-		echo "SSID:${essid}"
-		echo "BITRATE:${bitrate}"
-	    ]], function(stdout)
-			local essid = stdout:match("SSID:(.-)\n") or "N/A"
-			essid = essid ~= "" and essid or "N/A"
-			local bitrate = stdout:match("BITRATE:(.-)\n") or "N/A"
-			bitrate = bitrate ~= "" and bitrate or "N/A"
 
-			awesome.emit_signal("widget::network:ssid", essid)
+	awful.spawn.easy_async_with_shell("iw dev " .. interfaces.wlan_interface .. " link", function(stdout)
+		if stdout:match("Not connected") then
+			update_disconnected()
+			return
+		end
 
-			local message = "SSID: <b>"
+		local essid = stdout:match("SSID:%s*(.-)\n") or "N/A"
+		local signal_dbm = tonumber(stdout:match("signal:%s*(-?%d+)"))
+		local bitrate = stdout:match("tx bitrate:%s*([%d%.]+%s*MBit/s)") or "N/A"
+
+		if not signal_dbm then
+			update_disconnected()
+			return
+		end
+
+		-- Convert dBm → %
+		local strength = math.min(100, math.max(0, 2 * (signal_dbm + 100)))
+		local rounded = math.floor(strength / 25 + 0.5)
+
+		-- Icon
+		local function set_icon(normal, alert)
+			check_internet_health_async(function(healthy)
+				if healthy then
+					widget.icon:set_image(normal)
+				else
+					widget.icon:set_image(alert)
+				end
+			end)
+		end
+
+		if rounded <= 1 then
+			set_icon(icons.widgets.wifi.wifi_strength_1, icons.widgets.wifi.wifi_strength_1_alert)
+		elseif rounded == 2 then
+			set_icon(icons.widgets.wifi.wifi_strength_2, icons.widgets.wifi.wifi_strength_2_alert)
+		elseif rounded == 3 then
+			set_icon(icons.widgets.wifi.wifi_strength_3, icons.widgets.wifi.wifi_strength_3_alert)
+		else
+			set_icon(icons.widgets.wifi.wifi_strength_4, icons.widgets.wifi.wifi_strength_4_alert)
+		end
+
+		-- Tooltip
+		check_internet_health_async(function(healthy)
+			local msg = "SSID: <b>"
 				.. essid
-				.. "</b>\nInterface: <b>"
-				.. interfaces.wlan_interface
-				.. "</b>\nStrength: <b>"
-				.. tostring(wifi_strength)
-				.. "%"
-				.. "</b>\nBitrate: <b>"
+				.. "</b>\n"
+				.. "Signal: <b>"
+				.. signal_dbm
+				.. " dBm ("
+				.. math.floor(strength)
+				.. "%)</b>\n"
+				.. "Bitrate: <b>"
 				.. bitrate
 				.. "</b>"
 
-			if healthy then
-				update_tooltip(message)
-			else
-				update_tooltip("<b>Connected but no internet!</b>\n" .. message)
+			if not healthy then
+				msg = "<b>Connected but no internet!</b>\n" .. msg
 			end
+
+			update_tooltip(msg)
+		end)
+
+		-- Notify on connect
+		if reconnect_startup or startup then
+			notify('Connected to <b>"' .. essid .. '"</b>', "Connection Established", icons.widgets.wifi.wifi_on)
+			reconnect_startup = false
+			startup = false
+			awesome.emit_signal("system::network_connected")
+		end
+
+		awesome.emit_signal("widget::network:ssid", essid)
+	end)
+end
+
+-- Wired update
+local function update_wired()
+	network_mode = "wired"
+
+	check_internet_health_async(function(healthy)
+		if healthy then
+			widget.icon:set_image(icons.widgets.ethernet.eth_connected)
+			update_tooltip("Ethernet: <b>" .. interfaces.lan_interface .. "</b>")
 
 			if reconnect_startup or startup then
-				notify_connected(essid)
-				update_reconnect_startup(false)
-			end
-		end)
-	end
-
-	local function update_wifi_icon(strength)
-		if strength == 1 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_1)
-		end
-		if strength == 2 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_2)
-		end
-		if strength == 3 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_3)
-		end
-		if strength >= 4 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_4)
-		end
-	end
-	local function update_wifi_icon_alert(strength)
-		if strength == 1 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_1_alert)
-		end
-		if strength == 2 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_2_alert)
-		end
-		if strength == 3 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_3_alert)
-		end
-		if strength >= 4 then
-			widget.icon:set_image(icons.widgets.wifi.wifi_strength_4_alert)
-		end
-	end
-	-- Update wifi icon based on wifi strength and health
-	local update_wireless_icon = function(strength)
-		check_internet_health_async(function(healthy)
-			if healthy then
-				if startup or reconnect_startup then
-					awesome.emit_signal("system::network_connected")
-				end
-				update_wifi_icon(strength)
-				update_wireless_data(true)
-			else
-				update_wifi_icon_alert(strength)
-				update_wireless_data(false)
-			end
-		end)
-	end
-	-- Get wifi strength
-	local update_wireless_strength = function()
-		local wireless_data = read_file("/proc/net/wireless")
-		if not wireless_data then
-			return
-		end
-		local quality = wireless_data:match("\n.-:%s*[%d%.]+%s+([%d%.]+)")
-		if not quality then
-			return
-		end
-		wifi_strength = tonumber(quality) or 0
-		local wifi_strength_rounded = math.floor(wifi_strength / 25 + 0.5)
-		update_wireless_icon(wifi_strength_rounded)
-	end
-	update_wireless_strength()
-	update_startup()
-end
-local update_wired = function()
-	network_mode = "wired"
-	local notify_connected = function()
-		local message = 'Connected to internet with <b>"' .. interfaces.lan_interface .. '"</b>'
-		local title = "Connection Established"
-		local app_name = "System Notification"
-		local icon = icons.widgets.ethernet.eth_connected
-		network_notify(message, title, app_name, icon)
-	end
-	check_internet_health_async(function(healthy)
-		if not healthy then
-			update_tooltip(
-				"<b>Connected but no internet!</b>" .. "\nEthernet Interface: <b>" .. interfaces.lan_interface .. "</b>"
-			)
-			widget.icon:set_image(icons.widgets.ethernet.eth_no_route)
-		else
-			update_tooltip("Ethernet Interface: <b>" .. interfaces.lan_interface .. "</b>")
-			if startup or reconnect_startup then
+				notify("Ethernet connected", "Connection Established", icons.widgets.ethernet.eth_connected)
+				reconnect_startup = false
+				startup = false
 				awesome.emit_signal("system::network_connected")
-				notify_connected()
-				update_startup(false)
 			end
-			update_reconnect_startup(false)
-			widget.icon:set_image(icons.widgets.ethernet.eth_connected)
+		else
+			widget.icon:set_image(icons.widgets.ethernet.eth_no_route)
+			update_tooltip("<b>No internet!</b>\nEthernet: <b>" .. interfaces.lan_interface .. "</b>")
 		end
 	end)
 end
-local update_disconnected = function()
-	local notify_wireless_disconnected = function(essid)
-		local message = "Wi-Fi network has been disconnected"
-		local title = "Connection Disconnected"
-		local app_name = "System Notification"
-		local icon = icons.widgets.wifi.wifi_off
-		network_notify(message, title, app_name, icon)
-	end
-	local notify_wired_disconnected = function(essid)
-		local message = "Ethernet network has been disconnected"
-		local title = "Connection Disconnected"
-		local app_name = "System Notification"
-		local icon = icons.widgets.ethernet.eth_disconnected
-		network_notify(message, title, app_name, icon)
-	end
-	if network_mode == "wireless" then
-		widget.icon:set_image(icons.widgets.wifi.wifi_strength_off)
-		if not reconnect_startup then
-			update_reconnect_startup(true)
-			notify_wireless_disconnected()
-		end
-	elseif network_mode == "wired" then
-		widget_icon_name = "wired-off"
-		if not reconnect_startup then
-			update_reconnect_startup(true)
-			notify_wired_disconnected()
-		end
-	end
-	update_tooltip("Network is currently disconnected")
-end
-local check_network_mode = function()
-	local wireless_state = read_file("/sys/class/net/" .. tostring(interfaces.wlan_interface) .. "/operstate")
-	local wired_state = read_file("/sys/class/net/" .. tostring(interfaces.lan_interface) .. "/operstate")
 
-	if wired_state == "up" then
-		update_wired()
-	elseif wireless_state == "up" then
-		update_wireless()
-	else
-		update_disconnected()
+-- Disconnected
+local function update_disconnected()
+	widget.icon:set_image(icons.widgets.wifi.wifi_strength_off)
+	update_tooltip("Network disconnected")
+
+	if not reconnect_startup then
+		reconnect_startup = true
+		notify("Network disconnected", "Connection Lost", icons.widgets.wifi.wifi_off)
 	end
 end
 
-mode_update_debounce:connect_signal("timeout", function()
-	check_network_mode()
-end)
+local function read_operstate_async(interface, callback)
+	awful.spawn.easy_async({ "cat", "/sys/class/net/" .. interface .. "/operstate" }, function(stdout, _, _, exit_code)
+		if exit_code ~= 0 then
+			callback(nil)
+			return
+		end
 
+		local state = stdout and stdout:gsub("%s+$", "")
+		if state == "" then
+			state = nil
+		end
+
+		callback(state)
+	end)
+end
+
+-- Mode detection
+local function check_network_mode()
+	local wlan = interfaces.wlan_interface
+	local lan = interfaces.lan_interface
+
+	read_operstate_async(lan, function(lan_state)
+		read_operstate_async(wlan, function(wlan_state)
+			if lan_state == "up" then
+				update_wired()
+			elseif wlan_state == "up" then
+				update_wireless()
+			else
+				update_disconnected()
+			end
+		end)
+	end)
+end
+
+-- React to NM events
 awful.spawn.with_line_callback("nmcli monitor", {
-	stdout = function(_)
-		-- Trigger health check again after network events
+	stdout = function()
 		last_health_check = 0
-		mode_update_debounce:again()
-	end,
-})
-
-local network_updater = gears.timer({
-	timeout = 60,
-	autostart = true,
-	call_now = true,
-	callback = function()
 		check_network_mode()
 	end,
 })
+
+check_network_mode()
+
 return widget_button
