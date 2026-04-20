@@ -44,6 +44,14 @@ local slider_osd = wibox.widget({
 
 local bri_osd_slider = slider_osd.bri_osd_slider
 local updating_from_signal = false
+
+local function normalize_brightness(value)
+	local level = tonumber(value) or 0
+	level = math.floor(level + 0.5)
+	level = math.max(0, math.min(100, level))
+	return level
+end
+
 local brightness_apply_timer = gears.timer({
 	timeout = 0.08,
 	single_shot = true,
@@ -58,7 +66,7 @@ bri_osd_slider:connect_signal("property::value", function()
 	if updating_from_signal then
 		return
 	end
-	local brightness_level = bri_osd_slider:get_value()
+	local brightness_level = normalize_brightness(bri_osd_slider:get_value())
 	brightness_apply_timer:again()
 
 	-- Update textbox widget text
@@ -82,8 +90,10 @@ end)
 
 -- The emit will come from brightness slider
 awesome.connect_signal("osd::brightness_osd", function(brightness)
+	local brightness_level = normalize_brightness(brightness)
 	updating_from_signal = true
-	bri_osd_slider:set_value(brightness)
+	bri_osd_slider:set_value(brightness_level)
+	osd_value.text = brightness_level .. "%"
 	updating_from_signal = false
 end)
 

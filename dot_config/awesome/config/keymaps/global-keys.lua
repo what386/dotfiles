@@ -23,6 +23,21 @@ local function update_and_broadcast_volume()
 	)
 end
 
+-- Helper function to apply and broadcast brightness
+local function update_and_broadcast_brightness(change_cmd)
+	awful.spawn.easy_async(change_cmd, function()
+		awful.spawn.easy_async_with_shell(
+			[[brightnessctl -m | awk -F, '{print substr($4, 0, length($4)-1)}']],
+			function(stdout)
+				local brightness_level = tonumber(stdout) or 0
+				awesome.emit_signal("osd::brightness_osd", brightness_level)
+				awesome.emit_signal("widget::brightness")
+				awesome.emit_signal("osd::brightness_osd:show", true)
+			end
+		)
+	end)
+end
+
 -- AwesomeWM
 local keys = gears.table.join(
 
@@ -185,15 +200,11 @@ local keys = gears.table.join(
 	end, { description = "previous track", group = "media" }),
 
 	awful.key({}, "XF86MonBrightnessUp", function()
-		awful.spawn("brightnessctl s 5%+", false)
-		awesome.emit_signal("osd::brightness_osd:show", true)
-		awesome.emit_signal("widget::brightness")
+		update_and_broadcast_brightness("brightnessctl s 5%+")
 	end, { description = "brightness up", group = "device" }),
 
 	awful.key({}, "XF86MonBrightnessDown", function()
-		awful.spawn("brightnessctl s 5%-", false)
-		awesome.emit_signal("osd::brightness_osd:show", true)
-		awesome.emit_signal("widget::brightness")
+		update_and_broadcast_brightness("brightnessctl s 5%-")
 	end, { description = "brightness down", group = "device" }),
 
 	-- Layout
