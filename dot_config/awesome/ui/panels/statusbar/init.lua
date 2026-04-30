@@ -12,6 +12,7 @@ local clock_widget = require(widgetdir .. "clock")
 local volume_widget = require(widgetdir .. "volume")
 local network_widget = require(widgetdir .. "network")
 local bluetooth_widget = require(widgetdir .. "bluetooth")
+local sd_card_widget = require(widgetdir .. "sd-card")
 local layoutbox_widget = require(widgetdir .. "layoutbox")
 local dashboard_widget = require(widgetdir .. "dashboard-toggle")
 local dropdown_widget = require(widgetdir .. "dropdown")
@@ -28,6 +29,7 @@ local separator = wibox.widget({
 
 local right_widgets = wibox.widget({
 	{
+		sd_card_widget,
 		update_widget,
 		bluetooth_widget,
 		network_widget,

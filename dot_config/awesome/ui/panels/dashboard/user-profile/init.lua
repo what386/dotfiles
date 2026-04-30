@@ -5,7 +5,6 @@
 local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
-local naughty = require("naughty")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local preferences = require("config.user.preferences")
@@ -59,9 +58,61 @@ local create_profile = function()
 	local uptime_time = wibox.widget({
 		font = "Inter Regular 10",
 		markup = "up 1 minute",
-		align = "left",
+		align = "right",
 		valign = "center",
 		widget = wibox.widget.textbox,
+	})
+
+	local left_column_width = dpi(130)
+	local right_column_width = dpi(125)
+
+	local top_left = wibox.widget({
+		profile_name,
+		forced_width = left_column_width,
+		strategy = "max",
+		widget = wibox.container.constraint,
+	})
+
+	local top_right = wibox.widget({
+		uptime_time,
+		forced_width = right_column_width,
+		strategy = "max",
+		widget = wibox.container.constraint,
+	})
+
+	local bottom_left = wibox.widget({
+		distro_name,
+		forced_width = left_column_width,
+		strategy = "max",
+		widget = wibox.container.constraint,
+	})
+
+	local bottom_right = wibox.widget({
+		kernel_version,
+		forced_width = right_column_width,
+		strategy = "max",
+		widget = wibox.container.constraint,
+	})
+
+	local profile_row_top = wibox.widget({
+		layout = wibox.layout.align.horizontal,
+		top_left,
+		nil,
+		top_right,
+	})
+
+	local profile_row_bottom = wibox.widget({
+		layout = wibox.layout.align.horizontal,
+		bottom_left,
+		nil,
+		bottom_right,
+	})
+
+	local profile_info = wibox.widget({
+		layout = wibox.layout.fixed.vertical,
+		spacing = dpi(2),
+		profile_row_top,
+		profile_row_bottom,
 	})
 
 	local update_profile_image = function()
@@ -107,7 +158,7 @@ local create_profile = function()
 
 	awful.spawn.easy_async_with_shell("uname -r", function(stdout)
 		local kname = stdout:gsub("%\n", "")
-		kernel_version:set_markup("Kernel:" + kname)
+		kernel_version:set_markup(kname)
 	end)
 
 	local update_uptime = function()
@@ -128,11 +179,16 @@ local create_profile = function()
 
 	local user_profile = wibox.widget({
 		layout = wibox.layout.fixed.horizontal,
-		spacing = dpi(0),
+		spacing = dpi(10),
 		{
 			layout = wibox.layout.align.vertical,
 			expand = "none",
 			profile_imagebox,
+		},
+		{
+			layout = wibox.layout.align.vertical,
+			expand = "none",
+			profile_info,
 		},
 	})
 

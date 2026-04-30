@@ -8,6 +8,7 @@ widgets.brightness = require("theme.icons.widgets.brightness")
 widgets.volume = require("theme.icons.widgets.volume")
 widgets.microphone = require("theme.icons.widgets.microphone")
 widgets.bluetooth = require("theme.icons.widgets.bluetooth")
+widgets.sd_card = require("theme.icons.widgets.sd-card")
 
 local network = require("theme.icons.widgets.network")
 widgets.wifi = network.wifi
