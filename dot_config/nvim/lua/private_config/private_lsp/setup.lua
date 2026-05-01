@@ -22,7 +22,6 @@ return {
 			},
 		},
 	},
-
 	-- Python
 	pylsp = {
 		settings = {
@@ -40,33 +39,25 @@ return {
 			},
 		},
 	},
-	ruff = {}, -- Complimentary Python LSP
-
+	ruff = {}, -- Complementary Python LSP
 	-- Java / C#
 	jdtls = {},
 	csharp_ls = {},
-
 	-- Rust
 	rust_analyzer = {},
-
 	-- Web / Frontend
 	html = { filetypes = { "html", "twig", "hbs" } },
 	tailwindcss = {},
 	ts_ls = {},
-
 	-- Ruby
 	ruby_lsp = {},
-
 	-- JSON / SQL
 	jsonls = {},
 	sqlls = {},
-
 	-- Zig
 	zls = {},
-
 	-- Go
 	gopls = {},
-
 	-- Shell
 	bashls = {},
 	lash_lsp = {
@@ -75,8 +66,18 @@ return {
 		filetypes = { "lash" },
 		root_markers = { ".git" },
 	},
-
 	-- Docker
 	dockerls = {},
 	docker_compose_language_service = {},
+	-- CMake
+	cmake = {},
+	-- Assembly
+	asm_lsp = {},
+	-- PowerShell
+	powershell_es = {},
+	-- COBOL
+	cobol_ls = {},
+	-- Arduino
+	arduino_language_server = {},
+	-- YAML (via existing prettier/yamllint, but LSP adds hover/completion)
 }

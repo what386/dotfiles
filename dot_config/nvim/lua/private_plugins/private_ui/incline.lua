@@ -79,7 +79,7 @@ return {
 				end
 
 				if vim.api.nvim_buf_is_valid(buf.bufnr) then
-					local name = vim.fn.fnamemodify(buf.name, ":t")
+					local name = vim.fn.fnamemodify(buf.name, ":p:h:t") .. "/" .. vim.fn.fnamemodify(buf.name, ":t")
 					if name == "" then
 						name = "[No Name]"
 					end
