@@ -4,6 +4,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local icons = require("theme.icons")
+local audio = require("services.audio")
 
 -- Header and value display
 local osd_header = wibox.widget({
@@ -56,13 +57,10 @@ vol_osd_slider:connect_signal("property::value", function()
 	end
 
 	local volume_level = vol_osd_slider:get_value()
-	awful.spawn("pactl set-sink-volume @DEFAULT_SINK@ " .. volume_level .. "%", false)
+	audio.set_output_volume(volume_level)
 
 	-- Update text locally
 	osd_value.text = tostring(math.floor(volume_level)) .. "%"
-
-	-- Broadcast to other widgets
-	awesome.emit_signal("volume::update", volume_level)
 
 	if awful.screen.focused().show_vol_osd then
 		awesome.emit_signal("osd::volume_osd:show", true)
@@ -77,14 +75,12 @@ vol_osd_slider:connect_signal("mouse::enter", function()
 	awful.screen.focused().show_vol_osd = true
 end)
 
--- Listen for volume updates from other sources (keybinds, other sliders, pactl events)
-awesome.connect_signal("volume::update", function(level)
+awesome.connect_signal("audio::output-volume", function(level)
 	updating_from_signal = true
+	level = tonumber(level) or 0
 	vol_osd_slider:set_value(level)
 	osd_value.text = tostring(math.floor(level)) .. "%"
 	updating_from_signal = false
-
-	awesome.emit_signal("osd::volume_osd:show", true)
 end)
 
 -- Icon widget

@@ -29,6 +29,7 @@ require("config.rules")
 
 require("theme")
 local sounds = require("theme.sounds")
+require("services")
 
 if awesome.startup then
 	sounds.play("login")
@@ -39,6 +40,4 @@ require("config.tags")
 require("ui")
 
 require("modules.dynamic-wallpaper")
-require("modules.auto-hibernate")
-require("modules.vpn-auto-tunnel")
 require("modules.session-mgr")

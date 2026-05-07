@@ -4,6 +4,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local icons = require("theme.icons")
+local brightness = require("services.brightness")
 
 local osd_header = wibox.widget({
 	text = "Brightness",
@@ -58,7 +59,7 @@ local brightness_apply_timer = gears.timer({
 	autostart = false,
 	callback = function()
 		local brightness_level = bri_osd_slider:get_value()
-		awful.spawn("brightnessctl s " .. math.max(brightness_level, 5) .. "%", false)
+		brightness.set_level(brightness_level)
 	end,
 })
 
@@ -91,6 +92,14 @@ end)
 -- The emit will come from brightness slider
 awesome.connect_signal("osd::brightness_osd", function(brightness)
 	local brightness_level = normalize_brightness(brightness)
+	updating_from_signal = true
+	bri_osd_slider:set_value(brightness_level)
+	osd_value.text = brightness_level .. "%"
+	updating_from_signal = false
+end)
+
+awesome.connect_signal("brightness::level", function(value)
+	local brightness_level = normalize_brightness(value)
 	updating_from_signal = true
 	bri_osd_slider:set_value(brightness_level)
 	osd_value.text = brightness_level .. "%"

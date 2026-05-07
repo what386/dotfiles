@@ -4,6 +4,9 @@ local gears = require("gears")
 local naughty = require("naughty")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local apps = require("config.user.preferences")
+local audio = require("services.audio")
+local brightness = require("services.brightness")
+local media = require("services.media")
 
 local gfs = require("gears.filesystem")
 local themes_path = gfs.get_themes_dir()
@@ -11,32 +14,6 @@ local themes_path = gfs.get_themes_dir()
 -- Modkey: Mod4 (Super key) or Mod1 (Alt key)
 local modkey = "Mod4"
 local altkey = "Mod1"
-
--- Helper function to read and broadcast volume
-local function update_and_broadcast_volume()
-	awful.spawn.easy_async_with_shell(
-		[[pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '\d+(?=%)' | head -n 1]],
-		function(stdout)
-			local volume_level = tonumber(stdout) or 0
-			awesome.emit_signal("volume::update", volume_level)
-		end
-	)
-end
-
--- Helper function to apply and broadcast brightness
-local function update_and_broadcast_brightness(change_cmd)
-	awful.spawn.easy_async(change_cmd, function()
-		awful.spawn.easy_async_with_shell(
-			[[brightnessctl -m | awk -F, '{print substr($4, 0, length($4)-1)}']],
-			function(stdout)
-				local brightness_level = tonumber(stdout) or 0
-				awesome.emit_signal("osd::brightness_osd", brightness_level)
-				awesome.emit_signal("widget::brightness")
-				awesome.emit_signal("osd::brightness_osd:show", true)
-			end
-		)
-	end)
-end
 
 -- AwesomeWM
 local keys = gears.table.join(
@@ -157,54 +134,51 @@ local keys = gears.table.join(
 
 	-- Volume Up
 	awful.key({}, "XF86AudioRaiseVolume", function()
-		awful.spawn.easy_async("pactl set-sink-volume @DEFAULT_SINK@ +5%", function()
-			update_and_broadcast_volume()
-		end)
+		audio.change_output_volume(5)
+		awesome.emit_signal("osd::volume_osd:show", true)
 	end, { description = "raise volume", group = "device" }),
 
 	-- Volume Down
 	awful.key({}, "XF86AudioLowerVolume", function()
-		awful.spawn.easy_async("pactl set-sink-volume @DEFAULT_SINK@ -5%", function()
-			update_and_broadcast_volume()
-		end)
+		audio.change_output_volume(-5)
+		awesome.emit_signal("osd::volume_osd:show", true)
 	end, { description = "lower volume", group = "device" }),
 
 	-- Mute Toggle
 	awful.key({}, "XF86AudioMute", function()
-		awful.spawn.easy_async("pactl set-sink-mute @DEFAULT_SINK@ toggle", function()
-			-- The widget's pactl subscribe will handle the icon update
-			-- Just show the OSD
-			update_and_broadcast_volume()
-		end)
+		audio.toggle_output_mute()
+		awesome.emit_signal("osd::volume_osd:show", true)
 	end, { description = "toggle volume", group = "device" }),
 
 	awful.key({}, "XF86AudioMicMute", function()
-		awful.spawn("amixer set Capture toggle", false)
+		audio.toggle_input_mute()
 		awesome.emit_signal("osd::microphone_osd:show", true)
 	end, { description = "toggle mic", group = "device" }),
 
 	awful.key({}, "XF86AudioPlay", function()
-		awful.spawn("playerctl play-pause", false)
+		media.play_pause()
 	end, { description = "play/pause track", group = "media" }),
 
 	awful.key({}, "XF86AudioPause", function()
-		awful.spawn("playerctl pause", false)
+		media.pause()
 	end, { description = "pause track", group = "media" }),
 
 	awful.key({}, "XF86AudioNext", function()
-		awful.spawn("playerctl next", false)
+		media.next()
 	end, { description = "next track", group = "media" }),
 
 	awful.key({}, "XF86AudioPrev", function()
-		awful.spawn("playerctl previous", false)
+		media.previous()
 	end, { description = "previous track", group = "media" }),
 
 	awful.key({}, "XF86MonBrightnessUp", function()
-		update_and_broadcast_brightness("brightnessctl s 5%+")
+		brightness.change_level(5)
+		awesome.emit_signal("osd::brightness_osd:show", true)
 	end, { description = "brightness up", group = "device" }),
 
 	awful.key({}, "XF86MonBrightnessDown", function()
-		update_and_broadcast_brightness("brightnessctl s 5%-")
+		brightness.change_level(-5)
+		awesome.emit_signal("osd::brightness_osd:show", true)
 	end, { description = "brightness down", group = "device" }),
 
 	-- Layout

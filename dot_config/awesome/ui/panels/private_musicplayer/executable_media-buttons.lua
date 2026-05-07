@@ -5,6 +5,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
+local media = require("services.media")
 local media_buttons = {}
 
 media_buttons.play_button_image = wibox.widget({
@@ -117,50 +118,31 @@ local navigate_buttons = wibox.widget({
 	forced_height = dpi(35),
 })
 
-local loop_table = {
-	"None",
-	"Track",
-	"Playlist",
-}
-
 local playpause_status = false
 
 media_buttons.play_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	if playpause_status then
-		awful.spawn.with_shell("playerctl pause")
-		media_buttons.play_button_image.play:set_image(icons.applets.media.play)
-	else
-		awful.spawn.with_shell("playerctl play")
-		media_buttons.play_button_image.play:set_image(icons.applets.media.pause)
-	end
-	playpause_status = not playpause_status
+	media.play_pause()
 end)))
 
 media_buttons.next_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	awful.spawn.with_shell("playerctl next")
+	media.next()
 end)))
 
 media_buttons.prev_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	awful.spawn.with_shell("playerctl previous")
+	media.previous()
 end)))
-
-local repeat_status = false
 
 media_buttons.repeat_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	--awful.spawn.with_shell("playerctl repeat")
 end)))
-
-local shuffle_status = false
 
 media_buttons.random_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	if shuffle_status then
-		awful.spawn.with_shell("playerctl shuffle Off")
-		media_buttons.repeat_button_image.rep:set_image(icons.applets.media.random_off)
-	else
-		awful.spawn.with_shell("playerctl shuffle On")
-		media_buttons.repeat_button_image.rep:set_image(icons.applets.media.random_on)
-	end
-	shuffle_status = not shuffle_status
+	media.toggle_shuffle()
 end)))
+
+awesome.connect_signal("media::state", function(state)
+	playpause_status = state.playing and true or false
+	media_buttons.play_button_image.play:set_image(playpause_status and icons.applets.media.pause or icons.applets.media.play)
+	media_buttons.random_button_image.rand:set_image(state.shuffle and icons.applets.media.random_on or icons.applets.media.random_off)
+end)
 
 return navigate_buttons

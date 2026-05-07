@@ -1,7 +1,8 @@
 local wibox = require("wibox")
 local awful = require("awful")
-local wibox = require("wibox")
 local beautiful = require("beautiful")
+local gears = require("gears")
+local rubato = require("dependencies.rubato")
 local dpi = beautiful.xresources.apply_dpi
 panel_visible = false
 
@@ -9,6 +10,7 @@ local infopanel = function(s)
 	-- Set right panel geometry
 	local panel_width = dpi(290)
 	local panel_x = s.geometry.x + s.geometry.width - panel_width
+	local hidden_x = s.geometry.x + s.geometry.width + dpi(8)
 
 	local panel = wibox({
 		ontop = true,
@@ -24,6 +26,31 @@ local infopanel = function(s)
 	})
 
 	panel.opened = false
+	panel.opacity = 0
+	panel.x = hidden_x
+	local animation_token = 0
+
+	local slide_anim = rubato.timed({
+		rate = 60,
+		intro = 0.08,
+		outro = 0.12,
+		duration = 0.22,
+		easing = rubato.easing.quadratic,
+		subscribed = function(pos)
+			panel.x = pos
+		end,
+	})
+
+	local fade_anim = rubato.timed({
+		rate = 60,
+		intro = 0.06,
+		outro = 0.1,
+		duration = 0.16,
+		easing = rubato.easing.linear,
+		subscribed = function(opacity)
+			panel.opacity = opacity
+		end,
+	})
 
 	s.backdrop_rdb = wibox({
 		ontop = true,
@@ -40,22 +67,40 @@ local infopanel = function(s)
 		right = 0,
 	})
 
-	open_panel = function()
+	local open_panel = function()
 		local focused = awful.screen.focused()
+		animation_token = animation_token + 1
 		panel_visible = true
 
 		focused.backdrop_rdb.visible = true
 		focused.infopanel.visible = true
+		focused.infopanel.x = hidden_x
+		focused.infopanel.opacity = 0
+		slide_anim.target = panel_x
+		fade_anim.target = 1
 
 		panel:emit_signal("opened")
 	end
 
-	close_panel = function()
+	local close_panel = function()
 		local focused = awful.screen.focused()
+		animation_token = animation_token + 1
+		local token = animation_token
 		panel_visible = false
 
-		focused.infopanel.visible = false
-		focused.backdrop_rdb.visible = false
+		slide_anim.target = hidden_x
+		fade_anim.target = 0
+		gears.timer({
+			timeout = 0.24,
+			autostart = true,
+			single_shot = true,
+			callback = function()
+				if token == animation_token then
+					focused.infopanel.visible = false
+					focused.backdrop_rdb.visible = false
+				end
+			end,
+		})
 
 		panel:emit_signal("closed")
 	end
@@ -130,6 +175,7 @@ local infopanel = function(s)
 						layout = wibox.layout.fixed.vertical,
 						spacing = dpi(7),
 						require("ui.panels.infopanel.user-profile"),
+						require("ui.panels.infopanel.agenda"),
 						require("ui.panels.infopanel.weather"),
 						require("ui.panels.infopanel.calculator"),
 					},

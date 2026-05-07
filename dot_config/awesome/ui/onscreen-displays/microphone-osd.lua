@@ -5,6 +5,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
+local audio = require("services.audio")
 
 local osd_header = wibox.widget({
 	text = "Microphone",
@@ -51,7 +52,7 @@ local mic_apply_timer = gears.timer({
 	autostart = false,
 	callback = function()
 		local microphone_level = mic_osd_slider:get_value()
-		awful.spawn("pactl set-source-volume $(pactl get-default-source) " .. microphone_level .. "%", false)
+		audio.set_input_volume(microphone_level)
 	end,
 })
 
@@ -63,9 +64,6 @@ mic_osd_slider:connect_signal("property::value", function()
 	mic_apply_timer:again()
 	-- Update textbox widget text
 	osd_value.text = microphone_level .. "%"
-
-	-- Update the microphone slider if values here change
-	awesome.emit_signal("widget::microphone:update", microphone_level)
 
 	if awful.screen.focused().show_mic_osd then
 		awesome.emit_signal("osd::microphone_osd:show", true)
@@ -80,10 +78,19 @@ mic_osd_slider:connect_signal("mouse::enter", function()
 	awful.screen.focused().show_mic_osd = true
 end)
 
--- The emit will come from microphone slider
+awesome.connect_signal("audio::input-volume", function(microphone)
+	updating_from_signal = true
+	microphone = tonumber(microphone) or 0
+	mic_osd_slider:set_value(microphone)
+	osd_value.text = tostring(math.floor(microphone)) .. "%"
+	updating_from_signal = false
+end)
+
 awesome.connect_signal("osd::microphone_osd", function(microphone)
 	updating_from_signal = true
+	microphone = tonumber(microphone) or 0
 	mic_osd_slider:set_value(microphone)
+	osd_value.text = tostring(math.floor(microphone)) .. "%"
 	updating_from_signal = false
 end)
 

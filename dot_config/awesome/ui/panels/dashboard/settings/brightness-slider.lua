@@ -2,12 +2,10 @@ local wibox = require("wibox")
 local gears = require("gears")
 local awful = require("awful")
 local beautiful = require("beautiful")
-local spawn = awful.spawn
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-
-local config_dir = gears.filesystem.get_configuration_dir()
 local icons = require("theme.icons")
+local brightness = require("services.brightness")
 
 local action_name = wibox.widget({
 	text = "Brightness",
@@ -74,7 +72,7 @@ local brightness_apply_timer = gears.timer({
 	autostart = false,
 	callback = function()
 		local brightness_level = brightness_slider:get_value()
-		spawn("brightnessctl s " .. math.max(brightness_level, 5) .. "%", false)
+		brightness.set_level(brightness_level)
 	end,
 })
 
@@ -107,14 +105,11 @@ brightness_slider:buttons(gears.table.join(
 ))
 
 local update_slider = function()
-	awful.spawn.easy_async_with_shell(
-		[[brightnessctl -m | awk -F, '{print substr($4, 0, length($4)-1)}']],
-		function(stdout)
-			updating_from_signal = true
-			brightness_slider:set_value(tonumber(stdout))
-			updating_from_signal = false
-		end
-	)
+	local state = brightness.get_state()
+	updating_from_signal = true
+	brightness_slider:set_value(tonumber(state.level) or 0)
+	updating_from_signal = false
+	brightness.refresh()
 end
 
 -- Update on startup
@@ -147,6 +142,12 @@ end)
 awesome.connect_signal("widget::brightness:update", function(value)
 	updating_from_signal = true
 	brightness_slider:set_value(tonumber(value))
+	updating_from_signal = false
+end)
+
+awesome.connect_signal("brightness::level", function(value)
+	updating_from_signal = true
+	brightness_slider:set_value(tonumber(value) or 0)
 	updating_from_signal = false
 end)
 

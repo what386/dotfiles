@@ -135,6 +135,22 @@ local main_control_row_sliders = wibox.widget({
 		margins = dpi(10),
 		widget = wibox.container.margin,
 	}),
+	format_item_no_fix_height({
+		require("ui.panels.dashboard.settings.audio-device-switcher")({
+			kind = "sink",
+			title = "Output Device",
+		}),
+		margins = dpi(10),
+		widget = wibox.container.margin,
+	}),
+	format_item_no_fix_height({
+		require("ui.panels.dashboard.settings.audio-device-switcher")({
+			kind = "source",
+			title = "Input Device",
+		}),
+		margins = dpi(10),
+		widget = wibox.container.margin,
+	}),
 })
 local dashboard = function(s)
 	-- Set the control center geometry
@@ -254,6 +270,7 @@ local dashboard = function(s)
 		focused.backdrop_dashboard.visible = true
 		focused.dashboard.visible = true
 
+		awesome.emit_signal("audio::devices:refresh")
 		panel:emit_signal("opened")
 	end
 

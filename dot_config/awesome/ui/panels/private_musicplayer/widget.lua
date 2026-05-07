@@ -6,6 +6,7 @@ local icons = require("theme.icons")
 local clickable_container = require("widget.clickable-container")
 local music_box = require("widget.mpd.music-box")
 local toggle_music_box = music_box.toggle_music_box
+local media = require("services.media")
 
 local return_button = function()
 	local widget = wibox.widget({
@@ -43,8 +44,8 @@ local return_button = function()
 	end)))
 
 	widget_button:connect_signal("mouse::enter", function()
-		awful.spawn.easy_async_with_shell("mpc status", function(stdout)
-			music_tooltip.text = string.gsub(stdout, "\n$", "")
+		media.status_text(function(stdout)
+			music_tooltip.text = stdout
 		end)
 	end)
 

@@ -7,6 +7,7 @@ local icons = require("theme.icons")
 local sounds = require("theme.sounds")
 local userprefs = require("config.user.preferences")
 local clickable_container = require("ui.clickable-container")
+local power = require("services.power")
 
 local msg_table = {
 	"See you later, alligator!",
@@ -142,8 +143,7 @@ local build_power_button = function(name, icon, callback)
 end
 
 local suspend_command = function()
-	awesome.emit_signal("screen::exit_screen:hide")
-	awful.spawn.with_shell("systemctl suspend")
+	power.suspend()
 end
 
 local logout_command = function()
@@ -160,40 +160,19 @@ local logout_command = function()
 end
 
 local lock_command = function()
-	awesome.emit_signal("screen::exit_screen:hide")
-	awesome.emit_signal("screen::lockscreen:show")
-	--awful.spawn.with_shell(userprefs.default.lock)
+	power.lock()
 end
 
 local hibernate_command = function()
-	awful.spawn.with_shell("systemctl hibernate")
-	awesome.emit_signal("screen::exit_screen:hide")
+	power.hibernate()
 end
 
 local poweroff_command = function()
-	awesome.emit_signal("module::session_manager:save")
-	gears.timer({
-		timeout = 0.5,
-		autostart = true,
-		single_shot = true,
-		callback = function()
-			awful.spawn.with_shell("poweroff")
-		end,
-	})
-	awesome.emit_signal("screen::exit_screen:hide")
+	power.poweroff()
 end
 
 local reboot_command = function()
-	awesome.emit_signal("module::session_manager:save")
-	gears.timer({
-		timeout = 0.5,
-		autostart = true,
-		single_shot = true,
-		callback = function()
-			awful.spawn.with_shell("reboot")
-		end,
-	})
-	awesome.emit_signal("screen::exit_screen:hide")
+	power.reboot()
 end
 
 local poweroff = build_power_button("[P]ower off", icons.power.power, poweroff_command)
