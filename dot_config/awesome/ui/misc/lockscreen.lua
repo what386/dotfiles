@@ -591,6 +591,7 @@ function LockscreenController:new()
 	self.auth = AuthManager:new()
 	self.ui_instances = {}
 	self.is_locked = false
+	self.notifications_suspended_before_lock = nil
 
 	self:_init_screens()
 	self:_setup_signals()
@@ -658,13 +659,6 @@ function LockscreenController:_setup_signals()
 		self.auth:stop()
 	end)
 
-	-- Block notifications while locked
-	naughty.connect_signal("request::display", function()
-		if self.is_locked then
-			naughty.destroy_all_notifications(nil, 1)
-		end
-	end)
-
 	-- Handle screen changes
 	screen.connect_signal("added", function(s)
 		self:_create_screen_ui(s)
@@ -723,6 +717,8 @@ function LockscreenController:lock()
 		return
 	end
 
+	self.notifications_suspended_before_lock = naughty.suspended and true or false
+	naughty.suspended = true
 	self:_set_locked_state(true)
 	sounds.play("lock")
 
@@ -774,6 +770,10 @@ function LockscreenController:unlock(method)
 		end
 
 		self:_set_locked_state(false)
+		if self.notifications_suspended_before_lock ~= nil then
+			naughty.suspended = self.notifications_suspended_before_lock
+		end
+		self.notifications_suspended_before_lock = nil
 
 		local c = awful.client.restore()
 		if c then
