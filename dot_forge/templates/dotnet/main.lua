@@ -70,6 +70,10 @@ return {
 				.. shell_quote("src/" .. primary_project .. "/" .. primary_project .. ".csproj")
 		)
 
+		forge.tpl.render_file(".github/DISCUSSION_TEMPLATE/support_request.yml", ".github/DISCUSSION_TEMPLATE/support_request.yml", { binary_name = forge.args.name })
+		forge.tpl.render_file(".github/ISSUE_TEMPLATE/bug_report.yml", ".github/ISSUE_TEMPLATE/bug_report.yml", { binary_name = forge.args.name })
+		forge.tpl.render_file(".github/ISSUE_TEMPLATE/feature_request.yml", ".github/ISSUE_TEMPLATE/feature_request.yml", { binary_name = forge.args.name })
+
 		forge.exec.run("git init")
 		forge.exec.run("tally init")
 

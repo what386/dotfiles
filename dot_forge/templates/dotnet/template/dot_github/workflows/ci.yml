@@ -5,16 +5,14 @@ on:
     branches:
       - main
       - "feature/**"
-    tags:
-      - "v*"
   pull_request:
     branches:
       - main
 
 jobs:
   test:
-    name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -23,13 +21,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "{{sdk_version}}"
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore
 
       - name: Build
-        run: dotnet build --configuration Release --verbosity minimal --nologo
+        run: dotnet build --no-restore --configuration Release
 
       - name: Run tests
-        run: dotnet test --configuration Release --verbosity minimal --nologo
+        run: dotnet test --no-build --configuration Release --verbosity normal
