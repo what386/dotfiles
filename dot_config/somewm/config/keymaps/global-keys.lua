@@ -83,7 +83,7 @@ local keys = {
 		hotkeys_popup.show_help,
 		{ description = "show help menu", group = "awesome" }
 	),
-	awful.key({ modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
+	--awful.key({ modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
 	awful.key({ modkey, "Control" }, "q", function()
 		awesome.quit()
 	end, { description = "force quit", group = "awesome" }),

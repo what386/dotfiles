@@ -1,8 +1,3 @@
-/**
- * Wofi stylesheet converted from Rofi theme
- * Original Author: Aditya Shakya (adi1090x)
- **/
-
 /* ---- Color & font variables ---- */
 * {
     --background:     #000000;
@@ -11,7 +6,6 @@
     --selected:       #62AEEF;
     --active:         #98C379;
     --urgent:         #E06B74;
-
     font-family: "Iosevka Nerd Font";
     font-size:   10pt;
 }
@@ -19,20 +13,18 @@
 /* ---- Main window ---- */
 window {
     background-color: rgba(0, 0, 0, 0.1);
-    /* fullscreen is set via wofi config: `width=1366` / `height=768`
-       or just let the WM handle fullscreen via `--width`/`--height` flags */
 }
 
 /* ---- Outer wrapper ---- */
 #outer-box {
-    background-color: transparent;
-    padding:          100px 225px;
-    spacing:          100px;         /* gap between search bar and list */
+    padding:  0px 225px; /* L/R margin — compensate with --x=-225 in launch flags */
+    margin:   0;
+    spacing:  100px;
 }
 
 /* ---- Search / input bar ---- */
 #input {
-    margin:           0% 28%;
+    margin-top:       100px;
     padding:          10px;
     border:           1px solid rgba(255, 255, 255, 0.25);
     border-radius:    6px;
@@ -48,7 +40,6 @@ window {
 /* ---- Scrollable list area ---- */
 #scroll {
     background-color: transparent;
-    /* columns and lines are controlled by wofi config, not CSS */
 }
 
 /* ---- Inner list box ---- */
@@ -64,7 +55,6 @@ window {
     border-radius:    15px;
     background-color: transparent;
     color:            var(--foreground);
-    /* icon above, label below */
     flex-direction:   column;
     align-items:      center;
 }
@@ -77,14 +67,12 @@ window {
 /* ---- App icon ---- */
 #img {
     background-color: transparent;
-    /* size is set via wofi config: `image_size=72` */
 }
 
 /* ---- App name label ---- */
 #text {
     background-color: transparent;
     color:            inherit;
-    /* truncate long names */
     max-width:        90px;
     min-width:        0;
     overflow:         hidden;

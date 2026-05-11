@@ -2,7 +2,7 @@ local gears = require("gears")
 local naughty = require("naughty")
 local prefs = require("config.user.preferences")
 local icons = require("theme.icons")
-local process = require("services.process")
+local process = require("libraries.process")
 
 local bluetooth = {}
 

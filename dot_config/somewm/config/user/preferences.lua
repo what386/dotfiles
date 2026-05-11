@@ -24,17 +24,10 @@ return {
 		appmenu_search = "wofi"
 			.. " --conf " .. config_dir .. "/dependencies/wofi/appmenu/config"
 			.. " --style " .. config_dir .. "/dependencies/wofi/appmenu/style.css"
+			.. "--xoffset=-225"
+			.. "--yoffset=-100"
 			.. " --show drun"
 			.. " --layer=overlay"
-	},
-
-	-- TODO: replace with SomeWM native!
-	lockscreen = {
-		fallback_password = "", -- currently non-functional
-		capture_intruder = true,
-		bg_image = "locksreen-bg.jpg",
-		blur_background = false,
-		tmp_wall_dir = "/tmp/awesomewm/" .. os.getenv("USER") .. "/",
 	},
 
 	wallpaper = {

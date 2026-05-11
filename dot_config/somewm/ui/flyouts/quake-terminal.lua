@@ -157,6 +157,7 @@ local function animate_quake_terminal(show)
 		previous_client = client.focus
 		quake_client.hidden = false
 		quake_client:emit_signal("request::activate", "quake_toggle", { raise = true })
+		client.focus = quake_client
 		-- Start fade in slightly before the slide animation
 		quake_opacity_anim.target = target_opacity_show
 	else
@@ -185,6 +186,21 @@ local function animate_quake_terminal(show)
 			callback = function()
 				if quake_client and quake_client.valid then
 					quake_client.hidden = true
+				end
+			end,
+		})
+	end
+
+	-- force repaint
+	if show then
+		gears.timer({
+			timeout = quake_opacity_anim.duration + quake_opacity_anim.outro,
+			autostart = true,
+			single_shot = true,
+			callback = function()
+				if quake_client and quake_client.valid then
+					local g = quake_client:geometry()
+					quake_client:geometry({ x = g.x, y = g.y, width = g.width, height = g.height })
 				end
 			end,
 		})

@@ -3,7 +3,7 @@ local naughty = require("naughty")
 local machine = require("config.user.machine")
 local prefs = require("config.user.preferences")
 local icons = require("theme.icons")
-local process = require("services.process")
+local process = require("libraries.process")
 local settings = require("libraries.settings-store")
 
 local network = {}

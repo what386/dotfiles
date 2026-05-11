@@ -8,8 +8,8 @@ local icons = require("theme.icons")
 
 local DEVICE_PATH = "/sys/bus/usb/devices/2-3"
 local BOUND_PATH = "/sys/bus/usb/drivers/usb/2-3"
-local CMD_OFF = { "sudo", "-n", "/usr/local/bin/sdcard-off" }
-local CMD_ON = { "sudo", "-n", "/usr/local/bin/sdcard-on" }
+local CMD_OFF = { "sudo", "-n", "/opt/scripts/sdcard-off.sh" }
+local CMD_ON = { "sudo", "-n", "/opt/scripts/sdcard-on.sh" }
 
 local widget = wibox.widget({
 	{
