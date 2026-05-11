@@ -132,7 +132,7 @@ function power.reboot()
 end
 
 function power.start()
-	gears.timer({ timeout = 30, call_now = true, autostart = true, callback = power.refresh_battery })
+	gears.timer({ timeout = 30, call_now = true, autostart = true, callback = function() power.refresh_battery() end })
 	process.watch("acpi_listen", {
 		stdout = function(line)
 			if line:match("ac_adapter") or line:match("battery") then

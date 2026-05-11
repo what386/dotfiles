@@ -2,107 +2,112 @@ local awful = require("awful")
 local gears = require("gears")
 local naughty = require("naughty")
 local json = require("dependencies.json")
-local settings = require("modules.settings-store")
-local config_dir = gears.filesystem.get_configuration_dir()
+local settings = require("libraries.settings-store")
+
+local config_dir   = gears.filesystem.get_configuration_dir()
 local session_file = config_dir .. "persistent/session.json"
 local command_file = config_dir .. "persistent/command_table.json"
-local autorestore_allowed = settings.get_bool("autorestore_allowed", true)
-local restore_in_progress = false -- NEW: Prevent multiple simultaneous restores
 
--- Table to store pending applications to restore
+local autorestore_allowed = settings.get_bool("autorestore_allowed", true)
+local restore_in_progress = false
 local pending_restore = {}
+
+-- ── Command table ─────────────────────────────────────────────────────────────
 
 local function read_command_table()
 	local f = io.open(command_file, "r")
-	if not f then
-		naughty.notify({ title = "No command file found", text = command_file })
-		return
-	end
+	if not f then return {} end
 	local content = f:read("*a")
 	f:close()
-	local commands = json.parse(content)
-	if not commands then
-		naughty.notify({ title = "Error", text = "Failed to parse command file." })
-		return
-	end
-	return commands
+	return json.parse(content) or {}
 end
 
 local command_table = read_command_table()
 
+-- Returns a stable identifier for a client, preferring app_id (Wayland native)
+-- then class (XWayland), then instance.
+local function client_id(c)
+	return c.app_id or c.class or c.instance
+end
+
 local function get_command_from_pid(pid)
-	if not pid then
-		return nil
-	end
+	if not pid then return nil end
 	local f = io.open("/proc/" .. pid .. "/cmdline", "r")
-	if not f then
-		return nil
-	end
-	local cmd = f:read("*a")
+	if not f then return nil end
+	local raw = f:read("*a")
 	f:close()
-	-- Replace null bytes (used as argument separators) with spaces
-	return cmd and cmd:gsub("%z", " ")
+	if not raw or raw == "" then return nil end
+	-- /proc/PID/cmdline uses NUL as arg separator; convert to a shell command
+	local args = {}
+	for arg in (raw .. "\0"):gmatch("([^%z]*)%z") do
+		if arg ~= "" then
+			-- Shell-quote each argument
+			table.insert(args, "'" .. arg:gsub("'", "'\\''") .. "'")
+		end
+	end
+	return #args > 0 and table.concat(args, " ") or nil
 end
 
 local function resolve_command(c)
-	if command_table[c.class] then
-		return command_table[c.class]
-	else
-		local cmd = get_command_from_pid(c.pid)
-		if not cmd or not c.class then
-			return nil
-		end
-		command_table[c.class] = cmd
-		return cmd
+	local id = client_id(c)
+	if not id then return nil end
+	if command_table[id] then return command_table[id] end
+	local cmd = get_command_from_pid(c.pid)
+	if cmd then
+		command_table[id] = cmd
 	end
+	return cmd
 end
+
+-- ── Save ──────────────────────────────────────────────────────────────────────
 
 local function save()
 	local session = {}
 	for _, c in ipairs(client.get()) do
-		if c.class and not c.skip_taskbar and c.name ~= "awesome" and c.type ~= "dialog" then
+		local id = client_id(c)
+		if id and not c.skip_taskbar and c.type ~= "dialog" then
 			local cmd = resolve_command(c)
 			table.insert(session, {
-				class = c.class,
+				id       = id,                              -- app_id or class
+				class    = c.class,
 				instance = c.instance,
-				name = c.name,
-				tag = c.first_tag and c.first_tag.name,
-				screen = c.screen.index,
+				app_id   = c.app_id,
+				name     = c.name,
+				tag      = c.first_tag and c.first_tag.name,
+				screen   = c.screen.index,
 				floating = c.floating,
 				geometry = c:geometry(),
-				command = cmd,
+				command  = cmd,
 			})
 		end
 	end
-	local f, err
-	f, err = io.open(session_file, "w")
-	if f then
-		f:write(json.stringify(session))
-		f:close()
-	else
-		naughty.notify({ title = "Error saving session table", text = err or "Could not open file." })
+
+	local function write(path, data, label)
+		local f, err = io.open(path, "w")
+		if f then
+			f:write(json.stringify(data))
+			f:close()
+		else
+			naughty.notify({ title = "Error saving " .. label, text = err or "Could not open file." })
+		end
 	end
-	f, err = io.open(command_file, "w")
-	if f then
-		f:write(json.stringify(command_table))
-		f:close()
-	else
-		naughty.notify({ title = "Error saving command table", text = err or "Could not open file." })
-	end
-	naughty.notify({ title = "Session saved", text = session_file .. "\n" .. command_file })
+
+	write(session_file, session,       "session table")
+	write(command_file, command_table, "command table")
+	naughty.notify({ title = "Session saved", text = session_file })
 end
 
--- Function to find a matching app in pending_restore for a client
+-- ── Restore ───────────────────────────────────────────────────────────────────
+
 local function find_matching_app(c)
+	local id = client_id(c)
 	for i, app in ipairs(pending_restore) do
-		-- Try to match by class first
-		if app.class and c.class and app.class == c.class then
-			-- Remove from pending list and return the app data
-			table.remove(pending_restore, i)
-			return app
-		end
-		-- Fallback: try to match by instance if class doesn't match
-		if app.instance and c.instance and app.instance == c.instance then
+		-- Match by the unified id field first, then fall back to individual fields
+		if (id and app.id and app.id == id)
+			or (c.class    and app.class    and c.class    == app.class)
+			or (c.app_id   and app.app_id   and c.app_id   == app.app_id)
+			or (c.instance and app.instance and c.instance == app.instance)
+		then
 			table.remove(pending_restore, i)
 			return app
 		end
@@ -110,59 +115,50 @@ local function find_matching_app(c)
 	return nil
 end
 
--- Function to apply saved data to a client
-local function apply_saved_data(c, app_data)
-	-- Apply tag
-	if app_data.tag then
-		local target_screen = screen[app_data.screen] or screen.primary
-		local tag = nil
-		for _, t in ipairs(target_screen.tags) do
-			if t.name == app_data.tag then
-				tag = t
+local function apply_saved_data(c, app)
+	-- Tag
+	if app.tag then
+		local target = screen[app.screen] or screen.primary
+		for _, t in ipairs(target.tags) do
+			if t.name == app.tag then
+				c:move_to_tag(t)
 				break
 			end
 		end
-		if tag then
-			c:move_to_tag(tag)
-		end
 	end
-	-- Apply screen
-	if app_data.screen then
-		local target_screen = screen[app_data.screen] or screen.primary
-		c:move_to_screen(target_screen)
+
+	-- Screen
+	if app.screen then
+		c:move_to_screen(screen[app.screen] or screen.primary)
 	end
-	-- Apply floating state
-	if app_data.floating ~= nil then
-		c.floating = app_data.floating
+
+	-- Floating
+	if app.floating ~= nil then
+		c.floating = app.floating
 	end
-	-- Apply geometry (with a small delay to ensure the client is ready)
-	if app_data.geometry then
-		gears.timer.delayed_call(function()
+
+	-- Geometry — delayed to give the client time to map itself.
+	-- Under XWayland this is best-effort; native Wayland clients may ignore it.
+	if app.geometry then
+		gears.timer.start_new(0.5, function()
 			if c.valid then
-				c:geometry(app_data.geometry)
+				c:geometry(app.geometry)
 			end
+			return false
 		end)
 	end
 end
 
--- Signal handler for new clients during restore
-local function handle_new_client_during_restore(c)
-	local app_data = find_matching_app(c)
-	if app_data then
-		apply_saved_data(c, app_data)
-	end
+local function handle_new_client(c)
+	local app = find_matching_app(c)
+	if app then apply_saved_data(c, app) end
 end
 
 local function restore()
-	-- NEW: Prevent multiple simultaneous restore operations
 	if restore_in_progress then
-		naughty.notify({
-			title = "Restore already in progress",
-			text = "Please wait for the current restore to complete.",
-		})
+		naughty.notify({ title = "Restore already in progress", text = "Please wait." })
 		return
 	end
-
 	restore_in_progress = true
 
 	local f = io.open(session_file, "r")
@@ -173,87 +169,73 @@ local function restore()
 	end
 	local content = f:read("*a")
 	f:close()
+
 	local session = json.parse(content)
 	if not session then
 		naughty.notify({ title = "Error", text = "Failed to parse session file." })
 		restore_in_progress = false
 		return
 	end
-	-- Clear any previous pending restore data
+
 	pending_restore = {}
-	-- Connect signal to handle new clients during restore
-	client.connect_signal("request::manage", handle_new_client_during_restore)
-	-- Populate pending_restore with session data
+	client.connect_signal("request::manage", handle_new_client)
+
 	for _, app in ipairs(session) do
 		table.insert(pending_restore, app)
 	end
-	-- Spawn all applications
+
 	for _, app in ipairs(session) do
-		local cmd = app.command
-		if cmd then
-			awful.spawn.with_shell(cmd)
+		if app.command then
+			-- Ensure Wayland env vars are present when re-launching
+			awful.spawn.with_shell(app.command)
 		else
 			naughty.notify({
 				title = "Missing command",
-				text = "Could not find command for class: " .. (app.class or "unknown"),
-				preset = naughty.config.presets.critical,
+				text  = "No command for: " .. (app.id or app.class or "unknown"),
 			})
 		end
 	end
-	-- Set up a timer to disconnect the signal after a reasonable time
-	-- This prevents the signal from interfering with normal client management
+
+	-- Disconnect the signal after 30 s regardless of how many apps were matched
 	gears.timer.start_new(30, function()
-		client.disconnect_signal("request::manage", handle_new_client_during_restore)
-		-- Clear any remaining pending restore data
-		pending_restore = {}
-		restore_in_progress = false -- NEW: Reset the flag
-		return false -- Don't repeat the timer
+		client.disconnect_signal("request::manage", handle_new_client)
+		pending_restore      = {}
+		restore_in_progress  = false
+		return false
 	end)
+
 	naughty.notify({ title = "Session restored", text = session_file })
 end
 
+-- ── Keybindings ───────────────────────────────────────────────────────────────
+
 local modkey = "Mod4"
-local existing_keys = root.keys()
 local keys = {
-	awful.key({ modkey, "Shift" }, "r", function()
-		restore()
-	end, { description = "restore session", group = "awesome" }),
-	awful.key({ modkey, "Shift" }, "s", function()
-		save()
-	end, { description = "save session", group = "awesome" })
+	awful.key({ modkey, "Shift" }, "r", restore, { description = "restore session", group = "awesome" }),
+	awful.key({ modkey, "Shift" }, "s", save,    { description = "save session",    group = "awesome" }),
 }
+local merged = {}
+for _, k in ipairs(root.keys()) do merged[#merged + 1] = k end
+for _, k in ipairs(keys)        do merged[#merged + 1] = k end
+root.keys(merged)
 
-local merged_keys = {}
-for _, k in ipairs(existing_keys) do merged_keys[#merged_keys + 1] = k end
-for _, k in ipairs(keys) do merged_keys[#merged_keys + 1] = k end
-root.keys(merged_keys)
+-- ── Auto-restore on startup ───────────────────────────────────────────────────
 
--- FIXED: Use a timer to run restore once after startup is complete
--- This avoids the "startup" signal which fires multiple times in newer versions
 if awesome.startup and autorestore_allowed then
 	gears.timer.start_new(1, function()
 		restore()
-		return false -- Don't repeat
+		return false
 	end)
 end
 
-awesome.connect_signal("module::session_manager:save", function()
-	if autorestore_allowed then
-		save()
-	end
-end)
+-- ── Signals ───────────────────────────────────────────────────────────────────
 
-awesome.connect_signal("module::session_manager:restore", function()
-	if autorestore_allowed then
-		restore()
-	end
-end)
-
-awesome.connect_signal("module::session_manager:autosave_enable", function()
+awesome.connect_signal("module::session_manager:save",    function() if autorestore_allowed then save()    end end)
+awesome.connect_signal("module::session_manager:restore", function() if autorestore_allowed then restore() end end)
+awesome.connect_signal("module::session_manager:autosave_enable",  function()
 	autorestore_allowed = true
 	settings.set_bool("autorestore_allowed", true)
 end)
-
 awesome.connect_signal("module::session_manager:autosave_disable", function()
 	autorestore_allowed = false
 	settings.set_bool("autorestore_allowed", false)

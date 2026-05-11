@@ -6,18 +6,14 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local json = require("dependencies.json")
-
 local icons = require("theme.icons")
-
 local config = require("config.user.credentials")
-
 local secrets = {
 	key = config.weather.api_key,
 	city_id = config.weather.city_id,
 	units = config.weather.units,
 	update_interval = config.weather.update_interval,
 }
-
 local weather_icon_widget = wibox.widget({
 	{
 		id = "icon",
@@ -29,7 +25,6 @@ local weather_icon_widget = wibox.widget({
 	},
 	layout = wibox.layout.fixed.horizontal,
 })
-
 local sunrise_icon_widget = wibox.widget({
 	{
 		id = "sunrise_icon",
@@ -41,7 +36,6 @@ local sunrise_icon_widget = wibox.widget({
 	},
 	layout = wibox.layout.fixed.horizontal,
 })
-
 local sunset_icon_widget = wibox.widget({
 	{
 		id = "sunset_icon",
@@ -53,7 +47,6 @@ local sunset_icon_widget = wibox.widget({
 	},
 	layout = wibox.layout.fixed.horizontal,
 })
-
 local refresh_icon_widget = wibox.widget({
 	{
 		id = "refresh_icon",
@@ -65,20 +58,17 @@ local refresh_icon_widget = wibox.widget({
 	},
 	layout = wibox.layout.fixed.horizontal,
 })
-
 local refresh_button = clickable_container(refresh_icon_widget)
-refresh_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
+refresh_button:buttons({awful.button({}, 1, nil, function()
 	awesome.emit_signal("widget::weather_fetch")
 	awesome.emit_signal("widget::forecast_fetch")
-end)))
-
+end)})
 local refresh_widget = wibox.widget({
 	refresh_button,
 	bg = beautiful.transparent,
 	shape = gears.shape.circle,
 	widget = wibox.container.background,
 })
-
 local weather_desc_temp = wibox.widget({
 	{
 		id = "description",
@@ -97,7 +87,6 @@ local weather_desc_temp = wibox.widget({
 	fps = 30,
 	layout = wibox.container.scroll.horizontal,
 })
-
 local weather_location = wibox.widget({
 	{
 		id = "location",
@@ -116,7 +105,6 @@ local weather_location = wibox.widget({
 	fps = 30,
 	layout = wibox.container.scroll.horizontal,
 })
-
 local weather_sunrise = wibox.widget({
 	markup = "00:00",
 	font = "Inter Regular 10",
@@ -124,7 +112,6 @@ local weather_sunrise = wibox.widget({
 	valign = "center",
 	widget = wibox.widget.textbox,
 })
-
 local weather_sunset = wibox.widget({
 	markup = "00:00",
 	font = "Inter Regular 10",
@@ -132,7 +119,6 @@ local weather_sunset = wibox.widget({
 	valign = "center",
 	widget = wibox.widget.textbox,
 })
-
 local weather_data_time = wibox.widget({
 	markup = "00:00",
 	font = "Inter Regular 10",
@@ -140,7 +126,6 @@ local weather_data_time = wibox.widget({
 	valign = "center",
 	widget = wibox.widget.textbox,
 })
-
 local weather_forecast_tooltip = awful.tooltip({
 	text = "Loading...",
 	objects = { weather_icon_widget },
@@ -150,7 +135,6 @@ local weather_forecast_tooltip = awful.tooltip({
 	margin_leftright = dpi(8),
 	margin_topbottom = dpi(8),
 })
-
 local weather_report = wibox.widget({
 	{
 		{
@@ -206,8 +190,6 @@ local weather_report = wibox.widget({
 	end,
 	widget = wibox.container.background,
 })
-
--- Return weather symbol
 local get_weather_symbol = function()
 	local symbol_tbl = {
 		["metric"] = "°C",
@@ -215,111 +197,97 @@ local get_weather_symbol = function()
 	}
 	return symbol_tbl[secrets.units]
 end
-
--- Create openweathermap script based on pass mode
--- Mode must be `forecast` or `weather`
 local create_weather_script = function(mode)
 	local weather_script = [[
 		KEY="]] .. secrets.key .. [["
 		CITY="]] .. secrets.city_id .. [["
 		UNITS="]] .. secrets.units .. [["
-
 		weather=$(curl -sf "http://api.openweathermap.org/data/2.5/]] .. mode .. [[?APPID="${KEY}"&id="${CITY}"&units="${UNITS}"")
-
 		if [ ! -z "$weather" ]; then
 			printf "${weather}"
 		else
 			printf "error"
 		fi
 	]]
-
 	return weather_script
+end
+
+local function emit_error_state()
+	awesome.emit_signal(
+		"widget::weather_update",
+		"...",
+		"Dust and clouds, -1000°C",
+		"Earth, Milky Way",
+		"00:00",
+		"00:00",
+		"00:00"
+	)
 end
 
 awesome.connect_signal("widget::forecast_fetch", function()
 	awful.spawn.easy_async_with_shell(create_weather_script("forecast"), function(stdout)
-		if stdout:match("error") then
-			weather_forecast_tooltip:set_markup("Can't retrieve data!")
-		else
-			local forecast_data = json.parse(stdout)
-			local forecast = ""
-
-			for i = 8, 40, 8 do
-				local day = os.date("%A @ %H:%M", forecast_data.list[i].dt)
-				local temp = math.floor(forecast_data.list[i].main.temp + 0.5)
-				local feels_like = math.floor(forecast_data.list[i].main.feels_like + 0.5)
-				local weather = forecast_data.list[i].weather[1].description
-
-				-- Capitalize weather description
+		local raw = stdout and stdout:gsub("%s+$", "") or ""
+		if raw == "" or raw == "error" then
+			weather_forecast_tooltip:set_markup("Can't retrieve forecast data!")
+			return
+		end
+		local ok, forecast_data = pcall(json.parse, raw)
+		if not ok or type(forecast_data) ~= "table" or not forecast_data.list then
+			weather_forecast_tooltip:set_markup("Can't retrieve forecast data!")
+			return
+		end
+		local forecast = ""
+		for i = 8, 40, 8 do
+			local entry = forecast_data.list[i]
+			if entry then
+				local day = os.date("%A @ %H:%M", entry.dt)
+				local temp = math.floor(entry.main.temp + 0.5)
+				local feels_like = math.floor(entry.main.feels_like + 0.5)
+				local weather = entry.weather[1].description
 				weather = weather:sub(1, 1):upper() .. weather:sub(2)
-
 				forecast = forecast
-					.. "<b>"
-					.. day
-					.. "</b>\n"
-					.. "Weather: "
-					.. weather
-					.. "\n"
-					.. "Temperature: "
-					.. temp
-					.. get_weather_symbol()
-					.. "\n"
-					.. "Feels like: "
-					.. feels_like
-					.. get_weather_symbol()
-					.. "\n\n"
-
-				weather_forecast_tooltip:set_markup(forecast:sub(1, -2))
+					.. "<b>" .. day .. "</b>\n"
+					.. "Weather: " .. weather .. "\n"
+					.. "Temperature: " .. temp .. get_weather_symbol() .. "\n"
+					.. "Feels like: " .. feels_like .. get_weather_symbol() .. "\n\n"
 			end
 		end
+		weather_forecast_tooltip:set_markup(forecast:sub(1, -2))
 	end)
 end)
 
 awesome.connect_signal("widget::weather_fetch", function()
 	awful.spawn.easy_async_with_shell(create_weather_script("weather"), function(stdout)
-		if stdout:match("error") then
-			awesome.emit_signal(
-				"widget::weather_update",
-				"...",
-				"Dust and clouds, -1000°C",
-				"Earth, Milky Way",
-				"00:00",
-				"00:00",
-				"00:00"
-			)
-		else
-			-- Parse JSON string
-			local weather_data = json.parse(stdout)
-
-			-- Process weather data
-			local location = weather_data.name
-			local country = weather_data.sys.country
-			local sunrise = os.date("%H:%M", weather_data.sys.sunrise)
-			local sunset = os.date("%H:%M", weather_data.sys.sunset)
-			local refresh = os.date("%H:%M", weather_data.dt)
-			local temperature = math.floor(weather_data.main.temp + 0.5)
-			local weather = weather_data.weather[1].description
-			local weather_icon = weather_data.weather[1].icon
-
-			-- Capitalize weather description
-			local weather = weather:sub(1, 1):upper() .. weather:sub(2)
-
-			-- Contantenate weather description and symbol
-			local weather_description = weather .. ", " .. temperature .. get_weather_symbol()
-
-			-- Contantenate city and country
-			local weather_location = location .. ", " .. country
-
-			awesome.emit_signal(
-				"widget::weather_update",
-				weather_icon,
-				weather_description,
-				weather_location,
-				sunrise,
-				sunset,
-				refresh
-			)
+		local raw = stdout and stdout:gsub("%s+$", "") or ""
+		if raw == "" or raw == "error" then
+			emit_error_state()
+			return
 		end
+		local ok, weather_data = pcall(json.parse, raw)
+		if not ok or type(weather_data) ~= "table" then
+			emit_error_state()
+			return
+		end
+		local location    = weather_data.name
+		local country     = weather_data.sys.country
+		local sunrise     = os.date("%H:%M", weather_data.sys.sunrise)
+		local sunset      = os.date("%H:%M", weather_data.sys.sunset)
+		local refresh     = os.date("%H:%M", weather_data.dt)
+		local temperature = math.floor(weather_data.main.temp + 0.5)
+		local weather     = weather_data.weather[1].description
+		local weather_icon = weather_data.weather[1].icon
+		weather = weather:sub(1, 1):upper() .. weather:sub(2)
+		local weather_description = weather .. ", " .. temperature .. get_weather_symbol()
+		local weather_location    = location .. ", " .. country
+		awesome.emit_signal(
+			"widget::weather_update",
+			weather_icon,
+			weather_description,
+			weather_location,
+			sunrise,
+			sunset,
+			refresh
+		)
 	end)
 end)
 
@@ -333,15 +301,11 @@ local update_widget_timer = gears.timer({
 		awesome.emit_signal("widget::forecast_fetch")
 	end,
 })
-
 awesome.connect_signal("system::network_connected", function()
 	awesome.emit_signal("widget::weather_fetch")
 	awesome.emit_signal("widget::forecast_fetch")
 end)
-
 awesome.connect_signal("widget::weather_update", function(code, desc, location, sunrise, sunset, data_receive)
-	local widget_icon_name = icons.applets.weather.weather_error
-
 	local icon_tbl = {
 		["01d"] = icons.applets.weather.sun_icon,
 		["01n"] = icons.applets.weather.moon_icon,
@@ -363,17 +327,13 @@ awesome.connect_signal("widget::weather_update", function(code, desc, location, 
 		["50n"] = icons.applets.weather.nmist,
 		["..."] = icons.applets.weather.weather_error,
 	}
-
-	widget_icon_name = icon_tbl[code]
-
+	local widget_icon_name = icon_tbl[code] or icons.applets.weather.weather_error
 	weather_icon_widget.icon:set_image(widget_icon_name)
 	weather_icon_widget.icon:emit_signal("widget::redraw_needed")
-
 	weather_desc_temp.description:set_markup(desc)
 	weather_location.location:set_markup(location)
 	weather_sunrise:set_markup(sunrise)
 	weather_sunset:set_markup(sunset)
 	weather_data_time:set_markup(data_receive)
 end)
-
 return weather_report

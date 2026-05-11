@@ -25,25 +25,22 @@ if awesome.scenefx then
     awesome.set_blur_data(2, 5, 0.02, 0.9, 0.9, 1.0)
 end
 
+require("libraries")
+require("services")
+
 require("config.input")
-require("config.keymaps.global-keys")
-require("config.keymaps.client-keys")
-require("config.keymaps.mouse")
+require("config.keymaps")
 
 require("config.signals")
 require("config.rules")
 
 require("theme")
-require("services")
 
 --local sounds = require("theme.sounds")
 --if awesome.startup then
 --	sounds.play("login")
 --end
 
-require("config.tags")
-
 require("ui")
 
 --require("modules.dynamic-wallpaper")
---require("modules.session-mgr")

@@ -4,6 +4,6 @@ require("ui.flyouts.prompt-signal")
 require("ui.flyouts.quake-scratchpad")
 require("ui.flyouts.quake-terminal")
 -- TODO: fix
---require("ui.flyouts.clipboard-history")
+require("ui.flyouts.clipboard-history")
 require("ui.flyouts.alt-tab")
 require("ui.flyouts.window-overview")

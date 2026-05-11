@@ -12,14 +12,11 @@ return {
 		multimedia = "vlc",
 		photo_editor = "gimp",
 		sandbox = "virt-manager",
-		network_manager = "cinnamon-settings network",
+		network_manager = "nm-connection-editor",
 		bluetooth_manager = "blueman-manager",
 		power_manager = "gnome-power-statistics",
 		package_manager = "pacman",
-		package_updater = "pacman",
-		lock = "",
 		quake = "kitty --class QuakeTerminal",
-		scratchpad = "kitty --name QuakeScratchpad",
 
 		-- TODO: fix this
 		global_search = "echo nope",
@@ -28,6 +25,7 @@ return {
 			.. " --conf " .. config_dir .. "/dependencies/wofi/appmenu/config"
 			.. " --style " .. config_dir .. "/dependencies/wofi/appmenu/style.css"
 			.. " --show drun"
+			.. " --layer=overlay"
 	},
 
 	-- TODO: replace with SomeWM native!

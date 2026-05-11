@@ -4,7 +4,7 @@ local machine = require("config.user.machine")
 local prefs = require("config.user.preferences")
 local icons = require("theme.icons")
 local process = require("services.process")
-local settings = require("modules.settings-store")
+local settings = require("libraries.settings-store")
 
 local network = {}
 
@@ -225,7 +225,7 @@ function network.start()
 	process.watch("rfkill event", { stdout = function() emit_state() end })
 	awesome.connect_signal("vpn::toggle", network.toggle_vpn)
 	awesome.connect_signal("network::airplane-mode:toggle", network.toggle_airplane_mode)
-	gears.timer({ timeout = 60, call_now = true, autostart = true, callback = network.refresh_vpn })
+	gears.timer({ timeout = 60, call_now = true, autostart = true, callback = function() network.refresh_vpn() end })
 	network.refresh()
 end
 

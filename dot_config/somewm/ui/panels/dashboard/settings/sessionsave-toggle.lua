@@ -5,7 +5,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
-local settings = require("modules.settings-store")
+local settings = require("libraries.settings-store")
 
 local action_name = wibox.widget({
 	text = "Session Autosave",

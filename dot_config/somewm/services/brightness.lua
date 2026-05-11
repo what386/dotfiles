@@ -1,7 +1,7 @@
 local gears = require("gears")
 local naughty = require("naughty")
 local gfs = require("gears.filesystem")
-local settings = require("modules.settings-store")
+local settings = require("libraries.settings-store")
 local process = require("services.process")
 
 local brightness = {}
