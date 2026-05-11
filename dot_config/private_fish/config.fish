@@ -1,4 +1,5 @@
 source $HOME/.upstream/metadata/paths.sh
+fish_add_path ~/.local/bin
 
 if status is-interactive
     # Commands to run in interactive sessions can go here
@@ -19,14 +20,12 @@ if not contains $_asdf_shims $PATH
 end
 set --erase _asdf_shims
 
-
 zoxide init fish | source
 
 # PATH additions
 
-set -gx PATH $PATH /opt/zen
-set -gx PATH $PATH /opt/zig-x86_64-linux-0.16.0
-set -gx PATH $PATH /opt/chntpw-140201/bin/
+set -gx DOTNET_ROOT $HOME/.dotnet
+fish_add_path $HOME/.dotnet
 
 direnv hook fish | source
 
