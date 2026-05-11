@@ -1,0 +1,110 @@
+/**
+ * Wofi stylesheet converted from Rofi theme
+ * Original Author: Aditya Shakya (adi1090x)
+ **/
+
+/* ---- Color & font variables ---- */
+* {
+    --background:     #000000;
+    --background-alt: #101010;
+    --foreground:     #FFFFFF;
+    --selected:       #62AEEF;
+    --active:         #98C379;
+    --urgent:         #E06B74;
+
+    font-family: "Iosevka Nerd Font";
+    font-size:   10pt;
+}
+
+/* ---- Main window ---- */
+window {
+    background-color: rgba(0, 0, 0, 0.1);
+    /* fullscreen is set via wofi config: `width=1366` / `height=768`
+       or just let the WM handle fullscreen via `--width`/`--height` flags */
+}
+
+/* ---- Outer wrapper ---- */
+#outer-box {
+    background-color: transparent;
+    padding:          100px 225px;
+    spacing:          100px;         /* gap between search bar and list */
+}
+
+/* ---- Search / input bar ---- */
+#input {
+    margin:           0% 28%;
+    padding:          10px;
+    border:           1px solid rgba(255, 255, 255, 0.25);
+    border-radius:    6px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color:            var(--foreground);
+}
+
+/* Placeholder text */
+#input placeholder {
+    color: var(--foreground);
+}
+
+/* ---- Scrollable list area ---- */
+#scroll {
+    background-color: transparent;
+    /* columns and lines are controlled by wofi config, not CSS */
+}
+
+/* ---- Inner list box ---- */
+#inner-box {
+    background-color: transparent;
+    spacing:          0px;
+}
+
+/* ---- Individual entries ---- */
+#entry {
+    padding:          20px 10px;
+    spacing:          8px;
+    border-radius:    15px;
+    background-color: transparent;
+    color:            var(--foreground);
+    /* icon above, label below */
+    flex-direction:   column;
+    align-items:      center;
+}
+
+#entry:selected {
+    background-color: rgba(255, 255, 255, 0.05);
+    color:            var(--foreground);
+}
+
+/* ---- App icon ---- */
+#img {
+    background-color: transparent;
+    /* size is set via wofi config: `image_size=72` */
+}
+
+/* ---- App name label ---- */
+#text {
+    background-color: transparent;
+    color:            inherit;
+    /* truncate long names */
+    max-width:        90px;
+    min-width:        0;
+    overflow:         hidden;
+    text-overflow:    ellipsis;
+    white-space:      nowrap;
+    text-align:       center;
+}
+
+#text:selected {
+    color: var(--foreground);
+}
+
+/* ---- Scrollbar ---- */
+scrollbar {
+    background-color: var(--background-alt);
+    border-radius:    0px;
+}
+
+scrollbar slider {
+    background-color: var(--selected);
+    min-width:        5px;
+    border-radius:    0px;
+}

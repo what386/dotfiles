@@ -1,0 +1,23 @@
+Vectors and icons by SVG Repo (www.svgrepo.com)
+
+---Configurations this one takes from---
+https://github.com/eromatiya/the-glorious-dotfiles
+https://github.com/lcpz/awesome-copycats
+https://github.com/atsepkov/awesome-awesome-wm
+https://github.com/BlingCorp/bling
+
+--Libraries and/or dependencies--
+https://gist.github.com/tylerneylon/59f4bcf316be525b30ab
+
+---Development and testing tools---
+https://github.com/devclyde/awesome-emmylua
+https://github.com/Curve/aawmtt
+
+---Wallpapers---
+https://wall.alphacoders.com/big.php?i=988615
+https://wall.alphacoders.com/big.php?i=725593
+https://wall.alphacoders.com/big.php?i=863809
+https://wall.alphacoders.com/big.php?i=743289
+https://wall.alphacoders.com/big.php?i=805656
+https://hdqwalls.com/wallpaper/2560x1440/no-mans-sky-game-2019-4k
+https://www.pinterest.ph/pin/216313588332943910/
