@@ -75,8 +75,6 @@ return {
 	asm_lsp = {},
 	-- PowerShell
 	powershell_es = {},
-	-- COBOL
-	cobol_ls = {},
 	-- Arduino
 	arduino_language_server = {},
 	-- YAML (via existing prettier/yamllint, but LSP adds hover/completion)
