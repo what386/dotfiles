@@ -1,8 +1,8 @@
 local widgets = {}
 
 widgets.server = require("theme.icons.widgets.server")
-widgets.update = require("theme.icons.widgets.update")
-widgets.package = require("theme.icons.widgets.package")
+widgets.update = require("theme.icons.widgets.update-manager")
+widgets.package = require("theme.icons.widgets.package-manager")
 widgets.battery = require("theme.icons.widgets.battery")
 widgets.brightness = require("theme.icons.widgets.brightness")
 widgets.volume = require("theme.icons.widgets.volume")

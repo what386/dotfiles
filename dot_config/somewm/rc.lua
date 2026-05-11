@@ -17,15 +17,15 @@ local script_dir = config_dir .. "scripts/"
 awful.mouse.snap.edge_enabled = false
 awful.mouse.snap.client_enabled = false
 
---awful.spawn.with_shell(script_dir .. "preferences.sh")
---awful.spawn.with_shell(script_dir .. "autorun.sh")
+awful.spawn.with_shell(script_dir .. "autorun.sh")
+
+-- TODO: replace with someWM native
 --awful.spawn.with_shell(script_dir .. "screenlock.sh start")
 
 if awesome.scenefx then
     awesome.set_blur_data(2, 5, 0.02, 0.9, 0.9, 1.0)
 end
 
-require("libraries")
 require("services")
 
 require("config.input")
