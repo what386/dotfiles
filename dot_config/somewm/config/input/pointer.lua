@@ -24,7 +24,7 @@ awful.input.rules = {
       -- 0   = device default
       -- 274 = middle mouse button (common TrackPoint setup)
       -- 8   = back/thumb mouse button
-      scroll_button = 274,
+      scroll_button = 0,
 
       -- Swap left/right mouse buttons
       left_handed = 0,

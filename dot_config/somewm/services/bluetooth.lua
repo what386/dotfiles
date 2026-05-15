@@ -1,8 +1,8 @@
 local gears = require("gears")
 local naughty = require("naughty")
-local prefs = require("config.user.preferences")
+local apps = require("config.preferences.apps")
 local icons = require("theme.icons")
-local process = require("libraries.process")
+local process = require("utilities.process")
 
 local bluetooth = {}
 
@@ -60,7 +60,7 @@ function bluetooth.get_state()
 end
 
 function bluetooth.open_manager()
-	process.spawn(prefs.default.bluetooth_manager)
+	process.spawn(apps.bluetooth_manager)
 end
 
 function bluetooth.refresh(callback)

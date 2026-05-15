@@ -5,9 +5,11 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local icons = require("theme.icons")
 local sounds = require("theme.sounds")
-local userprefs = require("config.user.preferences")
 local clickable_container = require("ui.clickable-container")
 local power = require("services.power")
+local filesystem = require("gears.filesystem")
+local config_dir = filesystem.get_configuration_dir()
+
 local msg_table = {
 	"See you later, alligator!",
 	"Stay out of trouble.",
@@ -47,8 +49,9 @@ local profile_imagebox = wibox.widget({
 	clip_shape = gears.shape.circle,
 	widget = wibox.widget.imagebox,
 })
+
 local update_profile_pic = function()
-	awful.spawn.easy_async_with_shell(userprefs.utils.update_profile, function(stdout)
+	awful.spawn.easy_async_with_shell(config_dir .. "/scripts/update_profile.sh", function(stdout)
 		stdout = stdout:gsub("%\n", "")
 		if not stdout:match("default") then
 			profile_imagebox:set_image(stdout)

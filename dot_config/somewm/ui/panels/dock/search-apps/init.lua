@@ -5,7 +5,7 @@ local gears = require("gears")
 local dpi = require("beautiful").xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 
-local apps = require("config.user.preferences")
+local apps = require("config.preferences.apps")
 local icons = require("theme.icons")
 
 local widget = wibox.widget({

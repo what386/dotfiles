@@ -1,10 +1,10 @@
 local gears = require("gears")
 local naughty = require("naughty")
 local machine = require("config.user.machine")
-local prefs = require("config.user.preferences")
+local apps = require("config.preferences.apps")
 local icons = require("theme.icons")
-local process = require("libraries.process")
-local settings = require("libraries.settings-store")
+local process = require("utilities.process")
+local settings = require("utilities.settings")
 
 local network = {}
 
@@ -26,7 +26,6 @@ local state = {
 	reconnect_startup = true,
 	last_health_check = 0,
 	vpn_connected = false,
-	vpn_interface = "happycloud",
 	trusted = nil,
 	airplane_mode = settings.get_bool("airplane_mode", false),
 }
@@ -46,7 +45,7 @@ local function emit_state()
 		ssid = state.ssid,
 		trusted = state.trusted,
 		connected = state.vpn_connected,
-		interface = state.vpn_interface,
+		interface = machine.vpn_interface.name,
 	})
 	awesome.emit_signal("network::airplane-mode", state.airplane_mode)
 end
@@ -59,7 +58,7 @@ function network.get_state()
 end
 
 function network.open_manager()
-	process.spawn(prefs.default.network_manager)
+	process.spawn(apps.network_manager)
 end
 
 local function notify_connected(message, icon)
@@ -174,10 +173,14 @@ function network.refresh()
 end
 
 function network.refresh_vpn(callback)
-	process.run_shell("wg show " .. process.shell_quote(state.vpn_interface) .. " >/dev/null 2>&1 && echo up || echo down", function(stdout)
-		state.vpn_connected = tostring(stdout):match("up") ~= nil
+	process.run_shell("ip link show " .. machine.vpn_interface.name, function(stdout, stderr, exit_code)
+		state.vpn_connected = exit_code == 0
+
 		emit_state()
-		if callback then callback(state.vpn_connected) end
+
+		if callback then
+			callback(state.vpn_connected)
+		end
 	end)
 end
 
@@ -188,11 +191,11 @@ function network.set_vpn(connected)
 		return
 	end
 	if connected then
-		process.spawn("sudo /usr/bin/wg-quick up " .. state.vpn_interface)
+		process.spawn("sudo /usr/bin/wg-quick up " .. machine.vpn_interface.conf)
 		state.vpn_connected = true
 		naughty.notification({ message = "VPN tunnel has been enabled", title = "Connected to untrusted network", app_name = "System Notification", icon = icons.widgets.wifi.wifi_on })
 	else
-		process.spawn("sudo /usr/bin/wg-quick down " .. state.vpn_interface)
+		process.spawn("sudo /usr/bin/wg-quick down " .. machine.vpn_interface.conf)
 		state.vpn_connected = false
 		naughty.notification({ message = "VPN tunnel has been disabled", title = "Connected to trusted network", app_name = "System Notification", icon = icons.widgets.wifi.wifi_on })
 	end

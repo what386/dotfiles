@@ -1,8 +1,8 @@
 local gears = require("gears")
 local naughty = require("naughty")
 local icons = require("theme.icons")
-local prefs = require("config.user.preferences")
-local process = require("libraries.process")
+local apps = require("config.preferences.apps")
+local process = require("utilities.process")
 
 local power = {}
 
@@ -101,7 +101,7 @@ function power.refresh_battery(callback)
 end
 
 function power.open_power_manager()
-	process.spawn(prefs.default.power_manager)
+	process.spawn(apps.power_manager)
 end
 
 function power.suspend()
@@ -116,7 +116,7 @@ end
 
 function power.lock()
 	awesome.emit_signal("screen::exit_screen:hide")
-	awesome.emit_signal("screen::lockscreen:show")
+	--awesome.emit_signal("screen::lockscreen:show")
 end
 
 function power.poweroff()

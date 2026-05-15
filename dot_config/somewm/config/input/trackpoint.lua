@@ -6,7 +6,7 @@ local awful = require("awful")
 -- 1:	enable feature
 
 awful.input.rules = {
-  { rule = { type = "trackpoint" },
+  { rule = { name = "TrackPoint" },
     properties = {
       -- Tap touchpad to click
       tap_to_click = 1,
@@ -18,7 +18,7 @@ awful.input.rules = {
       -- Range: -1.0 to 1.0
       -- Negative = slower pointer movement
       -- Positive = faster pointer movement
-      accel_speed = 0.0,
+      accel_speed = 0.25,
 
       -- Button used for scroll-on-button-down
       -- 0   = device default

@@ -4,7 +4,7 @@ local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-local settings = require("libraries.settings-store")
+local settings = require("utilities.settings")
 local icons = require("theme.icons")
 
 _G.dont_disturb_state = false

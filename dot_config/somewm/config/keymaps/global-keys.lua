@@ -3,7 +3,7 @@ local awful = require("awful")
 local gears = require("gears")
 local naughty = require("naughty")
 local hotkeys_popup = require("awful.hotkeys_popup")
-local apps = require("config.user.preferences")
+local apps = require("config.preferences.apps")
 local audio = require("services.audio")
 local brightness = require("services.brightness")
 local media = require("services.media")
@@ -88,38 +88,49 @@ local keys = {
 		awesome.quit()
 	end, { description = "force quit", group = "awesome" }),
 
-	-- Utils
 	awful.key({ modkey, "Shift" }, "v", function()
 		awful.spawn.with_shell(
-			[[xclip -o -selection clipboard | xargs -0 -I {} xdotool type --clearmodifiers --delay 12 "{}"]]
+			[[wl-paste --no-newline | wtype -d 12 -]]
 		)
 	end, { description = "paste clipboard as text", group = "utils" }),
 
 	-- Launcher
 	awful.key({ modkey }, "o", function()
-		awful.spawn(apps.default.appmenu_search)
+		awful.spawn(apps.appmenu_search)
 	end, { description = "open program", group = "launcher" }),
 
 	awful.key({ modkey }, "p", function()
-		awful.spawn(apps.default.global_search)
+		awful.spawn(apps.global_search)
 		--awful.spawn("rofi -show window -show-icons")
 	end, { description = "search windows", group = "launcher" }),
 
-	awful.key({ modkey, "Shift" }, "Print", function()
-		local home = os.getenv("HOME")
-		local filepath = home .. "/Pictures/Screenshots/"
-		--awful.spawn.with_shell("flameshot full --path " .. filepath)
-	end, { description = "full-screen screenshot", group = "launcher" }),
 	awful.key({ modkey }, "Print", function()
 		local home = os.getenv("HOME")
 		local filepath = home .. "/Pictures/Screenshots/"
-		--awful.spawn.with_shell("flameshot gui --path " .. filepath)
-	end, { description = "screenshot area (gui)", group = "launcher" }),
+		awful.spawn.with_shell("ksnip --rectarea --save \"" .. filepath .. "\"")
+	end, { description = "screenshot area", group = "launcher" }),
+
+	-- TODO: ksnip is broken for some reason
+	-- replace this module
+	awful.key({ modkey, "Shift" }, "Print", function()
+		local home = os.getenv("HOME")
+		local filepath = home .. "/Pictures/Screenshots/"
+		awful.spawn.with_shell("ksnip --fullscreen --save \"" .. filepath .. "\"")
+	end, { description = "full-screen screenshot", group = "launcher" }),
+
 	awful.key({ modkey, "Control" }, "Print", function()
 		local home = os.getenv("HOME")
 		local filepath = home .. "/Pictures/Screenshots/"
-		--awful.spawn.with_shell("flameshot full --clipboard --path " .. filepath)
+		awful.spawn.with_shell("ksnip --fullscreen --clipboard --save \"" .. filepath .. "\"")
+	end, { description = "screenshot area (to clipboard)", group = "launcher" }),
+
+	awful.key({ modkey, "Control", "Shift" }, "Print", function()
+		local home = os.getenv("HOME")
+		local filepath = home .. "/Pictures/Screenshots/"
+		awful.spawn.with_shell("ksnip --rectarea --clipboard --save \"" .. filepath .. "\"")
 	end, { description = "full-screen screenshot (to clipboard)", group = "launcher" }),
+
+
 
 	-- Screen
 	awful.key({ modkey, "Control" }, "j", function()

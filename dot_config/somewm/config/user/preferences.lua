@@ -22,8 +22,8 @@ return {
 		global_search = "echo nope",
 
 		appmenu_search = "wofi"
-			.. " --conf " .. config_dir .. "/dependencies/wofi/appmenu/config"
-			.. " --style " .. config_dir .. "/dependencies/wofi/appmenu/style.css"
+			.. " --conf " .. config_dir .. "/libraries.wofi/appmenu/config"
+			.. " --style " .. config_dir .. "/libraries.wofi/appmenu/style.css"
 			.. "--xoffset=-225"
 			.. "--yoffset=-100"
 			.. " --show drun"

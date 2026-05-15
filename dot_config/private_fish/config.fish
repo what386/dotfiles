@@ -32,3 +32,5 @@ direnv hook fish | source
 set -U fish_user_paths /nix/var/nix/profiles/default/bin $fish_user_paths
 
 starship init fish | source
+
+source ~/Android/env.fish

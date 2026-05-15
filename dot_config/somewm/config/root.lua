@@ -1,4 +1,3 @@
-local gears = require("gears")
 local awful = require("awful")
 local audio = require("services.audio")
 local brightness = require("services.brightness")

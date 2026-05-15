@@ -1,8 +1,8 @@
 local awful = require("awful")
 local gears = require("gears")
 local naughty = require("naughty")
-local json = require("dependencies.json")
-local settings = require("libraries.settings-store")
+local json = require("libraries.json")
+local settings = require("utilities.settings")
 
 local config_dir   = gears.filesystem.get_configuration_dir()
 local session_file = config_dir .. "persistent/session.json"

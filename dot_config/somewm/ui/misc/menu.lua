@@ -1,7 +1,7 @@
 local awful = require("awful")
 local gears = require("gears")
 local beautiful = require("beautiful")
-local apps = require("config.user.preferences")
+local apps = require("config.preferences.apps")
 local menubar = require("menubar")
 local awful_menu = awful.menu
 local menu_gen = menubar.menu_gen
@@ -9,10 +9,10 @@ local menu_utils = menubar.utils
 local icon_theme = require("menubar.icon_theme")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 
-local terminal = apps.default.terminal
-local web_browser = apps.default.web_browser
-local file_manager = apps.default.file_manager
-local text_editor = apps.default.text_editor
+local terminal = apps.terminal
+local web_browser = apps.web_browser
+local file_manager = apps.file_manager
+local text_editor = apps.text_editor
 local editor_cmd = terminal .. " -e " .. (os.getenv("EDITOR") or "nano")
 
 --[[

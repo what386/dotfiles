@@ -7,7 +7,10 @@ local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
-local preferences = require("config.user.preferences")
+local filesystem = require("gears.filesystem")
+local config_dir = filesystem.get_configuration_dir()
+
+
 
 local icons = require("theme.icons")
 
@@ -116,7 +119,7 @@ local create_profile = function()
 	})
 
 	local update_profile_image = function()
-		awful.spawn.easy_async_with_shell(preferences.utils.update_profile, function(stdout)
+		awful.spawn.easy_async_with_shell(config_dir .. "/scripts/update_profile.sh", function(stdout)
 			stdout = stdout:gsub("%\n", "")
 			if not stdout:match("default") then
 				profile_imagebox.icon:set_image(stdout)
