@@ -1,8 +1,0 @@
-name = "rust"
-version = "0.1.0"
-description = "Rust starter"
-
-[requirements]
-allow_execution = true
-escape_cwd = false
-allow_network = false

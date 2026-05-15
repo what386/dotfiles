@@ -1,8 +1,0 @@
-name = "dotnet"
-version = "0.1.0"
-description = "C# .NET-10 starter"
-
-[requirements]
-allow_execution = true
-escape_cwd = false
-allow_network = false
