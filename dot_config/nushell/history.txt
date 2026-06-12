@@ -1,3 +1,68 @@
 ls
 clear
 exit
+ls
+clear
+ls -la
+clear
+ls | where size > 50MB
+clear
+ls | where size > 50mb
+ls
+ls -la | where size > 50mb
+ls -la | where size > 2mb
+ls -la | where size > 20kib
+ls -la | where size > 20kb
+ls -la
+clear
+ls
+clear
+exit
+ls -la
+clear
+eza -T
+clear
+eza
+clear
+ls
+clear
+ll
+clear
+ls | where size > 10kb
+ls
+clear
+ls -T
+ls -R
+clear
+ls
+clear
+ls
+clear
+ls
+ls | where size > 10b
+ls | where size > 50b
+clear
+ps
+clear
+^ps
+clear
+^ls
+clear
+ls
+clear
+exit
+$nu.config_path
+$nu.config-path
+clear
+cd .config
+clear
+ls
+clear
+ls
+clear
+ls
+cd nushell
+clear
+ls
+clear
+cat config.nu
