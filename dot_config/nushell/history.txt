@@ -251,3 +251,4 @@ forge new rust uvm
 cd uvm
 ls
 clear
+cd .forge
