@@ -319,25 +319,21 @@ function audio.toggle_input_mute(callback)
 	)
 end
 
-function audio.set_default_device(kind, name, callback)
-	if not name or name == "" then return end
-	local quoted = shell_quote(name)
-	local cmd
-	if kind == "sink" then
-		cmd = "wpctl set-default " .. quoted
-			.. "; pactl list short sink-inputs | cut -f1 | while read i; do [ -n \"$i\" ] && pactl move-sink-input \"$i\" " .. quoted .. "; done"
-	elseif kind == "source" then
-		cmd = "wpctl set-default " .. quoted
-			.. "; pactl list short source-outputs | cut -f1 | while read o; do [ -n \"$o\" ] && pactl move-source-output \"$o\" " .. quoted .. "; done"
-	else
-		return
-	end
-	awful.spawn.easy_async_with_shell(cmd, function(...)
-		audio.refresh()
-		if callback then callback(...) end
-	end)
+function audio.set_default_device(kind, wpctl_id, callback)
+    if not wpctl_id or wpctl_id == "" then return end
+    local cmd
+    if kind == "sink" then
+        cmd = "wpctl set-default " .. wpctl_id
+    elseif kind == "source" then
+        cmd = "wpctl set-default " .. wpctl_id
+    else
+        return
+    end
+    awful.spawn.easy_async_with_shell(cmd, function(...)
+        audio.refresh()
+        if callback then callback(...) end
+    end)
 end
-
 -- Debounced refresh timer
 local refresh_timer = gears.timer({
 	timeout = 0.08,

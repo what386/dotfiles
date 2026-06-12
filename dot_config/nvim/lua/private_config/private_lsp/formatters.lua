@@ -34,9 +34,6 @@ return {
 	-- SQL
 	"sqlfluff", -- or "sql-formatter" for simpler formatting
 
-	-- Docker
-	"hadolint", -- Dockerfile linter (formatter built-in to prettier for some)
-
 	-- Make
 	"checkmake",
 }

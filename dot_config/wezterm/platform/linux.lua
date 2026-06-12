@@ -2,13 +2,14 @@ local M = {}
 
 function M.apply(config)
 	-- Default shell for Linux
-	config.default_prog = { "fish" }
+	config.default_prog = { "nu" }
 
 	-- Launch menu options for Linux
 	config.launch_menu = {
 		{ label = "Fish", args = { "fish", "-l" } },
 		{ label = "Bash", args = { "bash", "-l" } },
 		{ label = "Zsh", args = { "zsh", "-l" } },
+		{ label = "Nu", args = { "nu", "-l" } },
 	}
 
 	-- Linux-specific settings

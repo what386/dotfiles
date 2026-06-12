@@ -66,3 +66,188 @@ clear
 ls
 clear
 cat config.nu
+nvim config.nu
+exit
+clear
+ls
+clear
+cd .config/nu
+cd .config
+cd nu
+cd nushell
+clear
+atuin init nu
+zoxide init nushell
+clear
+ls
+clear
+cat config.nu
+ls
+clear
+cd .upstream
+clear
+cd
+exit
+mkdir<\n> ~/.local/share/atuin/
+atuin<\n> init nu | save ~/.local/share/atuin/init.nu
+clear
+atuin init nu | save ~/.local/share/atuin/init.nu
+atuin --help
+clear
+exit
+clear
+ls
+clear
+ls
+clear
+eza
+clear
+cd --help
+clear
+ls
+ls | where size > 200b
+ls | where size > 2mb
+ls | reverse | sort-by size
+clear
+ls
+ls --raw
+clear
+ls
+ls | where size > 2mb
+clear
+ps
+ps | sort-by memory
+ps | sort-by mem
+clear
+ps | sort-by mem | reverse
+clear
+ls /etc/shells
+cat /etc/shells
+nano /etc/shells
+paru install nushell
+paru -S nushell
+clear
+exit
+clear
+cd 
+clear
+exit
+ls
+cd --help
+clear
+cd ..
+cd nushell
+cd --help
+z 
+zoxide 
+clear
+z
+clear
+cd
+clear
+zoxide init nushell
+nvim
+clear
+nvim
+clear
+z
+clear
+cd
+cd --help
+clear
+ls
+clear
+eza
+clear
+ls
+clear
+ls
+clear
+cd
+clear
+cd mod
+clear
+just refresh-release
+clear
+just refresh-release
+clear
+just refresh-release
+clear
+just refresh-release
+clear
+just refresh-release
+clear
+just refresh-release
+git push
+clear
+just refresh-release
+clear
+just refresh-release
+clear
+ls
+clear
+ls
+ls | where type is file
+ls | where type = file
+ls | where type == file
+just refresh-release
+clear
+just refresh-release
+clear
+nufmt 
+clear
+cd .config
+cd nushell
+nufmt --all
+clear
+git push
+just refresh-release
+clear
+clear
+git pull
+just list
+just
+just build-android-debug
+lear
+clear
+exit
+clear
+ls
+clear
+ls -l
+clear
+ls -l
+ls -la
+clear
+ls
+ls -l
+clear
+ls
+clear
+tally list
+clear
+tally list
+tally add etc
+tally remove etc
+clear
+tally list
+tally done /etc/
+clear
+tally list
+tally remove mutli
+clear
+tally list
+curl https://www.gyan.dev/ffmpeg/builds/ -o ffmpeg.html
+clear
+tally list
+tally add "fix custom domains for gitlab + gitea autodetection"
+clear
+tally list
+tally add "fix custom domains for gitlab + gitea autodetection in build command"
+clear
+uvm
+clear
+forge new rust uvm
+cd uvm
+ls
+clear

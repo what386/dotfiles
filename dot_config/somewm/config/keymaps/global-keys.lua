@@ -7,6 +7,7 @@ local apps = require("config.preferences.apps")
 local audio = require("services.audio")
 local brightness = require("services.brightness")
 local media = require("services.media")
+local process = require("utilities.process")
 
 local gfs = require("gears.filesystem")
 local themes_path = gfs.get_themes_dir()
@@ -14,6 +15,11 @@ local themes_path = gfs.get_themes_dir()
 -- Modkey: Mod4 (Super key) or Mod1 (Alt key)
 local modkey = "Mod4"
 local altkey = "Mod1"
+local screenshot_script = gfs.get_configuration_dir() .. "scripts/screenshot.sh"
+
+local function screenshot(mode, target)
+	process.spawn_shell(screenshot_script .. " " .. mode .. " " .. target)
+end
 
 -- AwesomeWM
 local keys = {
@@ -105,29 +111,19 @@ local keys = {
 	end, { description = "search windows", group = "launcher" }),
 
 	awful.key({ modkey }, "Print", function()
-		local home = os.getenv("HOME")
-		local filepath = home .. "/Pictures/Screenshots/"
-		awful.spawn.with_shell("ksnip --rectarea --save \"" .. filepath .. "\"")
+		screenshot("area", "save")
 	end, { description = "screenshot area", group = "launcher" }),
 
-	-- TODO: ksnip is broken for some reason
-	-- replace this module
 	awful.key({ modkey, "Shift" }, "Print", function()
-		local home = os.getenv("HOME")
-		local filepath = home .. "/Pictures/Screenshots/"
-		awful.spawn.with_shell("ksnip --fullscreen --save \"" .. filepath .. "\"")
+		screenshot("full", "save")
 	end, { description = "full-screen screenshot", group = "launcher" }),
 
 	awful.key({ modkey, "Control" }, "Print", function()
-		local home = os.getenv("HOME")
-		local filepath = home .. "/Pictures/Screenshots/"
-		awful.spawn.with_shell("ksnip --fullscreen --clipboard --save \"" .. filepath .. "\"")
+		screenshot("area", "clipboard")
 	end, { description = "screenshot area (to clipboard)", group = "launcher" }),
 
 	awful.key({ modkey, "Control", "Shift" }, "Print", function()
-		local home = os.getenv("HOME")
-		local filepath = home .. "/Pictures/Screenshots/"
-		awful.spawn.with_shell("ksnip --rectarea --clipboard --save \"" .. filepath .. "\"")
+		screenshot("full", "clipboard")
 	end, { description = "full-screen screenshot (to clipboard)", group = "launcher" }),
 
 

@@ -79,7 +79,7 @@ local function create_device_row(device, active, kind)
 			return
 		end
 
-		audio.set_default_device(kind, device.name)
+		audio.set_default_device(kind, device.id)
 	end)))
 
 	return row

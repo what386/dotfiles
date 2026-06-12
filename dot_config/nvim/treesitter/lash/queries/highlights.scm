@@ -6,6 +6,8 @@
   ")"
   "["
   "]"
+  "{"
+  "}"
 ] @punctuation.bracket
 
 [
@@ -30,6 +32,7 @@
   "%="
   "=="
   "!="
+  "=~"
   "&>"
   "&>>"
   "2>"
@@ -162,6 +165,7 @@
 
 (argv_index_expression "argv" @variable.builtin)
 (argv_length_expression "argv" @variable.builtin)
+(dollarsign) @variable.builtin
 
 ; ============================================================
 ; Functions / commands

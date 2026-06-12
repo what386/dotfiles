@@ -1,7 +1,7 @@
 [user]
 	email = robot0324@gmail.com
 	name = what386
-[url "git@github.com:"]
-	insteadOf = https://github.com/
 [init]
 	defaultBranch = main
+[pull]
+	rebase = false

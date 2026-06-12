@@ -6,7 +6,6 @@ local watch = awful.widget.watch
 local dpi = require("beautiful").xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
-
 local widget = wibox.widget({
 	{
 		id = "icon",
@@ -16,7 +15,6 @@ local widget = wibox.widget({
 	},
 	layout = wibox.layout.align.horizontal,
 })
-
 local widget_button = wibox.widget({
 	{
 		widget,
@@ -25,7 +23,6 @@ local widget_button = wibox.widget({
 	},
 	widget = clickable_container,
 })
-
 local update_tooltip = awful.tooltip({
 	objects = { widget_button },
 	delay_show = 0.15,
@@ -35,7 +32,6 @@ local update_tooltip = awful.tooltip({
 	margin_topbottom = dpi(8),
 	preferred_positions = { "right", "left", "top", "bottom" },
 })
-
 local function parse_pacman_updates(stdout)
 	local packages = {}
 	local count = 0
@@ -49,7 +45,6 @@ local function parse_pacman_updates(stdout)
 	end
 	return count, packages
 end
-
 local function parse_upstream_updates(stdout)
 	local packages = {}
 	local count = 0
@@ -63,7 +58,6 @@ local function parse_upstream_updates(stdout)
 	end
 	return count, packages
 end
-
 local function build_section(label, count, packages)
 	if count == 0 then return "" end
 	local text = string.format("\n%s (%d):\n", label, count)
@@ -76,7 +70,6 @@ local function build_section(label, count, packages)
 	end
 	return text
 end
-
 local function update_widget_state(pacman_count, pacman_packages, aur_count, aur_packages, upstream_count, upstream_packages)
 	local total_updates = pacman_count + aur_count + upstream_count
 	if total_updates > 0 then
@@ -91,16 +84,13 @@ local function update_widget_state(pacman_count, pacman_packages, aur_count, aur
 		update_tooltip.markup = "System is up to date"
 	end
 end
-
 local function check_updates()
 	widget.icon:set_image(icons.widgets.update.shield)
 	update_tooltip.markup = "Checking for updates..."
-
 	local pacman_count, pacman_packages = 0, {}
 	local aur_count, aur_packages = 0, {}
 	local upstream_count, upstream_packages = 0, {}
 	local checks_completed = 0
-
 	local function on_check_complete()
 		checks_completed = checks_completed + 1
 		if checks_completed == 3 then
@@ -111,7 +101,6 @@ local function check_updates()
 			)
 		end
 	end
-
 	-- Official repos via checkupdates (safe, no db lock)
 	awful.spawn.easy_async("checkupdates", function(stdout, _, _, exit_code)
 		-- checkupdates exits 2 when no updates, 0 when updates found
@@ -120,15 +109,13 @@ local function check_updates()
 		end
 		on_check_complete()
 	end)
-
-	-- AUR updates via paru (read-only, no locks, same output format as checkupdates)
-	awful.spawn.easy_async("paru -Qua", function(stdout, _, _, exit_code)
+	-- AUR-only updates via paru --aur flag (excludes official repo packages)
+	awful.spawn.easy_async("paru --aur -Qua", function(stdout, _, _, exit_code)
 		if exit_code == 0 then
 			aur_count, aur_packages = parse_pacman_updates(stdout)
 		end
 		on_check_complete()
 	end)
-
 	-- Upstream updates
 	awful.spawn.easy_async(
 		os.getenv("HOME") .. "/.upstream/symlinks/upstream upgrade --check --machine-readable",
@@ -140,11 +127,9 @@ local function check_updates()
 		end
 	)
 end
-
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	check_updates()
 end)))
-
 -- Official + upstream: every 30 minutes
 gears.timer({
 	timeout = 1800,
@@ -152,5 +137,4 @@ gears.timer({
 	autostart = true,
 	callback = check_updates,
 })
-
 return widget_button

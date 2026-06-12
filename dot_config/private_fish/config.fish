@@ -34,3 +34,5 @@ set -U fish_user_paths /nix/var/nix/profiles/default/bin $fish_user_paths
 starship init fish | source
 
 source ~/Android/env.fish
+
+test -f $HOME/.upstream/metadata/paths.sh; and source $HOME/.upstream/metadata/paths.sh

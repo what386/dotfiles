@@ -2,7 +2,7 @@ local M = {}
 
 function M.apply(config)
 	-- Default shell for macOS
-	config.default_prog = { "fish" }
+	config.default_prog = { "nu" }
 
 	-- Launch menu options for macOS
 	config.launch_menu = {
