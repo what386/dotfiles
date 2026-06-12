@@ -1,6 +1,7 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
 SETUVAR __fish_initialized:4300
+SETUVAR _fisher_upgraded_to_4_4:\x1d
 SETUVAR fish_user_paths:/nix/var/nix/profiles/default/bin\x1e/home/bmorin/Android/Sdk/emulator\x1e/home/bmorin/Android/Sdk/cmdline\x2dtools/latest/bin\x1e/home/bmorin/Android/Sdk/platform\x2dtools\x1e/home/bmorin/\x2edotnet\x1e/home/bmorin/\x2elocal/bin\x1e/home/bmorin/\x2enix\x2dprofile/bin
 SETUVAR pure_begin_prompt_with_current_directory:true
 SETUVAR pure_check_for_new_release:false
