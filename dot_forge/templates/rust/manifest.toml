@@ -1,0 +1,11 @@
+[package]
+name = "rust"
+version = "0.1.0"
+description = "TODO"
+min_forge_version = "0.1.0"
+
+[author]
+name = "what386"
+
+[requires]
+programs = ["git"]
