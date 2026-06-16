@@ -1,2 +1,6 @@
 history -c
 cd ..
+chezmoi re-add nushell
+clear
+ls
+cd ..
