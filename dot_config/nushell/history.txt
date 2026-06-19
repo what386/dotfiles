@@ -1113,3 +1113,44 @@ clear
 cd .forge
 nvim
 exit
+chezmoi re-add
+clear
+clear
+git push github gitea
+git push github; git push gitea
+clear
+ls
+clear
+just promote
+clear
+cd tall
+clear
+bash
+clear
+cd .forge
+nvim
+clear
+gitui
+clear
+tally add "feat: natural tag/priority processing from input"
+clear
+tally done natural
+clear
+tally list
+clear
+ls
+cleeeeeeear
+ls
+clear
+just prepare v1.14.0
+tally semver v1.14.0
+just prepare v1.14.0
+tally list --released v1.14.0
+clear
+just prepare v1.14.0
+clear
+just prepare v1.14.0
+clear
+tally list --released v1.14.0
+clear
+cd .forge
