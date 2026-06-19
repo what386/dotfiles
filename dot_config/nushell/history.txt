@@ -328,3 +328,788 @@ cd examples/; git clone https://github.com/hdngo/multi-threaded-downloader; cd .
 upstream install ollama/ollama
 upstream upgrade --check
 clear
+chezmoi re-add
+clear
+tally list
+tally add "feat: multi-worker downloads for large files"
+ls ~/.upstream/metadata/
+ls ~/.upstream/metadata/transactions.json
+cat ~/.upstream/metadata/transactions.json
+clear
+clear
+clear
+yazi
+clear
+upstream remove ollama
+ls .upstream/rollback/
+ls .upstream/rollback/ollama/
+ls .upstream/rollback/ollama/1781715410974696911-remove/
+ls .upstream/rollback/ollama/1781715410974696911-remove/artifact/
+ls .upstream/rollback/ollama/1781715410974696911-remove/artifact/ollama-linux-amd64/
+clear
+clear
+gitui
+just run install ollama/ollama
+clear
+ls
+clear
+tally list
+clear
+cargo test
+just test
+clear
+tally list
+tally add "remove unused functions/constants"
+tally list
+tally done multi
+tally done remov
+tally list
+clear
+tally remove SQL
+clear
+clear
+just test
+clear
+upstream remove ollama
+clear
+tally add "feat: progress bars for downloads"
+just run install ollama/ollama
+clear
+tally list
+clear
+clear
+cd
+cd proj
+ls
+ls archive/
+mv archive/scriptcenter/ programming/
+cd prog
+cd scriptcenter/
+clear
+ls
+clear
+git switch main
+git merge dev
+git push
+git switch dev
+git push
+clear
+ls Android/
+ls Android/Sdk
+cd mod
+clear
+ls -la
+clear
+cd Android
+clear
+ls
+cd Sdk
+ls
+cd water
+direnv allow
+cat .envrc
+cat .envrc | wayland-copy
+cat .envrc
+ls Android/Sdk/build-tools/
+ls Android/Sdk/cmdline-tools/
+clear
+ls Android
+eza -T  Android/
+clear
+ls Android/
+cat Android/env.bash
+clear
+cd
+ls .config/fish/
+cat .config/fish/config.fish
+cat Android/env.fish
+clear
+ls .bashrc
+cat .bashrc
+nano .bashrc
+mv Android/env.bash Android/env.sh
+ls Android/
+clear
+clear
+# Android SDK paths<\n>set -gx ANDROID_HOME "$HOME/Android/Sdk"<\n>set -gx ANDROID_SDK_ROOT "$HOME/Android/Sdk"<\n><\n># Android Virtual Devices<\n>set -gx ANDROID_AVD_HOME "$HOME/Android/avd"<\n><\n># SDK tools<\n>fish_add_path "$ANDROID_HOME/platform-tools"<\n>fish_add_path "$ANDROID_HOME/cmdline-tools/latest/bin"<\n>fish_add_path "$ANDROID_HOME/emulator":w
+clear
+ls
+clear
+upstream list codex
+clear
+ls .upstream
+clear
+ls Projects/
+clear
+eza Projects
+clear
+ls Projects
+clear
+fastfetch
+clear
+ls
+clear
+ls
+mv git Git
+clear
+ls
+clear
+ls Git
+clear
+ls
+clear
+ls Templates
+clear
+cat .config/user-dirs.dirs
+cat .config/user-dirs.locale
+clear
+ls
+clear
+eza
+ls
+ls -la
+cat .emulator_console_auth_token
+clear
+eza -l
+eza -la
+mv .zoxide.nu ~/.config/nushell/zoxide.nu
+cd nushell
+clear
+$nu.data_dir
+$nu.data-dir
+ls .local/share/nushell/
+ls .local/share/nushell/vendor
+ls .local/share/nushell/vendor/autoload/
+z 
+clear
+z
+clear
+zoxide
+clear
+cd .upstream
+clear
+ls
+clear
+eza -la
+ls metadata/
+clear
+ls
+clear
+ls
+clear
+ls
+ls metadata/
+ls tmp
+ls cache
+clear
+ls
+clear
+ls metadata
+clear
+ls
+ls metadata
+ls .local/share/atuin/init.nu
+cat .local/share/atuin/init.nu
+clear
+cd prog
+cd ig
+clear
+codex resume
+clear
+just gen-package
+clear
+rgr "Open Launcher"
+rgr "OPEN LAUNCHER"
+clear
+just gen-package
+clear
+upstream -V
+clear
+tally list
+just prepare v2.2.0
+clear
+tally add "feat: enter with no input for confirm is now a yes"
+clear
+tally add "feat: upgrade confirm option to press `c` in prompt to see changelog from installed to latest"
+tally list
+tally remove input
+clear
+tally list
+upstream upgrade
+clear
+upstream upgrade
+clear
+nvim .upstream/metadata/packages.json
+clear
+just run upgrade
+clear
+just run upgrade
+clear
+upstream changelog --help
+clear
+ls .upstream/metadata/packages.json
+cat .upstream/metadata/packages.json
+bat .upstream/metadata/packages.json
+clear
+ls .upstream/metadata/packages.json
+clear
+just run upgrade
+clear
+tally add "feat: latest and current special case tags for changelog subcommand"
+just run changelog codex --from current
+clear
+clear
+just run changelog upstream --from v2.0.0 --to latest
+tally list
+clear
+tally list
+tally done confirm
+tally done latest
+tally done parallel
+tally done computed
+tally done config
+clear
+tally list
+tally done docs
+tally remove progress
+tally list
+clear
+tally list
+clear
+just promote
+clear
+just prepare v2.2.0
+tally list
+clear
+just promote
+just publish v2.2.0
+clear
+ls
+clear
+upstream upgrade
+clear
+nvim .upstream/metadata/packages.json
+clear
+just run upgrade
+upstream list | rg atuin
+cat .config/fish/config.fish
+cat .config/fish/config.fish | rg atuin
+clear
+ls
+clear
+cd 
+clear
+cd Documents
+clear
+cd
+clear
+upstream -V
+clear
+cler
+clear
+ls .upstream
+ls .upstream/cache
+ls .upstream/tmp
+clear
+rm -rf .upstream/tmp
+clear
+just run hooks
+just run hooks check
+ls .upstream/
+just run hooks check
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls git
+ls Git
+clear
+ls
+clear
+ls Git
+ls Git | rg Yellow
+cd Git
+clear
+git clone https://github.com/Ap3xPr3d/YellowKey-Primer
+just run hooks check
+clear
+tally list
+clear
+git clone https://github.com/MSNightmare/GreatXML/tree/main
+git clone https://github.com/MSNightmare/GreatXML
+git clone https://github.com/MSNightmare/RoguePlanet
+cllear
+clear
+tally list
+clear
+clear
+nvim
+just test
+clear
+tally list
+clear
+tally list
+clear
+ls
+clear
+ls -la
+clear
+ls
+clear
+ls
+clear
+tally list
+just run hooks check
+just run hooks --help
+just run hooks init
+just run hooks check
+cd
+ls .upstream/
+cat .upstream/migration.json
+clear
+clear
+clear
+just run
+justt run package --help
+just run package --help
+free -h
+clear
+cargo upgrade
+cargo update
+cargo machete
+clear
+ls .upstream/cache
+ls .upstream/cache/build/
+ls .upstream/cache/source-archives/
+clear
+ls
+clear
+ls .upstream/
+clear
+ls .upstream/
+mkdir .upstream/temp
+rm -rf .upstream/tmp
+clear
+clearrrrrrrrrrrrrr
+clear
+tally list
+tally remove init
+clear
+tally list
+clear
+upstream -V
+clear
+tally list
+tally add "consider asset checksumming for file corruption"
+tally done migration
+tally done hooks check
+clear
+tally list
+tally list --json
+clear
+just lint
+just test
+clear
+just prepare v2.2.1
+clear
+upstream config set rollback.compression_level low
+upstream config set rollback.compression_level=low
+upstream config set rollback.stored_artifacts=3
+clear
+cat .config/upstream/config.toml
+nano .config/upstream/config.toml
+tally config list
+upstream config list
+nano .config/upstream/config.toml
+clear
+upstream config list
+clear
+tally add "BREAKING: move trusted keys out of config and into metadata/trust.json"
+clear
+cat .config/upstream/config.toml
+clear
+just test
+clear
+cllear
+clear
+tally list
+clear
+just prepare v2.3.0
+tally list
+tally done move
+tally 
+tally yank 2.2.1
+tally yank v2.2.1
+tally yank "feat: migration manifest"
+tally yank "fix: hooks check colors"
+tally list
+just prepare v2.3.0
+clear
+just run migrate
+clear
+uptime
+just promote
+just publish v2.3.0
+just run migrate
+upstream list
+clear
+cat .config/upstream/config.toml
+clear
+upstream upgrade
+upstream -V
+clear
+ls ~/.upstream/metadata
+cat ~/.upstream/metadata/trust.json
+clear
+upstream install Audacity audacity/audacity --help
+upstream install Audacity audacity/audacity --preview
+upstream install Audacity audacity/audacity --c preview
+upstream install Audacity audacity/audacity -c preview
+ping google.com
+ping 10.0.0.1
+ping 10.0.0.20
+ping google.com
+clear
+upstream install Audacity audacity/audacity -c preview
+upstream install audacity/audacity Audacity -c preview
+upstream remove Audacity
+upstream install audacity/audacity Audacity -c preview --desktop
+clear
+cd prog
+clear
+ls
+clear
+ls
+clear
+ls
+cd ..
+ls archive/
+cd archive/
+ls
+rm -rf stash-rs/
+rm -rf pakrat/
+clear
+ls
+rm -rf drover
+drover
+rm -rf optml
+clear
+ls
+clear
+cd upstream/
+nvim
+clear
+ls
+cd ..
+ls
+clear
+ls
+clear
+cd ..
+ls
+clear
+ls
+ls circuits/
+ls printable/
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+paru -R multios-usb-bin
+clear
+paru
+cd prog
+clear
+ls
+mv forge/ ../archive/
+clear
+ls
+mv scriptcenter/ ../archive/
+clear
+ls
+clear
+cd waterfall-launcher/
+clear
+just run refresh-release
+rgr "com.example.launchertest"
+just refresh-release
+tally add "configure spacing"
+just refresh-release
+clear
+tally list
+clear
+just prepare v1.5.0
+clear
+cd ..
+cd rs
+just prepare v1.5.0
+just refresh-release
+just prepare v1.5.0
+tally add "Renamed the Android package to com.what386.waterfall."
+tally list
+tally add "Updated release metadata, README, and repository templates for Waterfall Launcher."
+tally add "Prepared F-Droid-facing metadata for the next public release."
+tally list
+tally add Rename
+tally add Upda
+tally add Prep
+tally remove Rename
+tally remove Upda
+tally list
+tally remove Prep
+tally add "Renamed the Android package to com.what386.waterfall."
+tally add "Updated release metadata, README, and repository templates for Waterfall Launcher."
+tally add "Prepared F-Droid-facing metadata for the next public release."
+tally list
+tally done ren
+tally done upd
+tally done prep
+clear
+tally list
+clear
+just prepare v1.5.0
+tally
+cd s
+cd rs
+clear
+tally add "make azrail active when hidden in clean screen"
+clear
+kclear
+clear
+just prepare v1.5.0
+tally list
+cd rs
+tally list
+tally add "Renamed the Android package to com.what386.waterfall."
+tally add "Prepared F-Droid-facing metadata for the next public release."
+tally add "Updated release metadata, README, and repository templates for Waterfall Launcher."
+tally done Upd
+tally done Prep
+tally done Ren
+tally list
+clear
+just promote
+clear
+just promote
+git pull
+git pull github main
+clear
+gitui
+clear
+git pull github main
+git commit -m "merge main into main"
+git pull
+git-pushall
+git push github
+git push gitea
+git switch dev
+clear
+git rev-parse v1.5.0
+git switch main
+git rev-parse v1.5.0
+just publish v1.5.0
+clear
+just gen-package
+clear
+git rev-parse v1.5.0
+cd ..
+cd fdroiddata/
+clear
+nvim
+git clone https://github.com/what386/fdroiddata
+clear
+ls
+cd ..
+rm -rf fdroiddata/
+clear
+git clone https://gitlab.com/what386/fdroiddata
+cd fdroiddata/
+clear
+cp com.what386.waterfall.yml ../fdroiddata/metadata/
+ls metadata/
+clear
+clear
+git checkout -b com.what386.waterfall
+mkdir -p metadata
+cp ../waterfall-launcher/com.what386.waterfall.yml metadata/
+clear
+python3 -m venv .venv
+source .venv/bin/activate
+source .venv/bin/activate.fish
+fdroid rewritemeta com.what386.waterfall
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+upstream upgrade
+cat .ssh/id_ed25519.pub
+paru -S fdroidserver
+clear
+clear
+ls
+clear
+fish
+clear
+fdroid build -l com.what386.waterfall
+ls
+cd ..
+ls
+rm -rf fdroiddata/
+clear
+keytool
+clear
+keytool -genkeypair \<\n>    -v \<\n>    -keystore ~/.android/keys/waterfall-release.keystore \<\n>    -alias waterfall \<\n>    -keyalg RSA \<\n>    -keysize 4096 \<\n>    -validity 10000
+ls .android
+ls android
+ls Android
+ls Android/keys
+clear
+just build-release
+clear
+just gen-package
+clear
+ls
+clear
+ls ~/Android/
+ls ~/.android
+rm -rf ~/.android
+ls Android
+cd
+clear
+ls Android
+ls .android
+mkdir .android
+ls Android/keys
+clear
+gitui
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+cd tally
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+tally list
+clear
+cp -r ../upstream-rs/src/output/ src/
+clear
+tally list
+clear
+tally list
+clear
+tally
+tally list
+tally add "feat: pagination for long command outputs"
+tally add "feat: yank now supports semver matching"
+tally list
+tally
+tally scan --help
+cd .config
+cd tally
+clear
+tally list
+tally done pagin
+tally done yank
+clear
+tally list
+tally add "feat: more config options"
+tally done more
+just test
+cargo test
+nvim
+clear
+cd .con
+cd tal
+cd .con
+tally list
+scripts/publish.lash
+scripts/publish.lash v0.14.0
+clear
+git tag -d v0.14.0
+clear
+cargo test
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+git-pushall
+git push gitea && git push github
+git push gitea; git push github
+git switch dev
+git merge main
+clear
+git tag v0.14.0
+git push github v0.14.0
+clear
+ls
+clear
+clear
+ls
+clear
+ls
+clear
+cd ..
+cd .forge
+clear
+l
+sclear
+ls
+clear
+ls
+clear
+lash compile templates/rust/files/scripts/release/
+lash compile templates/rust/files/scripts/release/prepare.lash
+lash compile templates/rust/files/scripts/release/promote.lash
+lash compile templates/rust/files/scripts/release/publish.lash
+clear
+cp -r templates/rust/files/scripts/release/ ~/Projects/programming/
+clear
+cd
+clear
+cd prog
+nvim
+yazi
+clear
+cd rs
+chmod +x scripts/release/*.sh
+clear
+clear
+cd .forge
+nvim
+exit

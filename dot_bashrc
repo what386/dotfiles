@@ -15,6 +15,6 @@ export PATH="$HOME/.local/bin:$PATH"
 . "$HOME/.cargo/env"
 export DOTNET_ROOT="$HOME/.dotnet"
 export PATH="$HOME/.dotnet:$PATH"
-[ -f "$HOME/Android/env.bash" ] && . "$HOME/Android/env.bash"
+[ -f "$HOME/Android/env.sh" ] && . "$HOME/Android/env.sh"
 
 source /home/bmorin/.config/broot/launcher/bash/br

@@ -19,13 +19,13 @@ run *args:
     cargo run --bin "{{ forge.project.name }}" -- %{{args}}%
 
 prepare version:
-    lash run scripts/release/prepare.lash %{{version}}%
+    scripts/release/prepare.sh %{{version}}%
 
 promote:
     just lint
     just test
-    lash run scripts/release/promote.lash
+    scripts/release/promote.sh
 
 publish version:
-    lash run scripts/release/publish.lash %{{version}}%
+    scripts/release/publish.sh %{{version}}%
     git switch dev

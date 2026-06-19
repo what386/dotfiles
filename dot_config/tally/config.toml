@@ -1,6 +1,25 @@
 [preferences]
-auto_commit_todo = true
-auto_complete_tasks = true
+auto_commit_todo = false
+auto_complete_tasks = false
+editor = "nvim"
+
+[auto_commit]
+add = true
+done = false
+remove = false
+semver = true
+yank = true
 
 [git]
 done_prefix = "done:"
+track_created_files = "always"
+
+[scan]
+git_log_limit = 100
+todo_markers = ["TODO:", "FIXME:"]
+done_markers = ["DONE:", "SHIPPED:"]
+
+[matching]
+task_min_score = 90.0
+source_done_min_score = 90.0
+released_min_score = 90.0
