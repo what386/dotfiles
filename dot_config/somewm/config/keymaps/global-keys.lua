@@ -95,9 +95,9 @@ local keys = {
 	end, { description = "force quit", group = "awesome" }),
 
 	awful.key({ modkey, "Shift" }, "v", function()
-		awful.spawn.with_shell(
-			[[wl-paste --no-newline | wtype -d 12 -]]
-		)
+		awful.spawn.with_shell([[
+			wl-paste --no-newline | wtype -m shift -m logo -s 50 -d 12 -
+		]])
 	end, { description = "paste clipboard as text", group = "utils" }),
 
 	-- Launcher

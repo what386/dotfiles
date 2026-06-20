@@ -1154,3 +1154,76 @@ clear
 tally list --released v1.14.0
 clear
 cd .forge
+clear
+chezmoi re-add
+just promote
+just fmt
+clear
+just lint
+clear
+tally list
+just lint
+just promote
+just publish v0.14.0
+git tag -d v0.14.0
+just publish v0.14.0
+clear
+ls
+clear
+ls
+clear
+ls
+ls VMs
+ls VMs/images/
+clear
+nvim config.toml
+clear
+cat config.toml
+clear
+cd
+clear
+ls
+ls VMs
+ls VMs/machines/
+ls VMs/firmware/
+clear
+ls
+clear
+ls
+clear
+lsc
+ls
+clear
+ls
+c
+ls
+clear
+ls
+clear
+ls VMs
+ls VMs/shared
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+ls Pictures
+clear
+ls
+ls Downloads
+upstream rollback list
+upstream rollback prune
+clear
+clear
+cat .ssh/id_ed25519.pub
+clear
+cat .ssh/id_ed25519.pub
+clear
+cd some
+cd keybind
+cat .ssh/id_ed25519.pub
+clear
+cat .ssh/id_ed25519.pub
