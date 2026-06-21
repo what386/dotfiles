@@ -1227,3 +1227,260 @@ cd keybind
 cat .ssh/id_ed25519.pub
 clear
 cat .ssh/id_ed25519.pub
+chezmoi re-add
+systemctl status thermald
+systemctl status throttled
+clear
+clear
+cat /etc/fstab
+free -h
+clear
+swapon --show
+ls /swap
+clear
+ls
+clear
+sudo btrfs filesystem mkswapfile --size 64g --uuid clear /swap/swapfile
+swapon --show
+clear
+swapon --show
+sudo swapoff /swap/swapfile
+sudo rm /swap/swapfile
+clear
+sudo btrfs filesystem mkswapfile --size 64g /swap/swapfile
+sudo swapon /swap/swapfile
+swapon --show
+sudo findmnt -no UUID -T /swap/swapfile
+cat /etc/fstab
+clear
+sudo findmnt -no UUID -T /swap/swapfile
+sudo btrfs inspect-internal map-swapfile -r /swap/swapfile
+clear
+sudo nano /etc/mkinitcpio.conf
+cat /etc/fstab
+swapon --show
+sudo swapoff -a
+sudo swapon -a
+swapon --show
+clear
+systemctl list-unit-files | grep -Ei 'zram|zramswap'
+sudo systemctl restart systemd-zram-setup@zram0.service
+sudo systemctl start dev-zram0.swap
+swapon --show
+cat /etc/systemd/zram-generator.conf
+ls /etc/systemd/zram-generator.conf /usr/lib/systemd/zram-generator.conf.d/ /etc/systemd/zram-generator.conf.d/ 2>/dev/null
+clear
+zramctl
+clear
+swapon --show
+clear
+paru -S amd-ucode
+clear
+amdgpu
+clear
+cd
+ls
+clear
+touch TODO.txt
+cat /etc/default/limine
+cat /etc/default/limine | grep intel
+clear
+nvim TODO.txt
+clear
+exit
+clear
+cd prog
+ls
+clear
+upstream upgrade
+ls
+clear
+ls
+clear
+upstream probe --help
+clear
+cd rs
+clear
+just test
+clear
+gitui
+clear
+gitui
+clear
+clear
+ls
+clear
+just test
+clear
+just test
+clear
+upstream remove rg
+upstream search ripgrep
+upstream probe BurntSushi/ripgrep rg
+just run probe BurntSushi/ripgrep rg
+clear
+just run probe BurntSushi/ripgrep
+clear
+paru
+clear
+upstream -V
+clear
+just run probe BurntSushi/ripgrep
+clear
+just run probe BurntSushi/ripgrep rg
+rg
+clear
+just run probe BurntSushi/ripgrep
+clear
+just run probe --help
+just run probe BurntSushi/ripgrep -t all
+just run probe BurntSushi/ripgrep --tags all
+just run probe BurntSushi/ripgrep --tag all
+just run probe --help
+clear
+clear
+tally list
+clear
+tally list
+clear
+clear
+tally list
+tally remove asset checksumming
+clear
+ls .upstream/
+rm -rf .upstream/tmp
+clear
+tally list
+clear
+just run probe BurntSushi/ripgrep
+clear
+upstream --version
+clear
+cargo test
+clear
+just prepare v2.4.0
+git switch dev
+git merge main
+just prepare v2.4.0
+clear
+ls
+clear
+just prepare v2.4.0
+cd .forge
+clear
+cclear
+clear
+just promote
+clear
+rust toolchain
+clearrr
+clear
+just promote
+clear
+just publish v2.4.0
+clear
+just run probe what386/upstream-rs --dry-run
+cargo test
+clear
+just run probe what386/upstream-rs --dry-run --limit 10
+codex
+clear
+nvim
+clear
+upstream upgrade
+upstream list
+clear
+just run upgrade
+clear
+upstream -V
+upstream list
+upstream list --json
+upstream probe -h
+clear
+clear
+ls
+clear
+tally done fix
+clear
+cargo test
+clear
+just prepare v2.4.1
+just promote
+just test
+clear
+just promote
+clear
+just publish v2.4.1
+clear
+ls
+clear
+upstream upgrade
+clear
+tally --version
+clear
+cd ..
+cd tal
+clear
+tally list
+tally -V
+clear
+just run yank v1.14.0
+clear
+ls
+clear
+just run yank feat: pag
+just run yank feat:
+tally yank feat:
+clear
+just run yank v0.14.0
+clear
+just run yank v0.14.0
+clear
+just run yank v0.14.0
+clear
+just prepare v0.14.0
+cd rs
+clear
+cd .forge
+clear
+cd rs
+clear
+ls
+clear
+ls
+clear
+just prepare v0.14.0
+tally list
+tally yank v0.14.0
+just yank v0.14.0
+just run yank v0.14.0
+just prepare v0.14.0
+just promote
+just publish v0.14.0
+git tag -d v0.14.0
+just publish v0.14.0
+clear
+ls
+clear
+git switch dev
+clear
+cd rs
+cd .forge
+cd templates/
+ls
+cd rust
+clear
+nvim
+cd files
+cargo generate-lockfile --help
+nvim
+clear
+cd ..
+cd forge
+clear
+cd ..
+cd prog
+ls
+mv ../archive/forge/ ./
+cd forge/
+clear

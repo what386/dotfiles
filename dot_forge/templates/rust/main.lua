@@ -29,6 +29,8 @@ forge.args({
 
 forge.render_dir("")
 
+forge.prog.rust.gen_lockfile()
+
 if forge.vars.git then
     local ok = forge.prog.git.init({ allow_fail = true })
     if ok then

@@ -8,4 +8,4 @@ min_forge_version = "0.1.0"
 name = "what386"
 
 [requires]
-programs = ["git"]
+programs = ["git", "rust"]

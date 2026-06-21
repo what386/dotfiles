@@ -2,8 +2,8 @@
   "version": 1,
   "templates": [
     {
-      "name": "rust",
-      "path": "templates/rust"
+      "name": "rust-cli",
+      "path": "templates/rust-cli"
     }
   ]
 }
