@@ -1484,3 +1484,1466 @@ ls
 mv ../archive/forge/ ./
 cd forge/
 clear
+chezmoi re-add
+clear
+cd .forge
+clear
+ls
+clear
+ls
+clear
+cd rs
+clear
+ls
+clear
+upstream upgrade --check
+upstream remove lash-lang
+clear
+ls
+clear
+ls
+clear
+tally list
+upstream upgrade tally
+clear
+forge --version
+clear
+cargo generate-lockfile
+clear
+cargo upgrade
+cargo update
+cargo generate-lockfile
+clear
+pkill -9 vesk
+tally list
+clear
+cargo generate-lockfile
+clear
+just prepare v0.3.0
+clear
+upstream config get github
+clear
+yazi
+clear
+just prepare v0.3.0
+clear
+tally -V
+tally yank v0.3.0
+clear
+tally add "feat: doctor now checks if api token is working"
+tally list
+clear
+just test
+just prepare v0.3.0
+clear
+just promote
+tally list
+upstream list
+upstream remove fd
+upstream find fd
+clear
+clear
+tally list
+clear
+upstream list
+upstream remove fd rg yq
+upstream find fd
+upstream find ripgrep
+upstream find yq
+clear
+tally list
+tally add "feat: onboarding for setting up api keys"
+clear
+tally list
+clear
+cargo generate-lockfile
+clear
+ls src
+eza src -l
+eza src -T
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+tally list
+clear
+just test
+clear
+just test
+clear
+ls
+clear
+upstream -V
+clear
+just test
+clear
+just test
+clear
+tally list
+clear
+tally list
+clear
+upstream hooks
+clear
+just run doctor
+clear
+just run doctor
+clear
+tally list
+tally done docs
+clear
+tally add "feat: `manual` subcommand to parse READMEs for users"
+upstream
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+tally list
+clear
+ls
+clear
+ls
+clear
+tally list
+clear
+ls
+clear
+tally list
+clear
+just run rollback prune
+clear
+tally list
+tally add "feat: rollback prune now has a total progress callback"
+tally done rollback
+clear
+tally list
+clear
+tally add "feat: consider bulk installs with `upstream install --package REPO=NAME --package REPO=NAME`"
+clear
+ls
+clear
+ls cache
+clear
+ls .upstream/cache
+clear
+just run docs --help
+clear
+just run docs --help
+just run docs name
+just run docs name name
+just run docs upstream name
+clear
+just run docs upstream name
+just run docs upstream name aee aghg
+clear
+clear
+just run docs upstream name
+clear
+just run docs upstream name
+clear
+just run docs upstream name
+clear
+ls
+clear
+just run docs upstream name
+clear
+just run docs upstream usage
+clear
+just run docs upstream usage
+clear
+just run docs upstream usage
+clear
+just run docs upstream usage
+clear
+just run docs upstream usage
+clear
+just run docs rg usage
+just run docs rg quickstart
+just run docs rg quick
+just run docs rg examples
+clear
+tally list
+tally add "feat: merge packages.json and metadata.json into one packages.db SQL file"
+tally list
+clear
+just run docs rg examples
+clear
+ls .upstream/cache
+ls .upstream/cache/docs
+ls .upstream/cache/docs/github/
+ls .upstream/cache/docs/github/BurntSushi_ripgrep/
+clear
+ls .upstream/cache/
+ls .upstream/cache/docs
+rm -rf .upstream/cache/docs/github/
+clear
+gitui
+clear
+ls
+clear
+ls
+clear
+cd .upstream/
+clear
+just run docs rg examples
+clear
+just run docs rg examples --offline
+nmcli
+clear
+just run docs rg examples
+clear
+tally list
+tally done docs
+tally done `docs` subcommand
+clear
+ls
+clear
+cd water
+clear
+tally add "feat: run README markdown output through glow when available"
+clear
+glow
+clear
+just run docs rg examples
+clear
+tally list
+clear
+tally list
+clear
+tally list
+tlaly done README markdown
+tally done README markdown
+clear
+c;ear
+clear
+just run changelog upstream --from v2.0.0 --to latest
+clear
+just run docs upstream
+clear
+clear
+just run docs upstream
+clear
+just run docs upstream
+clear
+just run docs --fetch
+clear
+tally list
+clear
+just run docs --fetch
+clear
+just run docs --fetch
+clear
+ls
+clear
+clear
+tally list
+ls .upstream/metadata
+ls meta
+ls metadata/
+clear
+clear
+clea
+clear
+sudo systemctl restart display-manager
+clear
+cd rs
+bash
+clear
+just run --help
+just run docs --fetch
+clear
+tally list
+clear
+clear
+tally list
+clear
+just run docs upstream
+clear
+tally list
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+tally list
+just lint
+clear
+just prepare v2.5.0
+cd .forge
+clear
+tally yank v2.5.0
+just prepare v2.5.0
+clear
+just promote
+clear
+codex
+clear
+just publish v2.5.0
+clear
+tally list
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+tally list
+clear
+ls .upstream
+just test
+clear
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls .upstream/rollback
+clear
+ls .upstream/metadata/
+ls
+clear
+tally add BREAKING: remove pin reason #breaking #cli
+tally list
+tally done remove pin
+clear
+tally list
+clear
+clear
+ls
+clear
+just run migrate
+ls .upstream/metadata/
+just run list
+clear
+cargo build --release
+clear
+ls target/debug/
+ls target/debug/upstream
+clear
+just run doctor
+clear
+ls .upstream/metadata/transactions.json
+clear
+cd .upstream/
+clear
+ls
+cat migration.json
+upstream -V
+clear
+upstream list
+clear
+upstream doctor
+cargo build --release
+clear
+ls target/release/upstream
+ls ~/.upstream/packages/binaries/upstream-x86_64-unknown-linux-gnu
+clear
+ls metadata/
+clear
+tally list
+clear
+tally list
+just run list
+clear
+ls
+clear
+just run rollback prune
+clear
+ls
+ls metadata/
+ls rollback/
+clear
+ls
+clear
+clear
+ls
+clear
+just run rollback prune
+ls metadata/
+ls metadata/transactions.json
+cat metadata/transactions.json
+cat metadata/transactions.json | wl-clip
+cat metadata/transactions.json | wl-copy
+clear
+clear
+ls
+clear
+ls metadata/transactions.json
+just run rollback prune
+cat metadata/transactions.json
+ls rollback
+clear
+ls metadata/
+ls metadata/rollback.json
+clear
+clear
+ls
+clear
+cat metadata/rollback.json
+ls
+clear
+ls
+clear
+ls
+clear
+ls metadata/
+cat metadata/rollback.json
+clear
+ls
+clear
+upstream -V
+clear
+tally list
+clear
+tally list
+nvim
+clear
+tally add internal: merge rollback.json and transactions.json into rollback.json file
+clear
+tally done merge
+clear
+cargo generate-lockfile
+cargo upgrade
+cargo update
+clear
+tally list
+ls metadata/
+rm metadata/transactions.json
+rm metadata/rollback.json
+clear
+just run hooks check
+just run rollback prune
+ls metadata
+clear
+just run upgrade
+clear
+just run rollback list
+just run rollback
+just run rollback restore
+just run upgrade
+clear
+just run list
+just run rollback list
+clear
+ls
+clear
+ls temp
+clear
+just run install what386/upstream-rs upstream
+clear
+clear
+ls
+clear
+exit
+clear
+ls
+clear
+clar
+clear
+ls
+clear
+ls
+clear
+tally list
+tally add internal: remove completion caching
+tally list
+tally done remov
+clear
+tally list
+clear
+clear
+ls
+clear
+ls
+clear
+ls .cache
+clear
+cd .upstream/cache
+ls
+rm -rf completions/
+clear
+ls
+clear
+tally list
+upstream -V
+clear
+upstream upgrade
+just run upgrade
+just run install https://github.com/jorgerojas26/lazysql
+lazysql --help
+clear
+cd ..
+cd metadata/
+lazysql packages.db
+clear
+cd ~/.upstream
+clear
+cd metadata
+clear
+ls
+clear
+ls
+cp packages.db packages.db.old
+clear
+cp packages.json.bak packages.json
+cp metadata.json.bak metadata.json
+ls
+clear
+rm packages.db
+clear
+ls
+rm *.bak
+ls
+clear
+just run migrate
+ls
+clear
+ls
+clear
+cd .upstream
+cd metadata
+clear
+lazysql packages.db
+clear
+just run list
+just run list bun
+clear
+tally list
+clear
+ls
+clear
+lazysql packages.db
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+clar
+ls
+clear
+ls
+rm packages.db.old
+rm packages.db
+cp packages.json.bak packages.json
+cp metadata.json.bak metadata.json
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+upstream -V
+ls
+clear
+clear
+codex
+clear
+git reset --hard v2.5.0
+clear
+cat rollback.json
+clear
+ls
+clear
+tally list
+tally add "BREAKING: rollback is now names-only. transactions are no longer recorded. CLI shape reverted."
+clear
+tally list
+tally add "BREAKING: remove 'metadata' storage and pin reason"
+clear
+ls
+clear
+ls
+rm metadata.json
+rm metadata.json.bak
+clear
+ls
+clear
+tally list
+tally done breaking
+clear
+tally list
+clear
+tally list
+clear
+tally lis
+tally list
+tally add "BREAKING: make migrate a flag in doctor instead of its own first class subcommand"
+clear
+tally done BREAKING
+clear
+ls
+clear
+tally list
+clear
+just test
+clear
+ls
+clear
+ls
+clear
+nvim
+cd .nvim
+cd nvim
+clear
+nvim
+clear
+clear
+ls
+clear
+ls
+clear
+rgr appimage
+rgr Appimage
+rgr AppImage
+rgr AppImageExtractor
+rgr integration::AppImageExtractor
+rgr integration::compression_handler
+rgr integration::permission_handler
+jclear
+clear
+cargo test
+rgr integration::appimage_extractor::AppImageExtractor
+:w
+clear
+just test
+rg permission_handler
+clear
+nvim
+clear
+nvim
+clear
+nvim
+clear
+just test
+clear
+cd wate
+clear
+just promote
+clear
+clear
+psss
+ps
+ps | sort-by cpu
+clear
+ps | sort-by cpu
+clear
+nvim
+clear
+tally list
+tally add "disable dep metadata when building apks/bundles"
+tally done dep meta
+clear
+just prepare v1.6.0
+clear
+l
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+just prepare v1.6.0
+./gradlew
+./gradlew --help
+./gradlew --help | rg lnt
+./gradlew --help | rg fmt
+./gradlew --help | rg format
+clear
+just prepare v1.6.0
+just promote
+just gen-package
+clear
+clear
+free -h
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+rm packages.json.bak
+cp packages.json packages.json.old.bak.real
+clear
+just run doctor
+just run doctor --migrate
+ls
+rm packages.json
+mv packages.json.old.bak.real packages.json.old
+clear
+ls
+clear
+just run list
+clear
+ls
+rm packages.db
+cp packages.json.old packages.json
+clear
+ls
+clear
+just run doctor --migrate
+clear
+clear
+ls
+clear
+rm packages.json
+clear
+ls
+clear
+ls
+cp packages.db packages.db.bak
+ls
+clear
+mv packages.json.old packages.json.bak
+ls
+clear
+ls
+clear
+just run upgrade
+just run list Pear\ Desktop
+just run remove Pear\ Desktop
+just run remove Pear\ Desktop --force
+clear
+ls
+clear
+just run upgrade
+clear
+just inspect-db
+just run upgrade
+just run remove upstream --force
+ls
+clear
+clear
+just run upgrade --check
+just inspect-db
+clear
+just inspect-db
+clear
+ls
+cp packages.db packages.db.test
+ls
+clear
+just run upgrade
+ls ~/.upstream/temp
+mv ~/.upstream/temp/direnv.linux-amd64.old ~/.upstream/packages/binaries/direnv.linux-amd64
+mv ~/.upstream/temp/gitui-linux-x86_64.old ~/.upstream/packages/archives/gitui-linux-x86_64
+ls ~/.upstream/temp
+clear
+just run upgrade
+clear
+just run upgrade
+ls
+cp packages.json.bak packages.json
+clear
+just run install what386/upstream-rs upstream
+upstream upgrade
+upstream remove Pear\ Desktop --force
+upstream remove "Pear Desktop" --force
+clear
+ls
+nvim packages.json
+cp packages.json packages.json.test
+clear
+upstream upgrade
+just run remove upstream
+just run install what386/upstream-rs upstream --tag v2.4.1
+ls
+rm packages.json
+cp packages.json.test packages.json
+clear
+upstream upgrade
+clear
+ls
+clear
+ls
+clear
+just run doctor
+just run reinstall direnv gitui
+just run reinstall direnv gitui --force
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+just run reinstall direnv gitui --force
+ls ~/.upstream/temp
+mv ~/.upstream/temp/gitui-linux-x86_64.old ~/.upstream/packages/archives/gitui-linux-x86_64
+mv ~/.upstream/temp/direnv.linux-amd64.old ~/.upstream/packages/binaries/direnv.linux-amd64
+clear
+just run doctor
+clear
+just run list
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run list
+clear
+just run upgrade
+mv ~/.upstream/temp/gitui-linux-x86_64.old ~/.upstream/packages/archives/gitui-linux-x86_64
+mv ~/.upstream/temp/direnv.linux-amd64.old ~/.upstream/packages/binaries/direnv.linux-amd64
+ls ~/.upstream/temp
+clear
+ls
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+upstream -V
+clear
+just run uninstall upstream
+just run remove upstream
+upstream --help
+clear
+just run doctor
+just run remove upstream lazysql --force
+cd ~/.upstream
+rm packages/binaries/upstream-x86_64-unknown-linux-gnu
+rm symlinks/upstream
+rm symlinks/lazysql
+clear
+ls
+just run install what386/upstream-rs upstream --tag v2.2.0
+rm packages.json
+cp packages.json.test packages.json
+upstream upgrade
+clear
+just run uninstall upstream
+just run remove upstream
+just run install what386/upstream-rs upstream --tag v2.4.0
+upstream upgrade
+clear
+clear
+just run remove upstream
+clear
+clear
+nvim packages.json
+:q
+clear
+ls
+rm packages.json packages.json.test
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+clear
+ls
+cp packages.json.bak packages.json
+clear
+just run install what386/upstream-rs upstream --tag v2.4.0
+upstream upgrade
+nvim packages.json
+ls
+rm packages.json
+rm packages.db
+cp packages.db.test packages.db
+clear
+clear
+just run install https://github.com/jorgerojas26/lazysql
+rm -rf /home/bmorin/.upstream/packages/archives/lazysql_Linux_x86_64/
+just run install https://github.com/jorgerojas26/lazysql
+clear
+just inspect-db
+clear
+ls
+rm packages.db.test
+cp packages.db packages.db.test
+clear
+ls
+clear
+ls
+mkdir old
+cd old
+git clone https://github.com/what386/upstream-rs 
+ls
+cd upstream-rs/
+git checkout v2.2.0
+ls
+cd ..
+ls
+clear
+mkdir older
+cd older
+git clone https://github.com/what386/upstream-rs 
+cd upstream-rs/
+git checkout v2.1.0 
+clear
+cd ..
+clear
+clear\
+clear
+just run upgrade
+ls
+clear
+free -h
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+rm packages.db
+cp packages.db.test packages.db
+clear
+ls
+clear
+nano .config/upstream/config.toml
+clear
+cd
+cd .config
+cd upstream/
+clear
+nvim config.toml
+clear
+ls
+clear
+cd
+cd .upstream
+ls
+clear
+ls
+cd metadata
+clear
+ls
+clear
+ls
+rm packages.db
+cp packages.db.test packages.db
+just run upgrade
+ls .upstream/temp
+ls ~/.upstream/temp
+clear
+just run upgrade
+clear
+ls
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+clear
+FreeCAD
+clear
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+clear
+just run upgrade
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+clear
+just run upgrade
+clear
+rm packages.db
+cp packages.db.test packages.db
+just run upgrade
+clear
+rm packages.db
+cp packages.db.test packages.db
+just run upgrade
+clear
+just run upgrade
+clar
+clear
+ls
+clear
+c;ear
+ls
+clear
+clear
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run upgrade
+clear
+ls
+clear
+ls
+clear
+ls
+rm packages.db
+cp packages.db.test packages.db
+clear
+just run doctor
+just run remove upstream
+rm ~/.upstream/symlinks/upstream
+clear
+upstream 
+clear
+just run doctor
+cd ..
+clear
+rm packages/binaries/upstream-x86_64-unknown-linux-gnu
+upstream remove direnv --force
+just run remove direnv dz6 eza FreeCAD minisign --force
+just run install direnv/direnv
+clear
+just run install https://github.com/jedisct1/minisign
+just run install https://github.com/freecad/freecad FreeCAD --desktop
+just run install https://github.com/mentebinaria/dz6
+just run install https://github.com/eza-community/eza
+just run install https://github.com/direnv/direnv
+clear
+clear
+ls
+clear
+cd rs
+clear
+ls
+clear
+ls .upstream/metadata/
+cd .upstream/metadata/
+clear
+cp packages.json.bak packages.json
+just run install what386/upstream-rs upstream
+clear
+just run upgrade
+clear
+ls
+clear
+rm packages.db.test
+ls
+rm packages.json
+clear
+ls
+clear
+ls
+clear
+ls
+rm transactions.json
+ls rollback.json
+cat rollback.json
+rm rollback.json
+just run doctor
+clear
+just run rollback --prune
+just run rollback --prune all
+clear
+tally list
+clear
+clear
+cd ..
+ls rollback
+rm -rf rollback/*
+ls rollback
+clear
+ls
+clear
+just run upgrade
+clear
+ls
+clear
+just run upgrade
+clear
+just run upgrade
+clear
+clear
+ls
+clear
+just inspect-db
+just run upgrade
+ls
+clear
+just inspect-db
+just run upgrade
+clear
+just inspect-db
+clear
+cd metadata/
+ls
+cp packages.db packages.db.test
+clear
+just run upgrade
+just run remove yazi --force
+just run install sxyazi/yazi
+clear
+gitui
+clear
+just run list
+just run uninstall dust
+just run remove dust
+just run find dust
+clear
+just run remove dust
+just run install bootandy/dust
+clear
+upstream upgrade --check
+just run upgrade --check
+clear
+just run upgrade --check
+clear
+just run upgrade --check --json
+clear
+ls
+clear
+just run list | rg Free
+just run list
+just run list --json
+clear
+clear
+just run list rg
+just run list
+clear
+ls
+clear
+tally list
+tally add "feat: improve list <package> UI"
+tally add feat: add install type and commit hash to list
+just run list rg
+just run list
+ls
+clear
+cleaaar
+clear
+clear
+clear
+just run list rg
+clear
+just run list rg
+just run list riprip
+clear
+just run upgrade --check
+paru
+clear
+just run install https://github.com/michei69/pear-desktop "Pear Desktop" --desktop
+paru
+paru -R orcaslicer-bin
+paru -R orcaslicer
+just run install https://github.com/michei69/pear-desktop Pear\ Desktop --desktop
+clear
+pacan -Qmq | paru -Ta -
+pacman -Qmq | paru -Ta -
+paru -R orca-slicer-bin
+clear
+cd
+clear
+tally list
+tally done improve list
+tally done move
+tally done add
+tally done add install type
+tally done move packages.json
+clear
+tally list
+just run rollback --help
+clear
+just prepare v2.5.0
+just promote
+clear
+ls
+clear
+clear
+just run upgrade
+clear
+just inspect-db
+clear
+ls
+clear
+ls
+clear
+just run install https://github.com/OrcaSlicer/OrcaSlicer Orca\ Slicer --desktop
+clear
+just run list
+tcp
+udp
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+just run upgrade
+clear
+just inspect-db
+clear
+cat ~/.config/upstream/config.toml > tests/ephemeral/.config/upstream/config.toml
+ls
+clear
+ls
+clear
+cat ~/.config/upstream/config.toml > ./tests/ephemeral/.config/upstream/config.toml
+xcp ~/.config/upstream/config.toml ./tests/ephemeral/.config/upstream/config.toml
+clear
+just promote
+clear
+just run list rg
+clear
+tally list
+tally done BREAKING: 
+tally done BREAKING:
+tally done improve list
+tally done add install type
+tally add internal: move
+tally done internal: move
+clear
+just prepare v2.6.0
+just promote
+just publish v2.6.0
+clear
+just run install what386/upstream-rs upstream
+clear
+upstream docs upstream
+upstream docs upstream usage
+jjjjjjjjclear
+clear
+upstream -V
+clear
+ls .upstream/
+cd .upstream/metadata/
+clear
+ls
+rm packages.db.test
+rm packages.db.bak
+clear
+ls
+rm packages.json.bak
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+ls
+upstream rollback --prune
+ls
+cat trust.json
+clear
+ls
+cat packages.db
+clear
+ls
+clear
+Pear Desktop 
+Pear\ Desktop
+clear
+cd
+ls .local/share/applications/
+cat .local/share/applications/Pear\ Desktop.desktop
+cat '.local/share/applications/Pear Desktop.desktop'
+./.upstream/packages/appimages/YouTube-Music-3.11.13.AppImage
+clear
+upstream remove Pear\ Desktop
+upstream remove "Pear Desktop"
+clear
+ls /tmp
+rm -rf /tmp/upstream-*
+ls /tmp
+clear
+./.upstream/packages/appimages/YouTube-Music-3.11.13.AppImage
+clear
+upstream install michei69/pear-desktop "Pear Desktop" --desktop
+clear
+./.upstream/packages/appimages/YouTube-Music-3.11.13.AppImage
+clear
+upstream remove "Pear Desktop"
+dz6
+clear
+eza
+clear
+direnv
+clear
+paru -R python-validity
+fprintd
+clear
+pacman -Qs 'fprint|open-fprint'
+sudo systemctl disable --now open-fprintd.service python3-validity.service 2>/dev/null
+sudo pacman -Rs open-fprintd python-validity
+sudo pacman -Rs open-fprintd
+paru -S fprintd
+sudo systemctl enable --now fprintd.service
+sudo systemctl unmask fprintd.service
+sudo systemctl enable --now fprintd.service
+paru -R fprintd
+paru -S fprintd
+sudo systemctl enable --now fprintd.service
+systemctl status fprintd.service
+clear
+busctl --system status net.reactivated.Fprint
+clear
+sudo systemctl disable --now open-fprintd.service
+sudo systemctl stop open-fprintd.service
+reboot
+fprintd-enroll
+fprintd-enroll left-index-finger
+fprintd-enroll bmorin right-index-finger
+clear
+pgrep fprintd
+pkill fprintd
+sudo pkill fprintd
+pgrep fprintd
+sudo pkill -9 fprintd
+pgrep fprintd
+clear
+fprintd-enroll bmorin right-index-finger
+fprintd-enroll bmorin left-index-finger
+clear
+fprintd-enroll bmorin -f left-index-finger
+fprintd-enroll bmorin -f right-index-finger
+fprintd-enroll bmorin -f right-thumb
+fprintd-verify
+fprintd-verify --help
+fprintd-verify -f right-index-finger
+clear
+pcsc_scan 
+clear
+paru -R intel-ucode
+clear
+fastfetch
+clear
+cd rs
+clear
+just build-release
+clear
+ls
+just
+cargo build --release
+cargo clean
+just build-release
+clear
+cargo build --release
+clear
+cargo clean
+clear
+dust --help
+clear
+dust
+clear
+sudo limine-update
+clear
+sudo dmesg -l err,warn | grep -i firmware
+clear
+lspci
+clear
+cd some
+clear
+ls
+clear
+nvim
+clear
