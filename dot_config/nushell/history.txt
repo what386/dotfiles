@@ -3138,3 +3138,38 @@ btm
 clear
 nvim
 clear
+cd
+clear
+cd git
+chezmoi re-add
+git clone https://github.com/ClementTsang/bottom
+clear
+ls
+clear
+ls
+ls GreatXML
+rm -rf ytmdesktop2/
+rm -rf python-validity/
+rm -rf openlauncher/
+rm -rf odysseus/
+clear
+ls
+ls RoguePlanet/
+clear
+ls
+clear
+ls
+cd bottom
+clear
+ls
+clear
+git checkout custom-binds
+git branch custom-binds
+git checkout custom-binds
+clear
+cd waterfall
+clear
+bash
+clear
+cd nvim
+nvim
