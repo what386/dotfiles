@@ -3173,3 +3173,72 @@ bash
 clear
 cd nvim
 nvim
+cd wat
+clear
+chezmoi re-add
+just gen-package
+clear
+git-pushall
+git push github; git push gitea
+clear
+gp
+clear
+fastfetch
+lear
+clear
+ls
+clear
+clear
+sudo nano /etc/default/limine
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+lear
+clear
+bottom
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+cd git
+rm -rf bottom/
+git clone https://github.com/ClementTsang/bottom
+cd bottom
+git branch vim-bindings
+git checkout vim-bindings
+clear
+ls
+clear
+ls
+clear
+ls
+clear
+nvim
+clear
+cd ..
+rm -rf bottom/
+clear
+cd
+clear
+cd nushell
+cd ..
+chezmoi list
+chezmoi --help
+chezmoi list --help
+chezmi managed
+chezmoi managed
+chezmoi managed --help
+clear
+ls
+clear
+eza -l
+eza -a
+clear
+eza -a
