@@ -24,7 +24,7 @@ local function get_screen_geometry()
 	local screen_width = screen_geom.width
 	local screen_height = screen_geom.height
 	local panel_width = screen_width - lr_margins * 2
-	local panel_height = dpi(500)
+	local panel_height = dpi(600)
 	local panel_x = screen_geom.x + lr_margins
 	return {
 		screen = focused_screen,

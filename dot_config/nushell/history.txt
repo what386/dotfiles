@@ -3017,3 +3017,124 @@ cat id_ed25519.pub
 clear
 bash
 clear
+chezmoi re-add
+clear
+systemctl hibernate
+clear
+nano /etc/mkinitcpio.conf
+clear
+systemctl hibernate
+swapon --show
+cat /proc/cmdline
+findmnt -no SOURCE,UUID -T /swap/swapfile
+clear
+cd
+clear
+ls /boot
+sudo ls /boot
+sudo nano /boot/limine.conf
+sudo nvim /boot/limine.conf
+sudo nano /boot/limine.conf
+clear
+sudo mkinitcpio -P 
+ls /swap/swapfile
+sudo swapon /swap/swapfile
+sudo mkswap /swap/swapfile
+clear
+swapon --show
+clear
+ls
+clear
+lsblk
+clear
+sudo btrfs subvolume create /swap --help
+sudo btrfs subvolume create /swap
+clear
+swapon --show
+clear
+sudo findmnt -no UUID -T /swap/swapfile
+sudo btrfs inspect-internal map-swapfile -r /swap/swapfile
+cat /etc/sdboot-manage.conf
+clear
+sudo findmnt -no UUID -T /swap/swapfile
+sudo btrfs inspect-internal map-swapfile -r /swap/swapfile
+swapon --show
+sudoedit /etc/default/limine
+EDITOR=nano sudoedit /etc/default/limine
+sudo limine-mkinitcpio
+reboot
+systemctl hibernate --dry-run
+swapon --show
+clear
+systemctl hibernate
+swapon --show
+systemctl hibernate --help
+cat /proc/cmdline | tr ' ' '\n' | grep -E '^resume=|^resume_offset='
+clear
+sudo btrfs inspect-internal map-swapfile -r /swap/swapfile
+sudo findmnt -no UUID -T /swap/swapfile
+clear
+sudo btrfs inspect-internal map-swapfile -r /swap/swapfile
+sudo findmnt -no UUID -T /swap/swapfile
+cat /proc/cmdline | tr ' ' '\n' | grep -E '^resume=|^resume_offset='
+clear
+swapon --show
+cat /sys/power/resume
+cat /sys/power/resume_offset
+cat /sys/power/state
+sudo swapon -a
+clear
+lsblk -o NAME,MAJ:MIN,UUID,FSTYPE,MOUNTPOINTS | grep -E '253:0|1937a851'
+swapon --show
+clear
+systemctl hibernate
+clear
+journalctl -b -u systemd-hibernate.service -u systemd-suspend.service -u systemd-suspend-then-hibernate.service --no-pager
+journalctl -b --no-pager | grep -Ei 'hibernate|suspend|sleep|resume|PM:|Freezing|Thawing|wakeup|ACPI|swap'
+journalctl -b -k --no-pager | grep -Ei 'hibernate|suspend|resume|PM:|Freezing|Thawing|wakeup|ACPI|swap'
+systemctl status systemd-hibernate.service
+clear
+ls
+clear
+sudo cat /sys/kernel/debug/wakeup_sources | sort -k7 -nr | head -30
+bash
+clear
+cat /proc/acpi/wakeup
+clear
+lspci -nn -s 00:02.2
+lspci -tv
+clear
+systemctl hibernate
+clear
+ls
+clear
+s-tui
+clear
+s-tui
+clear
+btop
+clear
+cd some
+btop
+clear
+htop
+clear
+http
+clear
+s-tui
+clear
+upstream install ClementTsang/bottom btm
+clear
+btm --help
+clear
+btm
+clear
+btop
+btm
+btm --help
+clear
+btm -h
+btm
+clear
+nvim
+clear
