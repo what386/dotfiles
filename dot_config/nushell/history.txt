@@ -3244,3 +3244,16 @@ clear
 eza -a
 chezmoi add nushell
 chezmoi add kitty
+cd nushell
+clear
+ls
+clear
+chezmoi re-add
+gcl --help
+clear
+gcl https://github.com/ClementTsang/bottom
+cd ..
+rm -rf bottom/
+clear
+ls
+clear
