@@ -2947,3 +2947,73 @@ ls
 clear
 nvim
 clear
+chezmoi re-add
+clear
+ls
+clear
+pactl
+clear
+acpi -i
+acpi_listen
+paru -S acpid
+sudo systemctl enable --now acpid.service
+systemctl status acpid.service
+clear
+acpi_listen
+clear
+nvim
+clear
+lsblk
+clear
+swapon --show
+clear
+free -h
+swapon --show
+clear
+upstream install https://github.com/ifd3f/caligula
+clear
+caligula
+clear
+cd Downloads/
+clear
+ls
+clear
+caligula --help
+caligula burn bazzite-nvidia-open-stable-live-amd64.iso
+clear
+clear
+ls
+clear
+hostnamectl
+hostname -h
+hostnamectl -h
+hostnamectl hostname T14
+ls
+clear
+ls
+clear
+hostnamectl
+clear
+bmorin@T14
+clear
+bmorin@t14
+clear
+hostnamectl hostname t14
+clear
+ls
+clear
+hostnamectl hostname t14g2
+clear
+cd
+clear
+ls .ssh
+cd .ssh
+clear
+ls
+cat id_ed25519
+cat id_ed25519.pub
+nvim id_ed25519.pub
+cat id_ed25519.pub
+clear
+bash
+clear
