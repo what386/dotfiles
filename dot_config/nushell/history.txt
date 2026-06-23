@@ -3242,3 +3242,5 @@ eza -l
 eza -a
 clear
 eza -a
+chezmoi add nushell
+chezmoi add kitty
