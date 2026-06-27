@@ -107,7 +107,7 @@ local keys = {
 	end, { description = "paste clipboard as text", group = "utils" }),
 
 	-- Launcher
-	awful.key({ modkey }, "d", function()
+	awful.key({ modkey }, "o", function()
 		process.spawn(apps.appmenu_search)
 	end, { description = "open program", group = "launcher" }),
 
