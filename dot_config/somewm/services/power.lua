@@ -106,12 +106,12 @@ end
 
 function power.suspend()
 	awesome.emit_signal("screen::exit_screen:hide")
-	process.spawn_shell("systemctl suspend")
+	process.spawn({ "systemctl", "suspend" })
 end
 
 function power.hibernate()
 	awesome.emit_signal("screen::exit_screen:hide")
-	process.spawn_shell("systemctl hibernate")
+	process.spawn({ "systemctl", "hibernate" })
 end
 
 function power.lock()
@@ -121,13 +121,13 @@ end
 
 function power.poweroff()
 	awesome.emit_signal("module::session_manager:save")
-	gears.timer({ timeout = 0.5, autostart = true, single_shot = true, callback = function() process.spawn_shell("poweroff") end })
+	gears.timer({ timeout = 0.5, autostart = true, single_shot = true, callback = function() process.spawn({ "poweroff" }) end })
 	awesome.emit_signal("screen::exit_screen:hide")
 end
 
 function power.reboot()
 	awesome.emit_signal("module::session_manager:save")
-	gears.timer({ timeout = 0.5, autostart = true, single_shot = true, callback = function() process.spawn_shell("reboot") end })
+	gears.timer({ timeout = 0.5, autostart = true, single_shot = true, callback = function() process.spawn({ "reboot" }) end })
 	awesome.emit_signal("screen::exit_screen:hide")
 end
 

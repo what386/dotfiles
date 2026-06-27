@@ -1,7 +1,7 @@
 local awful = require("awful")
+local modifiers = require("config.keymaps.modifiers")
 
-local modkey = "Mod4"
-local alt = "Mod1"
+local modkey = modifiers.mod
 
 -- Client
 client.connect_signal("request::default_keybindings", function()

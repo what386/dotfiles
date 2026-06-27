@@ -2,7 +2,7 @@ local awful = require("awful")
 local audio = require("services.audio")
 local brightness = require("services.brightness")
 
-local apps = require("configuration.apps")
+local apps = require("config.preferences.apps")
 
 root.buttons({
 	awful.button({}, 1, function()
@@ -16,7 +16,7 @@ root.buttons({
 		end
 	end),
 	awful.button({}, 2, function()
-		awful.util.spawn(apps.default.rofi_appmenu)
+		awful.spawn(apps.appmenu_search)
 	end),
 	awful.button({ "Control" }, 2, function()
 		awesome.emit_signal("module::exit_screen:show")

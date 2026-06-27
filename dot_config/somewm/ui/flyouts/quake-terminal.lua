@@ -249,3 +249,5 @@ client.connect_signal("request::unmanage", function(c)
 		quake_opacity_anim = nil
 	end
 end)
+
+awful.spawn(app)

@@ -6,7 +6,7 @@ local dpi = beautiful.xresources.apply_dpi
 
 require("awful.autofocus")
 
-local modkey = "Mod4"
+local modkey = require("config.keymaps.modifiers").mod
 
 -- Function to create a taglist widget for each screen in AwesomeWM.
 -- This function sets up a taglist for each screen connected to the system.

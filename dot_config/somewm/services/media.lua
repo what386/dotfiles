@@ -135,7 +135,7 @@ function media.pause() process.spawn("playerctl pause"); media.refresh() end
 function media.play_pause() process.spawn("playerctl play-pause"); media.refresh() end
 function media.next() process.spawn("playerctl next"); media.refresh() end
 function media.previous() process.spawn("playerctl previous"); media.refresh() end
-function media.set_shuffle(enabled) process.spawn_shell("playerctl shuffle " .. (enabled and "On" or "Off")); state.shuffle = enabled and true or false; emit_state() end
+function media.set_shuffle(enabled) process.spawn({ "playerctl", "shuffle", enabled and "On" or "Off" }); state.shuffle = enabled and true or false; emit_state() end
 function media.toggle_shuffle() media.set_shuffle(not state.shuffle) end
 function media.status_text(callback) process.run_shell("mpc status", function(stdout) callback(tostring(stdout or ""):gsub("\n$", "")) end) end
 

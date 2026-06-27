@@ -109,7 +109,7 @@ local function start_stream()
 	if state.stream_running then
 		return
 	end
-	process.run_shell("bash " .. process.shell_quote(script_dir .. "v4l2_brightness_stream.sh") .. " start", function(_, _, _, exit_code)
+	process.run({ "bash", script_dir .. "v4l2_brightness_stream.sh", "start" }, function(_, _, _, exit_code)
 		state.stream_running = exit_code == 0
 		if not state.stream_running then
 			state.auto_backlight = false
@@ -122,13 +122,13 @@ end
 
 local function stop_stream()
 	if state.stream_running then
-		process.spawn_shell("bash " .. process.shell_quote(script_dir .. "v4l2_brightness_stream.sh") .. " stop")
+		process.spawn({ "bash", script_dir .. "v4l2_brightness_stream.sh", "stop" })
 	end
 	state.stream_running = false
 end
 
 local function read_stream(callback)
-	process.run_shell("bash " .. process.shell_quote(script_dir .. "v4l2_brightness_stream.sh") .. " read", function(stdout, _, _, exit_code)
+	process.run({ "bash", script_dir .. "v4l2_brightness_stream.sh", "read" }, function(stdout, _, _, exit_code)
 		if exit_code ~= 0 then
 			return
 		end

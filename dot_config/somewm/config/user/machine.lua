@@ -1,7 +1,7 @@
 return {
 	network_interface = {
 		-- Wired interface
-		wired = "enp0s31f6",
+		wired = "enp5s0",
 		-- Wireless interface
 		wireless = "wlan0",
 

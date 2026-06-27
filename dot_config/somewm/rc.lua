@@ -9,6 +9,7 @@ require("awful.autofocus")
 
 local awful = require("awful")
 local gfs = require("gears.filesystem")
+local process = require("utilities.process")
 
 local config_dir = gfs.get_configuration_dir()
 local script_dir = config_dir .. "scripts/"
@@ -17,7 +18,7 @@ local script_dir = config_dir .. "scripts/"
 awful.mouse.snap.edge_enabled = false
 awful.mouse.snap.client_enabled = false
 
-awful.spawn.with_shell(script_dir .. "autorun.sh")
+process.spawn(script_dir .. "autorun.sh")
 
 -- TODO: replace with someWM native
 --awful.spawn.with_shell(script_dir .. "screenlock.sh start")

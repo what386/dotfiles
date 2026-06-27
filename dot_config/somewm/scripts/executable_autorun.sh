@@ -8,4 +8,4 @@ run() {
 
 run /usr/lib/polkit-kde-authentication-agent-1
 run blueman-applet
-#run "${HOME}/.upstream/symlinks/ollama" serve
+run "${HOME}/.upstream/symlinks/ollama" serve

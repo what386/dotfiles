@@ -209,7 +209,7 @@ end
 
 -- ── Keybindings ───────────────────────────────────────────────────────────────
 
-local modkey = "Mod4"
+local modkey = require("config.keymaps.modifiers").mod
 local keys = {
 	awful.key({ modkey, "Shift" }, "r", restore, { description = "restore session", group = "awesome" }),
 	awful.key({ modkey, "Shift" }, "s", save,    { description = "save session",    group = "awesome" }),

@@ -1,24 +1,22 @@
 -- Required libraries
 local awful = require("awful")
-local gears = require("gears")
-local naughty = require("naughty")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local apps = require("config.preferences.apps")
 local audio = require("services.audio")
 local brightness = require("services.brightness")
 local media = require("services.media")
 local process = require("utilities.process")
+local modifiers = require("config.keymaps.modifiers")
 
 local gfs = require("gears.filesystem")
-local themes_path = gfs.get_themes_dir()
 
 -- Modkey: Mod4 (Super key) or Mod1 (Alt key)
-local modkey = "Mod4"
-local altkey = "Mod1"
+local modkey = modifiers.mod
+local altkey = modifiers.alt
 local screenshot_script = gfs.get_configuration_dir() .. "scripts/screenshot.sh"
 
 local function screenshot(mode, target)
-	process.spawn_shell(screenshot_script .. " " .. mode .. " " .. target)
+	process.spawn({ screenshot_script, mode, target })
 end
 
 -- AwesomeWM
@@ -53,11 +51,11 @@ local keys = {
 		awesome.emit_signal("flyout::quake_terminal:toggle")
 	end, { description = "show terminal", group = "flyouts" }),
 
-	awful.key({ modkey }, "l", function()
+	awful.key({ modkey, "Shift" }, "Return", function()
 		awesome.emit_signal("flyout::quake_scratchpad:toggle")
 	end, { description = "show scratchpad", group = "flyouts" }),
 
-	awful.key({ modkey }, "k", function()
+	awful.key({ modkey }, "F12", function()
 		awesome.emit_signal("flyout::osd_keyboard:toggle")
 	end, { description = "show keyboard", group = "flyouts" }),
 
@@ -70,12 +68,20 @@ local keys = {
 	end, { description = "show window overview", group = "flyouts" }),
 
 	awful.key({ modkey }, "Tab", function()
-		awesome.emit_signal("flyout::alt_tab:next")
+		awesome.emit_signal("flyout::mod_tab:next")
 	end, { description = "switch window forward", group = "flyouts" }),
 
 	awful.key({ modkey, "Shift" }, "Tab", function()
-		awesome.emit_signal("flyout::alt_tab:prev")
+		awesome.emit_signal("flyout::mod_tab:prev")
 	end, { description = "switch window backward", group = "flyouts" }),
+
+	awful.key({ altkey }, "Tab", function()
+		awesome.emit_signal("flyout::alt_tab:next")
+	end, { description = "switch workspace window forward", group = "flyouts" }),
+
+	awful.key({ altkey, "Shift" }, "Tab", function()
+		awesome.emit_signal("flyout::alt_tab:prev")
+	end, { description = "switch workspace window backward", group = "flyouts" }),
 
 	--awesome
 
@@ -84,30 +90,30 @@ local keys = {
 	end, { description = "show exit menu", group = "awesome" }),
 
 	awful.key(
-		{ modkey, "Control" },
-		"h",
+		{ modkey },
+		"F11",
 		hotkeys_popup.show_help,
 		{ description = "show help menu", group = "awesome" }
 	),
-	--awful.key({ modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
+	awful.key({ modkey, "Control" }, "r", awesome.reload, { description = "hot-reload awesome", group = "awesome" }),
 	awful.key({ modkey, "Control" }, "q", function()
 		awesome.quit()
 	end, { description = "force quit", group = "awesome" }),
 
 	awful.key({ modkey, "Shift" }, "v", function()
-		awful.spawn.with_shell([[
+		process.spawn_shell([[
 			wl-paste --no-newline | wtype -m shift -m logo -s 50 -d 12 -
 		]])
 	end, { description = "paste clipboard as text", group = "utils" }),
 
 	-- Launcher
-	awful.key({ modkey }, "o", function()
-		awful.spawn(apps.appmenu_search)
+	awful.key({ modkey }, "d", function()
+		process.spawn(apps.appmenu_search)
 	end, { description = "open program", group = "launcher" }),
 
 	awful.key({ modkey }, "p", function()
-		awful.spawn(apps.global_search)
-		--awful.spawn("rofi -show window -show-icons")
+		process.spawn(apps.global_search)
+		--process.spawn("rofi -show window -show-icons")
 	end, { description = "search windows", group = "launcher" }),
 
 	awful.key({ modkey }, "Print", function()

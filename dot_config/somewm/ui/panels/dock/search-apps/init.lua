@@ -28,7 +28,7 @@ local widget_button = wibox.widget({
 })
 
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	awful.spawn(apps.default.rofi_appmenu, false)
+	awful.spawn(apps.appmenu_search, false)
 end)))
 
 return widget_button

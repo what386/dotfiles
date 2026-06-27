@@ -1,0 +1,48 @@
+cat /dev/null
+clear
+ls /dev/null
+ls /dev
+clear
+pcsc_scan
+clear
+acpi
+<\n>lsusb
+lspci
+clear
+lsusb
+clear
+fwupd
+fwupdmgr
+fwupdmgr refresh
+fwupdmgr get-updates
+clear
+upstream install https://github.com/michei69/pear-desktop "Pear Desktop"
+upstream upgrade
+clear
+upstream remove "Pear Desktop"
+upstream install https://github.com/michei69/pear-desktop "Pear Desktop" --desktop
+./.upstream/packages/appimages/YouTube-Music-3.11.13.AppImage
+upstream remove "Pear Desktop"
+upstream install https://github.com/michei69/pear-desktop "Pear Desktop" --desktop --tag v3.11.12
+./.upstream/packages/appimages/YouTube-Music-3.11.12.AppImage
+clear
+upstream remove "Pear Desktop"
+upstream remove codex
+upstream probe openai/codex
+codex --help
+clear
+upstream install https://github.com/michei69/pear-desktop "Pear Desktop"
+clear
+"Pear Desktop"
+./.upstream/packages/appimages/YouTube-Music-3.11.13.AppImage
+clear
+ls
+clear
+ls .upstream/cache/
+ls .upstream/cache/docs
+rm -rf .upstream/cache/docs/*
+clear
+tl
+clear
+upstream remove tl
+clear
