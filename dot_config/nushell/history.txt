@@ -46,3 +46,33 @@ tl
 clear
 upstream remove tl
 clear
+..
+clear
+cd
+..
+clear
+...
+clear
+cd
+clear
+~
+clear
+ls
+~
+cd ..
+~
+clear
+error
+error make
+clear
+groot
+clear
+ghcs
+clear
+alias
+alias --help
+clear
+cd nushell
+z nushell
+$nu.default_config_dir
+$nu.default-config-dir

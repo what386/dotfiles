@@ -17,4 +17,5 @@
 # You can remove these comments if you want or leave
 # them for future reference.
 
-zoxide init nushell | save -f ~/.zoxide.nu
+let zoxide_file = ($nu.default-config-dir | path join "vendor" "zoxide.nu")
+zoxide init nushell | save -f $zoxide_file
