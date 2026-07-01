@@ -76,3 +76,8 @@ cd nushell
 z nushell
 $nu.default_config_dir
 $nu.default-config-dir
+chezmoi re-add
+clear
+paru -S apfs-fuse
+clear
+paru -S apfs-fuse
