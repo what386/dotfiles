@@ -5,9 +5,7 @@ mkdir $vendor_dir
 def init [program: string, command: closure] {
   let vendor_file = ($vendor_dir | path join $"($program).nu")
 
-  if not ($vendor_file | path exists) {
-    do $command | save -f $vendor_file
-  }
+  do $command | save -f $vendor_file
 }
 
 init zoxide { zoxide init nushell }

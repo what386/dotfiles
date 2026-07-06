@@ -8,5 +8,6 @@ source ~/.config/nushell/conf.d/completions.nu
 
 source ~/.config/nushell/conf.d/aliases.nu
 source ~/.config/nushell/conf.d/commands.nu
+source ~/.config/nushell/conf.d/variables.nu
 
 const upstream_paths_nu = if ("~/.upstream/metadata/paths.nu" | path expand | path exists) { ("~/.upstream/metadata/paths.nu" | path expand) } else { null }; source-env $upstream_paths_nu
