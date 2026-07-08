@@ -5,7 +5,7 @@ local gears = require("gears")
 local dpi = require("beautiful").xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 
-local apps = require("config.preferences.apps")
+local launchers = require("config.preferences.launchers")
 local icons = require("theme.icons")
 
 local widget = wibox.widget({
@@ -28,7 +28,7 @@ local widget_button = wibox.widget({
 })
 
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	awful.spawn(apps.appmenu_search, false)
+	awful.spawn(launchers.appmenu, false)
 end)))
 
 return widget_button

@@ -1,24 +1,19 @@
--- Required libraries
+-- Required dependencies
 local awful = require("awful")
 local hotkeys_popup = require("awful.hotkeys_popup")
-local apps = require("config.preferences.apps")
+local actions = require("config.preferences.actions")
+local launchers = require("config.preferences.launchers")
 local audio = require("services.audio")
 local brightness = require("services.brightness")
 local media = require("services.media")
 local process = require("utilities.process")
 local modifiers = require("config.keymaps.modifiers")
 
-local gfs = require("gears.filesystem")
-
 -- Modkey: Mod4 (Super key) or Mod1 (Alt key)
 local modkey = modifiers.mod
 local altkey = modifiers.alt
-local screenshot_script = gfs.get_configuration_dir() .. "scripts/screenshot.sh"
 
-local function screenshot(mode, target)
-	process.spawn({ screenshot_script, mode, target })
-end
-
+local screenshot = actions.screenshot
 -- AwesomeWM
 local keys = {
 	awful.key({ modkey }, "F1", function()
@@ -108,12 +103,11 @@ local keys = {
 
 	-- Launcher
 	awful.key({ modkey }, "o", function()
-		process.spawn(apps.appmenu_search)
+		process.spawn(launchers.appmenu)
 	end, { description = "open program", group = "launcher" }),
 
 	awful.key({ modkey }, "p", function()
-		process.spawn(apps.global_search)
-		--process.spawn("rofi -show window -show-icons")
+		process.spawn(launchers.global_search)
 	end, { description = "search windows", group = "launcher" }),
 
 	awful.key({ modkey }, "Print", function()

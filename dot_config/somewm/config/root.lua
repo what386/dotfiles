@@ -2,7 +2,7 @@ local awful = require("awful")
 local audio = require("services.audio")
 local brightness = require("services.brightness")
 
-local apps = require("config.preferences.apps")
+local launchers = require("config.preferences.launchers")
 
 root.buttons({
 	awful.button({}, 1, function()
@@ -16,7 +16,7 @@ root.buttons({
 		end
 	end),
 	awful.button({}, 2, function()
-		awful.spawn(apps.appmenu_search)
+		awful.spawn(launchers.appmenu)
 	end),
 	awful.button({ "Control" }, 2, function()
 		awesome.emit_signal("module::exit_screen:show")

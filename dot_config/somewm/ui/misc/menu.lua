@@ -197,38 +197,11 @@ local default_app_menu = {
 	},
 }
 
--- Screenshot menu
-local screenshot_menu = {
-	{
-		"Full",
-		function()
-			gears.timer.start_new(0.1, function()
-				awful.spawn(apps.utils.full_screenshot, false)
-			end)
-		end,
-		menubar.utils.lookup_icon("accessories-screenshot"),
-	},
-	{
-		"Area",
-		function()
-			gears.timer.start_new(0.1, function()
-				awful.spawn(apps.utils.area_screenshot, false)
-			end, menubar.utils.lookup_icon("accessories-screenshot"))
-		end,
-		menubar.utils.lookup_icon("accessories-screenshot"),
-	},
-}
-
 local tools_menu = {
 	{
 		"Awesome",
 		awesome_menu,
 		beautiful.awesome_icon,
-	},
-	{
-		"Take a Screenshot",
-		screenshot_menu,
-		menubar.utils.lookup_icon("accessories-screenshot"),
 	},
 	{
 		"End Session",

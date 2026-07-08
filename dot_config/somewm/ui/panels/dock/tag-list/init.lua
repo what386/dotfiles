@@ -4,7 +4,7 @@ local dpi = require("beautiful").xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local gears = require("gears")
 
-local rubato = require("libraries.rubato")
+local rubato = require("dependencies.rubato")
 
 -- Configuration variables for underline and tag calculations
 local UNDERLINE_WIDTH = dpi(45) -- Width of the underline indicator

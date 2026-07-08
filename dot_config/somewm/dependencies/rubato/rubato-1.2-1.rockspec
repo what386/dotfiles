@@ -12,7 +12,7 @@ If not ran from awesomeWM, you must have lgi installed. Otherwise you're good
    homepage = "https://github.com/andOrlando/rubato",
    license = "MIT"
 }
-dependencies = {}
+dependencies.= {}
 build = {
    type = "builtin",
    modules = {

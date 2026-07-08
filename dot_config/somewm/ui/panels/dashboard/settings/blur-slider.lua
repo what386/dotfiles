@@ -68,7 +68,7 @@ local blur_slider = slider.blur_strength_slider
 local function update_slider_value()
     awful.spawn.easy_async_with_shell(
         [[bash -c "
-        grep -F 'strength =' $HOME/.config/somewm/libraries.picom/picom.conf |
+        grep -F 'strength =' $HOME/.config/somewm/dependencies.picom/picom.conf |
         awk 'NR==1 {print $3}' | tr -d ';'
         "]],
         function(stdout)
@@ -108,7 +108,7 @@ end)})
 local adjust_blur = function(power)
 	awful.spawn.with_shell([[bash -c "
 		sed -i 's/.*strength = .*/    strength = ]] .. power .. [[;/g' \
-		$HOME/.config/awesome/libraries.picom/picom.conf
+		$HOME/.config/awesome/dependencies.picom/picom.conf
 		"]])
 end
 
