@@ -35,4 +35,4 @@ starship init fish | source
 
 source ~/Android/env.fish
 
-test -f $HOME/.upstream/metadata/paths.sh; and source $HOME/.upstream/metadata/paths.sh
+test -f $HOME/.upstream/generated/paths.sh; and source $HOME/.upstream/generated/paths.sh

@@ -4,15 +4,9 @@ local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
-local military_mode = false
 
 local create_clock = function(s)
-	local clock_format = nil
-	if not military_mode then
-		clock_format = '<span font="Inter Bold 11">%I:%M %p</span>'
-	else
-		clock_format = '<span font="Inter Bold 11">%H:%M</span>'
-	end
+	local clock_format = '<span font="Inter Bold 11">%-I:%M %p (%H:%M)</span>'
 
 	s.clock_widget = wibox.widget.textclock(clock_format, 1)
 

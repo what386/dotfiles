@@ -11,7 +11,7 @@ PS1='[\u@\h \W]\$ '
 
 export PATH="$HOME/.local/bin:$PATH"
 
-[ -f $HOME/.upstream/metadata/paths.sh ] && source $HOME/.upstream/metadata/paths.sh
+[ -f $HOME/.upstream/generated/paths.sh ] && source $HOME/.upstream/generated/paths.sh
 . "$HOME/.cargo/env"
 export DOTNET_ROOT="$HOME/.dotnet"
 export PATH="$HOME/.dotnet:$PATH"
