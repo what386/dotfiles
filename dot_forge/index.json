@@ -2,6 +2,10 @@
   "version": 1,
   "templates": [
     {
+      "name": "dotnet",
+      "path": "templates/dotnet"
+    },
+    {
       "name": "rust-cli",
       "path": "templates/rust-cli"
     }
