@@ -14,9 +14,9 @@
 
 -- Limitations:
 -- Timeout paused when laptop/pc is suspended or in sleep mode, and there's probably some bugs too so whatever
-local awful = require("awful")
 local gears = require("gears")
 local beautiful = require("beautiful")
+local wallpaper_preferences = require("config.preferences.wallpaper")
 
 --  ========================================
 -- 				Configuration
@@ -25,22 +25,17 @@ local beautiful = require("beautiful")
 
 local wall_config = {
 	-- Wallpaper directory. The default is:
-	wall_dir = gears.filesystem.get_configuration_dir() .. "theme/wallpapers/",
+	wall_dir = gears.filesystem.get_configuration_dir() .. wallpaper_preferences.directory,
 
 	-- If there's a picture format that awesome accepts and i missed
 	-- (which i probably did) feel free to add it right here
-	valid_picture_formats = { "jpg", "png", "jpeg" },
+	valid_picture_formats = wallpaper_preferences.valid_formats,
 
 	-- Table mapping schedule to wallpaper filename
-	wallpaper_schedule = {
-		["00:00:00"] = "midnight-wallpaper.jpg",
-		["06:22:00"] = "morning-wallpaper.jpg",
-		["12:00:00"] = "noon-wallpaper.jpg",
-		["17:58:00"] = "night-wallpaper.jpg",
-	},
+	wallpaper_schedule = wallpaper_preferences.schedule,
 
 	-- Don't stretch wallpaper on multihead setups if true
-	stretch = false,
+	stretch = wallpaper_preferences.stretch,
 }
 
 --  ========================================
@@ -112,11 +107,14 @@ end
 -- Returns a table containing all file paths in a directory
 local function get_dir_contents(dir)
 	-- Command to give list of files in directory
-	local dir_explore = "find " .. dir .. ' -printf "%f\\n"'
-	local lines = io.popen(dir_explore):lines() --Done synchronously because we literally can't continue without files
+	local dir_explore = "find " .. string.format("%q", dir) .. ' -maxdepth 1 -type f -printf "%f\\n"'
+	local pipe = io.popen(dir_explore)
 	local files = {}
-	for line in lines do
-		table.insert(files, line)
+	if pipe then
+		for line in pipe:lines() do
+			table.insert(files, line)
+		end
+		pipe:close()
 	end
 	return files
 end
@@ -160,6 +158,9 @@ end
 -- Turn an ordered list of files into a scheduled list of files
 local function auto_schedule(wall_list)
 	local sched = {}
+	if #wall_list == 0 then
+		return sched
+	end
 	for index, file in ipairs(wall_list) do
 		local auto_time = parse_to_time(parse_to_seconds("24:00:00") * (index - 1) / #wall_list)
 		sched[auto_time] = file
@@ -264,12 +265,17 @@ end
 -- We need some delay.
 -- Hey it's working, so whatever
 local update_wallpaper = function(wall_name)
+	if not wall_name or wall_name == "" then
+		return false
+	end
+
 	local wall_dir = wall_config.wall_dir .. wall_name
 	set_wallpaper(wall_dir)
 
 	-- Overwrite the default wallpaper
 	-- This is important in case we add an extra monitor
 	beautiful.wallpaper = wall_dir
+	return true
 end
 
 -- Updates variables

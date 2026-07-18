@@ -43,5 +43,3 @@ require("theme")
 --end
 
 require("ui")
-
---require("modules.dynamic-wallpaper")

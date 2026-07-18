@@ -1,18 +1,5 @@
 local gears = require("gears")
-local awful = require("awful")
 local beautiful = require("beautiful")
-
--- set wallpaper on request
-if beautiful.wallpaper then
-	local wallpaper = beautiful.wallpaper
-	-- If wallpaper is a function, call it with the screen
-	if type(wallpaper) == "function" then
-		wallpaper = wallpaper(s)
-	end
-	gears.wallpaper.maximized(wallpaper, s, true)
-end
-
-gears.wallpaper.maximized(beautiful.wallpaper, s, true)
 
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", function(s)
@@ -46,4 +33,17 @@ screen.connect_signal("request::wallpaper", function(s)
 	end
 end)
 
---require("theme.wallpapers.dynamic-wallpaper")
+require("theme.wallpapers.dynamic-wallpaper")
+
+-- The dynamic module selects the current image during startup, before Awesome
+-- has finished creating all screens. Re-apply it on the next main-loop turn.
+gears.timer.delayed_call(function()
+	local wallpaper = beautiful.wallpaper
+	if type(wallpaper) ~= "string" then
+		return
+	end
+
+	for s in screen do
+		gears.wallpaper.maximized(wallpaper, s, true)
+	end
+end)
