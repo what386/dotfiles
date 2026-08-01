@@ -1,4 +1,3 @@
-source $HOME/.upstream/metadata/paths.sh
 fish_add_path ~/.local/bin
 
 if status is-interactive

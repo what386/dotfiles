@@ -1,4 +1,8 @@
 {
   "entries": [
+    {
+      "path": "/home/bmorin/.forge/templates/dotnet",
+      "checksum": "419d02ff037169875c17e656d1f2efe771110e53eb7feb4c546dc8f76eb60fdd"
+    }
   ]
 }

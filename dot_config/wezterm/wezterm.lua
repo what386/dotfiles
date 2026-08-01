@@ -8,4 +8,6 @@ require("platform").apply(config)
 require("theme").apply(config)
 require("modules").apply(config)
 
+config.enable_wayland = false
+
 return config

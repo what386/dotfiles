@@ -48,7 +48,7 @@ local function show_prompt()
 	awful.prompt.run({
 		prompt = "Run Lua: ",
 		textbox = prompt.widget,
-		history_path = awful.util.get_cache_dir() .. "/history_eval",
+		history_path = gears.filesystem.get_cache_dir() .. "/history_eval",
 
 		exe_callback = function(input)
 			if not input or input == "" then
