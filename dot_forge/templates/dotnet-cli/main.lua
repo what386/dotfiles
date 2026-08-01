@@ -1,3 +1,11 @@
+local function to_pascal_case(value)
+    return value
+        :gsub("[-_]+(.)", function(char)
+            return char:upper()
+        end)
+        :gsub("^.", string.upper)
+end
+
 forge.on_init(function()
     local name = forge.project.name
 
@@ -9,7 +17,9 @@ forge.on_init(function()
         )
     end
 
-    forge.log.info("Scaffolding .NET project: " .. name)
+    local project_name = to_pascal_case(name)
+
+    forge.log.info("Scaffolding .NET project: " .. project_name)
 end)
 
 forge.on_error(function()
@@ -18,11 +28,12 @@ end)
 
 forge.on_complete(function()
     local name = forge.project.name
+    local project_name = to_pascal_case(name)
 
     forge.log.success("Created " .. name)
     forge.log.info("")
     forge.log.info("  cd " .. name)
-    forge.log.info("  dotnet run --project src/" .. name)
+    forge.log.info("  dotnet run --project src/" .. project_name)
 end)
 
 forge.args({
@@ -34,23 +45,25 @@ forge.args({
 })
 
 local name = forge.project.name
-local project_dir = "src/" .. name
-local project_file = project_dir .. "/" .. name .. ".csproj"
-local solution_file = name .. ".slnx"
+local project_name = to_pascal_case(name)
+
+local project_dir = "src/" .. project_name
+local project_file = project_dir .. "/" .. project_name .. ".csproj"
+local solution_file = project_name .. ".slnx"
 
 forge.render_dir("")
 
 forge.fs.mkdir(project_dir, { recursive = true })
 
 forge.prog.dotnet.new("sln", {
-    name   = name,
+    name   = project_name,
     format = "slnx",
 })
 
 forge.prog.dotnet.new("console", {
-    name        = name,
-    output      = project_dir,
-    no_restore  = true,
+    name       = project_name,
+    output     = project_dir,
+    no_restore = true,
 })
 
 forge.prog.dotnet.sln_add(solution_file, project_file)
