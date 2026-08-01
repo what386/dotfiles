@@ -5,6 +5,10 @@
       "checksum": "419d02ff037169875c17e656d1f2efe771110e53eb7feb4c546dc8f76eb60fdd"
     },
     {
+      "path": "/home/bmorin/.forge/templates/dotnet-cli",
+      "checksum": "98a6cf266ee333359211e9d29eaebef1bc51d230dd392d3964a102e2a79252c9"
+    },
+    {
       "path": "/home/bmorin/.forge/templates/kotlin-android",
       "checksum": "41f520a7a0007be8c8bd51135e281452bcc342628e3b2277b7e79d363c193208"
     }
