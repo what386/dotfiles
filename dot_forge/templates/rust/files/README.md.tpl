@@ -1,1 +1,0 @@
-# {{ forge.project.name }}
