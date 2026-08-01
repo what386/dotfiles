@@ -1,0 +1,11 @@
+[package]
+name = "dotnet-cli"
+version = "0.1.0"
+description = "Dotnet 10.0 command line application"
+min_forge_version = "0.2.2"
+
+[author]
+name = "what386"
+
+[requires]
+programs = ["git", "dotnet"]

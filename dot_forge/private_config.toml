@@ -1,0 +1,6 @@
+[user]
+name = "what386"
+email = ""
+
+[templates]
+default_scope = "global"

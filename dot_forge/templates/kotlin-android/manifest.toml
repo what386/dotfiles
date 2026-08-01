@@ -1,0 +1,11 @@
+[package]
+name = "kotlin-android"
+version = "0.1.0"
+description = "Kotlin and Jetpack Compose Android application"
+min_forge_version = "0.2.2"
+
+[author]
+name = "what386"
+
+[requires]
+programs = ["git", "java"]

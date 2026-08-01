@@ -1,0 +1,92 @@
+name: Bug report
+description: Report a reproducible problem with the app.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please include enough detail to reproduce the issue.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A concise description of the problem.
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide exact steps on the Android device or emulator.
+      placeholder: |
+        1. Launch the app
+        2. Reproduce the problem
+        3. Observe the problem
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: What actually happened?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Version name and version code from Android app info, the APK, or F-Droid.
+      placeholder: 1.5.0 (6)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: android_version
+    attributes:
+      label: Android version
+      options:
+        - Android 8.x
+        - Android 9
+        - Android 10
+        - Android 11
+        - Android 12
+        - Android 13
+        - Android 14
+        - Android 15
+        - Android 16
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / errors
+      description: Paste relevant logcat output, screenshots, or stack traces.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Device setup
+      description: Include device model, Android version, ROM/OEM skin, and relevant app settings.
+      placeholder: Pixel 8, Android 15.
+    validations:
+      required: false

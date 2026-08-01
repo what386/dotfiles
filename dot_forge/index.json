@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "name": "dotnet-cli",
+      "path": "templates/dotnet-cli"
+    },
+    {
+      "name": "kotlin-android",
+      "path": "templates/kotlin-android"
+    },
+    {
+      "name": "rust-cli",
+      "path": "templates/rust-cli"
+    }
+  ]
+}
