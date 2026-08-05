@@ -3,14 +3,6 @@
     {
       "path": "/home/bmorin/.forge/templates/dotnet",
       "checksum": "419d02ff037169875c17e656d1f2efe771110e53eb7feb4c546dc8f76eb60fdd"
-    },
-    {
-      "path": "/home/bmorin/.forge/templates/dotnet-cli",
-      "checksum": "aaba582c418b51d55dfb4e2447a1150f692c2be700cf58f453bd84b95df46880"
-    },
-    {
-      "path": "/home/bmorin/.forge/templates/kotlin-android",
-      "checksum": "41f520a7a0007be8c8bd51135e281452bcc342628e3b2277b7e79d363c193208"
     }
   ]
 }

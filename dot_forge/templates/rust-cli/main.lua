@@ -37,12 +37,6 @@ local name = forge.project.name
 
 forge.render_dir("")
 
-forge.prog.cargo.init(
-    "--bin",
-    "--name",
-    name
-)
-
 forge.prog.cargo.gen_lockfile()
 
 if forge.vars.git then

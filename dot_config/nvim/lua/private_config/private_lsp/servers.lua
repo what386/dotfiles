@@ -3,45 +3,57 @@ return {
 	-- Application languages
 	jdtls = {}, -- Java
 	csharp_ls = {}, -- C#
+	ruby_lsp = {}, -- Ruby
+	pylsp = {}, -- Python
+	ruff = {}, -- Python linting/formatting LSP
 
 	-- Systems languages
 	rust_analyzer = {},
 	zls = {},
 	gopls = {},
+	asm_lsp = {},
 
 	-- Web
-	html = { filetypes = { "html", "twig", "hbs" } },
+	html = {
+		filetypes = { "html", "twig", "hbs" },
+	},
 	tailwindcss = {},
-	ts_ls = {}, -- or vtsls = {}
-	ruby_lsp = {},
+	ts_ls = {},
 
-	-- Shell / Docker
+	-- Shell
 	bashls = {},
 	powershell_es = {},
-	basedpyright = {},
-	ruff = {},
-	shellcheck = {},
+
+	-- Docker
+	dockerls = {},
+	docker_compose_language_service = {},
 
 	-- Embedded
+	arduino_language_server = {},
+
+	-- Lua
 	lua_ls = {
 		settings = {
 			Lua = {
-				workspace = { checkThirdParty = false },
-				telemetry = { enable = false },
-				diagnostics = { disable = { "missing-fields" } },
+				workspace = {
+					checkThirdParty = false,
+				},
+				telemetry = {
+					enable = false,
+				},
+				diagnostics = {
+					disable = { "missing-fields" },
+				},
 			},
 		},
 	},
 
-	-- Other
+	-- Markup and configuration
 	jsonls = {},
-	taplo = {},
 	yamlls = {},
-	sqlls = {},
-	actionlint = {},
-	dockerls = {},
-	docker_compose_language_service = {},
+	taplo = {},
+	tinymist = {},
 
-	-- Custom
-	clangd = require("config.lsp.custom.clangd")
+	-- SQL
+	sqlls = {},
 }

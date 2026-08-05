@@ -7,6 +7,9 @@ lint:
 test:
     ./gradlew test
 
+verify-release:
+    ./gradlew testDebugUnitTest lintDebug assembleDebug
+
 build-debug:
     ./gradlew :app:assembleDebug
 
@@ -26,3 +29,14 @@ run-debug:
     just build-debug
     just install-debug
     just start-app
+
+prepare version:
+    scripts/release/prepare.sh %{{version}}%
+
+promote:
+    scripts/release/promote.sh
+
+publish version:
+    scripts/release/publish.sh %{{version}}%
+    git switch dev
+    printf "ready" > .release-state

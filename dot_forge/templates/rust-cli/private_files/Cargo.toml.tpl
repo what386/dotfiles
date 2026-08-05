@@ -1,4 +1,4 @@
-package]
+[package]
 name = "{{ forge.project.name }}"
 version = "0.1.0"
 edition = "2024"
@@ -31,4 +31,3 @@ path = "src/main.rs"
 [dependencies]
 clap = { version = "4.6", features = ["derive"] }
 clap_complete = { version = "4.6", optional = true }
-

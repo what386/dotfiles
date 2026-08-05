@@ -13,8 +13,30 @@ fi
 
 readonly version="$1"
 
+if [[ ! -r .release-state ]] || [[ "$(<.release-state)" != "promoted" ]]; then
+    echo -e "${RED}Invalid release state: should be 'promoted'${NC}"
+    exit 1
+fi
+
 if [[ "$(git branch --show-current)" != "main" ]]; then
     echo -e "${RED}Not on main branch.${NC}"
+    exit 1
+fi
+
+if [[ -n "$(git status --porcelain)" ]]; then
+    echo -e "${RED}Working tree must be clean before publishing a release.${NC}"
+    exit 1
+fi
+
+mapfile -t project_files < <(find src -mindepth 2 -maxdepth 2 -type f -name '*.csproj')
+if (( ${#project_files[@]} != 1 )); then
+    echo -e "${RED}Expected exactly one project file under src/.${NC}"
+    exit 1
+fi
+
+project_version="$(dotnet msbuild "${project_files[0]}" -getProperty:Version -nologo | tail -n 1 | tr -d '\r')"
+if [[ "${version#v}" != "$project_version" ]]; then
+    echo -e "${RED}Version ${version} does not match project version ${project_version}.${NC}"
     exit 1
 fi
 
@@ -28,5 +50,7 @@ git tag "$version"
 
 echo -e "${BLUE}Publishing release tag on GitHub...${NC}"
 git push github "$version"
+
+printf "published" > .release-state
 
 echo -e "${GREEN}${version} published on GitHub successfully.${NC}"

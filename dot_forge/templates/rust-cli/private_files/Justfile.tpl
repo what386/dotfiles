@@ -11,9 +11,12 @@ lint:
     cargo xwin clippy --all-targets -- -D warnings
 
 test:
-    cargo nextest run --all
-    cargo xwin test run --all --target x86_64-pc-windows-msvc
+    cargo nextest run --all --no-tests=pass
+    cargo xwin test --all --target x86_64-pc-windows-msvc
 
+verify-release:
+    just lint
+    just test
 
 run *args:
     cargo run --bin "{{ forge.project.name }}" -- %{{args}}%
@@ -22,13 +25,12 @@ prepare version:
     scripts/release/prepare.sh %{{version}}%
 
 promote:
-    just lint
-    just test
     scripts/release/promote.sh
 
 publish version:
     scripts/release/publish.sh %{{version}}%
     git switch dev
+    printf "ready" > .release-state
 
 gen-completions:
     #!/usr/bin/env bash

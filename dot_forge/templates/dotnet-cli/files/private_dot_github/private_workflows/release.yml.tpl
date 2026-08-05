@@ -1,4 +1,3 @@
-```yaml
 name: Release
 
 on:
@@ -97,23 +96,23 @@ jobs:
             self_contained: true
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "9.0.x"
+          dotnet-version: "10.0.x"
 
       - name: Restore
         run: >
           dotnet restore
-          "{{forge.project.name}}/{{forge.project.name}}.csproj"
+          "src/{{project_name}}/{{project_name}}.csproj"
           --runtime $%{{ matrix.rid }}%
 
       - name: Publish
         run: >
           dotnet publish
-          "{{forge.project.name}}/{{forge.project.name}}.csproj"
+          "src/{{project_name}}/{{project_name}}.csproj"
           --configuration Release
           --runtime $%{{ matrix.rid }}%
           --self-contained $%{{ matrix.self_contained }}%
@@ -129,14 +128,14 @@ jobs:
           mkdir -p dist
 
           cp \
-            "publish/{{forge.project.name}}$%{{ matrix.binary_ext }}%" \
-            "dist/{{forge.project.name}}-$%{{ matrix.rid }}%-$%{{ matrix.deployment }}%$%{{ matrix.binary_ext }}%"
+            "publish/{{project_name}}$%{{ matrix.binary_ext }}%" \
+            "dist/{{project_name}}-$%{{ matrix.rid }}%-$%{{ matrix.deployment }}%$%{{ matrix.binary_ext }}%"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: "{{forge.project.name}}-$%{{ matrix.rid }}%-$%{{ matrix.deployment }}%"
-          path: "dist/{{forge.project.name}}-$%{{ matrix.rid }}%-$%{{ matrix.deployment }}%$%{{ matrix.binary_ext }}%"
+          name: "{{project_name}}-$%{{ matrix.rid }}%-$%{{ matrix.deployment }}%"
+          path: "dist/{{project_name}}-$%{{ matrix.rid }}%-$%{{ matrix.deployment }}%$%{{ matrix.binary_ext }}%"
           if-no-files-found: error
 
   release:
@@ -145,30 +144,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
           path: dist
-
-      - name: Flatten artifacts
-        shell: bash
-        run: |
-          find dist -mindepth 2 -type f -exec mv {} dist/ \;
-          find dist -mindepth 1 -type d -empty -delete
+          merge-multiple: true
 
       - name: Generate checksums
-        working-directory: dist
         run: |
-          find . \
-            -maxdepth 1 \
-            -type f \
-            ! -name SHA256SUMS.txt \
-            -printf '%P\0' \
-            | sort -z \
-            | xargs -0 sha256sum \
-            > SHA256SUMS.txt
+          cd dist
+          set -- \
+            {{project_name}}-linux-x64-runtime \
+            {{project_name}}-linux-x64-bundled \
+            {{project_name}}-linux-arm64-runtime \
+            {{project_name}}-linux-arm64-bundled \
+            {{project_name}}-osx-x64-runtime \
+            {{project_name}}-osx-x64-bundled \
+            {{project_name}}-osx-arm64-runtime \
+            {{project_name}}-osx-arm64-bundled \
+            {{project_name}}-win-x64-runtime.exe \
+            {{project_name}}-win-x64-bundled.exe \
+            {{project_name}}-win-arm64-runtime.exe \
+            {{project_name}}-win-arm64-bundled.exe
+          for asset in "$@"; do
+            test -f "$asset" || { echo "Missing release asset: $asset" >&2; exit 1; }
+          done
+          sha256sum "$@" > SHA256SUMS.txt
 
       - name: Read changelog section for tag
         id: release_notes
@@ -187,5 +190,4 @@ jobs:
           tag_name: $%{{ github.ref_name }}%
           body: $%{{ steps.release_notes.outputs.body }}%
           files: dist/*
-```
-
+          fail_on_unmatched_files: true

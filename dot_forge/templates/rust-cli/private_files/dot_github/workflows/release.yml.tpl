@@ -31,7 +31,7 @@ jobs:
             target: aarch64-pc-windows-msvc
             binary_ext: ".exe"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: $%{{ matrix.target }}%
@@ -59,11 +59,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
           path: dist
+          merge-multiple: true
       - name: Add completion assets
         run: |
           cp completions/completions.bash dist/completions.bash
@@ -74,7 +75,22 @@ jobs:
       - name: Generate checksums
         run: |
           cd dist
-          sha256sum **/* > SHA256SUMS.txt
+          set -- \
+            {{forge.project.name}}-x86_64-unknown-linux-gnu \
+            {{forge.project.name}}-aarch64-unknown-linux-gnu \
+            {{forge.project.name}}-x86_64-apple-darwin \
+            {{forge.project.name}}-aarch64-apple-darwin \
+            {{forge.project.name}}-x86_64-pc-windows-msvc.exe \
+            {{forge.project.name}}-aarch64-pc-windows-msvc.exe \
+            completions.bash \
+            completions.fish \
+            completions.zsh \
+            completions.ps1 \
+            completions.elvish
+          for asset in "$@"; do
+            test -f "$asset" || { echo "Missing release asset: $asset" >&2; exit 1; }
+          done
+          sha256sum "$@" > SHA256SUMS.txt
       - name: Read changelog section for tag
         id: release_notes
         run: |
@@ -89,4 +105,5 @@ jobs:
         with:
           tag_name: $%{{ github.ref_name }}%
           body: $%{{ steps.release_notes.outputs.body }}%
-          files: dist/**/*
+          files: dist/*
+          fail_on_unmatched_files: true

@@ -4,13 +4,12 @@ return {
 
 	-- C#
 	"csharpier",
-	"netcoredbg",
 
 	-- CMake
 	"cmakelang",
 
-	-- JavaScript/TypeScript
-	"prettier", -- also handles JSON, YAML, HTML, CSS, Markdown
+	-- JavaScript / TypeScript / web
+	"prettier",
 	"eslint_d",
 
 	-- Tailwind
@@ -18,6 +17,7 @@ return {
 
 	-- Shell
 	"shfmt",
+	"shellcheck",
 
 	-- Python
 	"ruff",
@@ -29,11 +29,20 @@ return {
 	"xmlformatter",
 
 	-- Java
-	"google-java-format", -- or "clang-format" works for Java too
+	"google-java-format",
 
 	-- SQL
-	"sqlfluff", -- or "sql-formatter" for simpler formatting
+	"sqlfluff",
 
 	-- Make
 	"checkmake",
+
+	-- Docker
+	"hadolint",
+
+	-- GitHub Actions
+	"actionlint",
+
+	-- Debugger
+	"netcoredbg",
 }
