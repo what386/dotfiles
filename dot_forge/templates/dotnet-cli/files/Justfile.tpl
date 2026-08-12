@@ -1,3 +1,5 @@
+set positional-arguments
+
 default:
     just --list
 
@@ -21,7 +23,7 @@ verify-release:
     just test
 
 run *args:
-    dotnet run --project "src/{{ project_name }}" -- %{{args}}%
+    dotnet run --project "src/{{ project_name }}" -- "$@"
 
 prepare version:
     scripts/release/prepare.sh %{{version}}%

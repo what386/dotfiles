@@ -1,3 +1,5 @@
+set positional-arguments
+
 default:
     just --list
 
@@ -19,7 +21,7 @@ verify-release:
     just test
 
 run *args:
-    cargo run --bin "{{ forge.project.name }}" -- %{{args}}%
+    cargo run --bin "{{ forge.project.name }}" -- "$@"
 
 prepare version:
     scripts/release/prepare.sh %{{version}}%
