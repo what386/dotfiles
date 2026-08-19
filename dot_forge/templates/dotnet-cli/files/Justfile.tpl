@@ -23,7 +23,7 @@ verify-release:
     just test
 
 run *args:
-    dotnet run --project "src/{{ project_name }}" -- "$@"
+    dotnet run --project "src/{{ project_name }}" -- %{{args}}%
 
 prepare version:
     scripts/release/prepare.sh %{{version}}%

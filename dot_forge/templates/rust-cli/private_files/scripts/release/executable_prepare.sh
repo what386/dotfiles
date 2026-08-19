@@ -36,10 +36,11 @@ fi
 cargo publish --dry-run --locked
 
 cargo fmt
+cargo spaced
 
 git add src/
 if ! git diff --cached --quiet; then
-    git commit -m "cargo fmt"
+    git commit -m "formatting"
 fi
 
 tally semver "${version}"

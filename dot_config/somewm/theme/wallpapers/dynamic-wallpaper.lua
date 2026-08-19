@@ -17,6 +17,9 @@
 local gears = require("gears")
 local beautiful = require("beautiful")
 local wallpaper_preferences = require("config.preferences.wallpaper")
+local awful = require("awful")
+local wibox = require("wibox")
+
 
 --  ========================================
 -- 				Configuration
@@ -248,14 +251,25 @@ end
 
 -- Set wallpaper
 local set_wallpaper = function(path)
+	local screens_to_set = {}
 	if wall_config.stretch then
 		for s in screen do
-			-- Update wallpaper based on the data in the array
-			gears.wallpaper.maximized(path, s)
+			table.insert(screens_to_set, s)
 		end
 	else
-		-- Update wallpaper based on the data in the array
-		gears.wallpaper.maximized(path)
+		table.insert(screens_to_set, screen.primary)
+	end
+
+	for _, s in ipairs(screens_to_set) do
+		awful.wallpaper {
+			screen = s,
+			widget = {
+				image = path,
+				horizontal_fit_policy = "fit",
+				vertical_fit_policy = "fit",
+				widget = wibox.widget.imagebox,
+			},
+		}
 	end
 end
 

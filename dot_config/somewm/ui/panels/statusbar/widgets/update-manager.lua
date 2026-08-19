@@ -84,6 +84,7 @@ local function update_widget_state(pacman_count, pacman_packages, aur_count, aur
 		update_tooltip.markup = "System is up to date"
 	end
 end
+
 local function check_updates()
 	widget.icon:set_image(icons.widgets.update.shield)
 	update_tooltip.markup = "Checking for updates..."
@@ -118,7 +119,7 @@ local function check_updates()
 	end)
 	-- Upstream updates
 	awful.spawn.easy_async(
-		os.getenv("HOME") .. "/.upstream/symlinks/upstream upgrade --check --machine-readable",
+		"upstream upgrade --check --machine-readable",
 		function(stdout, _, _, exit_code)
 			if exit_code == 0 then
 				upstream_count, upstream_packages = parse_upstream_updates(stdout)
@@ -127,14 +128,17 @@ local function check_updates()
 		end
 	)
 end
+
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
 	check_updates()
 end)))
--- Official + upstream: every 30 minutes
+
+-- Official + upstream: every hr
 gears.timer({
-	timeout = 1800,
+	timeout = 3600,
 	call_now = true,
 	autostart = true,
 	callback = check_updates,
 })
+
 return widget_button
