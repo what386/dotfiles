@@ -4,11 +4,11 @@ auto_complete_tasks = false
 editor = "nvim"
 
 [auto_commit]
-add = true
+add = false
 done = false
 remove = false
-semver = true
-yank = true
+semver = false
+yank = false
 
 [git]
 done_prefix = "done:"

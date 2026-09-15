@@ -11,4 +11,6 @@ source ~/.config/nushell/conf.d/commands.nu
 source ~/.config/nushell/conf.d/variables.nu
 source ~/.config/nushell/conf.d/paths.nu
 
+source ~/.config/nushell/conf.d/autoexec.nu
+
 const upstream_paths_nu = if ("~/.upstream/generated/paths.nu" | path expand | path exists) { ("~/.upstream/generated/paths.nu" | path expand) } else { null }; source-env $upstream_paths_nu

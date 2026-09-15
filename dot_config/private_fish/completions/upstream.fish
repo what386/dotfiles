@@ -28,7 +28,6 @@ complete -c upstream -n "__fish_upstream_needs_command" -s y -l yes -d 'Accept c
 complete -c upstream -n "__fish_upstream_needs_command" -l no-pager -d 'Prevent paging long command outputs'
 complete -c upstream -n "__fish_upstream_needs_command" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c upstream -n "__fish_upstream_needs_command" -s V -l version -d 'Print version'
-complete -c upstream -n "__fish_upstream_needs_command" -f -a "add" -d 'Install a package from the configured registry'
 complete -c upstream -n "__fish_upstream_needs_command" -f -a "install" -d 'Install a release asset or direct download'
 complete -c upstream -n "__fish_upstream_needs_command" -f -a "build" -d 'Build and install a package from source'
 complete -c upstream -n "__fish_upstream_needs_command" -f -a "remove" -d 'Remove installed package files and metadata'
@@ -53,11 +52,6 @@ complete -c upstream -n "__fish_upstream_needs_command" -f -a "export" -d 'Expor
 complete -c upstream -n "__fish_upstream_needs_command" -f -a "history" -d 'Show recent grouped operation history'
 complete -c upstream -n "__fish_upstream_needs_command" -f -a "doctor" -d 'Run diagnostics to detect installation and integration issues'
 complete -c upstream -n "__fish_upstream_needs_command" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
-complete -c upstream -n "__fish_upstream_using_subcommand add" -l fetch -d 'Refresh the local registry index before resolving the package'
-complete -c upstream -n "__fish_upstream_using_subcommand add" -l dry-run -d 'Preview resolution without downloading or installing the package'
-complete -c upstream -n "__fish_upstream_using_subcommand add" -s y -l yes -d 'Accept confirmation prompts automatically'
-complete -c upstream -n "__fish_upstream_using_subcommand add" -l no-pager -d 'Prevent paging long command outputs'
-complete -c upstream -n "__fish_upstream_using_subcommand add" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c upstream -n "__fish_upstream_using_subcommand install" -s t -l tag -d 'Release tag to install (defaults to latest matching the channel)' -r
 complete -c upstream -n "__fish_upstream_using_subcommand install" -s v -l semver -d 'Semantic version to resolve to a release tag' -r
 complete -c upstream -n "__fish_upstream_using_subcommand install" -s k -l kind -d 'Asset kind to install' -r -f -a "app-image\t''
@@ -210,7 +204,6 @@ complete -c upstream -n "__fish_upstream_using_subcommand find" -l topic -d 'Res
 complete -c upstream -n "__fish_upstream_using_subcommand find" -l min-stars -d 'Restrict results to repositories with at least this many stars' -r
 complete -c upstream -n "__fish_upstream_using_subcommand find" -l max-stars -d 'Restrict results to repositories with at most this many stars' -r
 complete -c upstream -n "__fish_upstream_using_subcommand find" -l pushed-after -d 'Restrict results to repositories pushed on or after YYYY-MM-DD' -r
-complete -c upstream -n "__fish_upstream_using_subcommand find" -l name -d 'Package name to register without prompting' -r
 complete -c upstream -n "__fish_upstream_using_subcommand find" -s k -l kind -d 'Asset kind to install' -r -f -a "app-image\t''
 archive\t''
 compressed\t''
@@ -303,7 +296,7 @@ complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fis
 complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "unset" -d 'Clear user-controlled settings for an installed package'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "pin" -d 'Mark an installed package as pinned'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "unpin" -d 'Clear the pinned flag on an installed package'
-complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "rename" -d 'Rename an installed package record and aliases'
+complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "rename" -d 'Rename an installed executable alias'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "add-entry" -d 'Add a desktop launcher entry for an installed package'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "rm-entry" -d 'Remove an upstream-managed desktop launcher entry'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and not __fish_seen_subcommand_from set get unset pin unpin rename add-entry rm-entry help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
@@ -337,7 +330,7 @@ complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_se
 complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "unset" -d 'Clear user-controlled settings for an installed package'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "pin" -d 'Mark an installed package as pinned'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "unpin" -d 'Clear the pinned flag on an installed package'
-complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "rename" -d 'Rename an installed package record and aliases'
+complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "rename" -d 'Rename an installed executable alias'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "add-entry" -d 'Add a desktop launcher entry for an installed package'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "rm-entry" -d 'Remove an upstream-managed desktop launcher entry'
 complete -c upstream -n "__fish_upstream_using_subcommand package; and __fish_seen_subcommand_from help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
@@ -397,12 +390,10 @@ complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_see
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from keys" -s y -l yes -d 'Accept confirmation prompts automatically'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from keys" -l no-pager -d 'Prevent paging long command outputs'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from keys" -s h -l help -d 'Print help (see more with \'--help\')'
-complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from packages" -l skip-failed -d 'Continue installing remaining packages after a package import fails'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from packages" -l latest -d 'Ignore exported tags and re-resolve release and non-branch build packages'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from packages" -s y -l yes -d 'Accept confirmation prompts automatically'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from packages" -l no-pager -d 'Prevent paging long command outputs'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from packages" -s h -l help -d 'Print help (see more with \'--help\')'
-complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from profile" -l skip-failed -d 'Continue installing remaining packages after a package import fails'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from profile" -l latest -d 'Ignore exported tags and re-resolve release and non-branch build packages'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from profile" -s y -l yes -d 'Accept confirmation prompts automatically'
 complete -c upstream -n "__fish_upstream_using_subcommand import; and __fish_seen_subcommand_from profile" -l no-pager -d 'Prevent paging long command outputs'
@@ -453,30 +444,29 @@ complete -c upstream -n "__fish_upstream_using_subcommand doctor" -l json -d 'Pr
 complete -c upstream -n "__fish_upstream_using_subcommand doctor" -s y -l yes -d 'Accept confirmation prompts automatically'
 complete -c upstream -n "__fish_upstream_using_subcommand doctor" -l no-pager -d 'Prevent paging long command outputs'
 complete -c upstream -n "__fish_upstream_using_subcommand doctor" -s h -l help -d 'Print help (see more with \'--help\')'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "add" -d 'Install a package from the configured registry'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "install" -d 'Install a release asset or direct download'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "build" -d 'Build and install a package from source'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "remove" -d 'Remove installed package files and metadata'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "rollback" -d 'Restore or prune stored rollback artifacts'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "reinstall" -d 'Reinstall packages from their stored source metadata'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "upgrade" -d 'Check for or install package updates'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "list" -d 'List installed packages'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "info" -d 'Show details for one installed package'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "changelog" -d 'Show release notes for an installed package'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "docs" -d 'Search cached or fetched package README docs'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "probe" -d 'Inspect releases, choose an asset, and install it'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "search" -d 'Search provider repositories without installing'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "find" -d 'Search repositories interactively and install one'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "config" -d 'View and edit config.toml'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "auth" -d 'View and edit auth.toml'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "package" -d 'Manage installed package records and launcher entries'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "cache" -d 'Inspect or remove reusable cached data'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "hooks" -d 'Manage shell PATH hooks and local upstream data'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "import" -d 'Import config, trust keys, packages, or a profile'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "export" -d 'Export config, trust keys, packages, or a profile'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "history" -d 'Show recent grouped operation history'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "doctor" -d 'Run diagnostics to detect installation and integration issues'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from add install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "install" -d 'Install a release asset or direct download'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "build" -d 'Build and install a package from source'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "remove" -d 'Remove installed package files and metadata'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "rollback" -d 'Restore or prune stored rollback artifacts'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "reinstall" -d 'Reinstall packages from their stored source metadata'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "upgrade" -d 'Check for or install package updates'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "list" -d 'List installed packages'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "info" -d 'Show details for one installed package'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "changelog" -d 'Show release notes for an installed package'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "docs" -d 'Search cached or fetched package README docs'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "probe" -d 'Inspect releases, choose an asset, and install it'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "search" -d 'Search provider repositories without installing'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "find" -d 'Search repositories interactively and install one'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "config" -d 'View and edit config.toml'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "auth" -d 'View and edit auth.toml'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "package" -d 'Manage installed package records and launcher entries'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "cache" -d 'Inspect or remove reusable cached data'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "hooks" -d 'Manage shell PATH hooks and local upstream data'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "import" -d 'Import config, trust keys, packages, or a profile'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "export" -d 'Export config, trust keys, packages, or a profile'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "history" -d 'Show recent grouped operation history'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "doctor" -d 'Run diagnostics to detect installation and integration issues'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and not __fish_seen_subcommand_from install build remove rollback reinstall upgrade list info changelog docs probe search find config auth package cache hooks import export history doctor help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from config" -f -a "set" -d 'Set configuration values'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from config" -f -a "get" -d 'Get configuration values'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from config" -f -a "list" -d 'List current configuration values'
@@ -492,7 +482,7 @@ complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from package" -f -a "unset" -d 'Clear user-controlled settings for an installed package'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from package" -f -a "pin" -d 'Mark an installed package as pinned'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from package" -f -a "unpin" -d 'Clear the pinned flag on an installed package'
-complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from package" -f -a "rename" -d 'Rename an installed package record and aliases'
+complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from package" -f -a "rename" -d 'Rename an installed executable alias'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from package" -f -a "add-entry" -d 'Add a desktop launcher entry for an installed package'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from package" -f -a "rm-entry" -d 'Remove an upstream-managed desktop launcher entry'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from cache" -f -a "list" -d 'Show known cache categories and their disk usage'
@@ -509,3 +499,21 @@ complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from export" -f -a "keys" -d 'Export trusted minisign and cosign public keys'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from export" -f -a "packages" -d 'Export installed package references'
 complete -c upstream -n "__fish_upstream_using_subcommand help; and __fish_seen_subcommand_from export" -f -a "profile" -d 'Export config, trust keys, and package references'
+
+
+function __upstream_dynamic
+    set -l words (commandline -opc)
+    set -e words[1]
+    test (count $words) -gt 0; or return
+    set -l command $words[1]
+    set -e words[1]
+    set -a words (commandline -ct)
+    set -l cursor (math (count $words) - 1)
+    switch $command
+        case changelog docs doctor history info list package reinstall remove rollback upgrade
+            command upstream __complete $command $cursor -- $words
+    end
+end
+for command in changelog docs doctor history info list package reinstall remove rollback upgrade
+    complete -c upstream -n "__fish_upstream_using_subcommand $command" -f -a '(__upstream_dynamic)'
+end

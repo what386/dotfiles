@@ -6,12 +6,20 @@
       "path": "templates/dotnet-cli"
     },
     {
+      "name": "go-cli",
+      "path": "templates/go-cli"
+    },
+    {
       "name": "kotlin-android",
       "path": "templates/kotlin-android"
     },
     {
       "name": "rust-cli",
       "path": "templates/rust-cli"
+    },
+    {
+      "name": "zig-cli",
+      "path": "templates/zig-cli"
     }
   ]
 }

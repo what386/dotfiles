@@ -1,10 +1,13 @@
 local M = {}
 
 local manual_parsers = {
-	require("config.treesitter.manual.lash"),
 }
 
 function M.register()
+	if #manual_parsers == 0 then
+		return
+	end
+
 	local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
 
 	for _, parser in ipairs(manual_parsers) do

@@ -5,8 +5,16 @@
       "checksum": "419d02ff037169875c17e656d1f2efe771110e53eb7feb4c546dc8f76eb60fdd"
     },
     {
+      "path": "/home/bmorin/.forge/templates/go-cli",
+      "checksum": "b231e082ce9f7d187e7d7c31c68a086778916d2821975f0f01d4d0f382ae464c"
+    },
+    {
       "path": "/home/bmorin/.forge/templates/rust-cli",
-      "checksum": "f7e6a2b196d4781cd6018145267bbffcaefdc90a438d1f4e26bbee5a4740a367"
+      "checksum": "9c4800c5fcb5a72e5c0298ea0da9a8acacb4c6e6b9b2528fab49e28a44c530a3"
+    },
+    {
+      "path": "/home/bmorin/.forge/templates/zig-cli",
+      "checksum": "0cdbf7349a2824426ac701a75215f833c1f9a20583f24a74cac1cfc82d517b04"
     }
   ]
 }
