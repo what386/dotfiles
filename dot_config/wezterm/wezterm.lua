@@ -7,6 +7,7 @@ require("config").apply(config)
 require("platform").apply(config)
 require("theme").apply(config)
 require("modules").apply(config)
+require("plugins").apply(config)
 
 config.enable_wayland = false
 

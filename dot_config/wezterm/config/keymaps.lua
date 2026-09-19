@@ -1,5 +1,6 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
+local pane_move = require("modules.pane_move")
 local M = {}
 
 local function create_keys()
@@ -25,11 +26,19 @@ local function create_keys()
 		{ key = "q", mods = "ALT", action = act.CloseCurrentPane({ confirm = true }) },
 		{ key = "[", mods = "ALT", action = act.ActivateTabRelative(-1) },
 		{ key = "]", mods = "ALT", action = act.ActivateTabRelative(1) },
+		{ key = "[", mods = "ALT|SHIFT", action = act.MoveTabRelative(-1) },
+		{ key = "]", mods = "ALT|SHIFT", action = act.MoveTabRelative(1) },
 		{ key = "t", mods = "ALT", action = act.ShowTabNavigator },
 		{ key = "m", mods = "ALT", action = act.ActivateKeyTable({ name = "move", one_shot = false }) },
 
 		-- Workspace management
-		{ key = "p", mods = "ALT", action = act.ShowLauncherArgs({ flags = "WORKSPACES" }) },
+		{
+			key = "p",
+			mods = "ALT",
+			action = wezterm.action_callback(function(window, pane)
+				require("modules.workspace").switch(window, pane)
+			end),
+		},
 		{
 			key = "o",
 			mods = "ALT",
@@ -67,14 +76,18 @@ local function create_key_tables()
 			{ key = "j", action = act.AdjustPaneSize({ "Down", 1 }) },
 			{ key = "k", action = act.AdjustPaneSize({ "Up", 1 }) },
 			{ key = "l", action = act.AdjustPaneSize({ "Right", 1 }) },
+			{ key = "h", mods = "SHIFT", action = act.AdjustPaneSize({ "Left", 5 }) },
+			{ key = "j", mods = "SHIFT", action = act.AdjustPaneSize({ "Down", 5 }) },
+			{ key = "k", mods = "SHIFT", action = act.AdjustPaneSize({ "Up", 5 }) },
+			{ key = "l", mods = "SHIFT", action = act.AdjustPaneSize({ "Right", 5 }) },
 			{ key = "Escape", action = "PopKeyTable" },
 			{ key = "Enter", action = "PopKeyTable" },
 		},
 		move = {
-			{ key = "h", action = act.MoveTabRelative(-1) },
-			{ key = "j", action = act.MoveTabRelative(-1) },
-			{ key = "k", action = act.MoveTabRelative(1) },
-			{ key = "l", action = act.MoveTabRelative(1) },
+			{ key = "h", action = pane_move.swap("Left") },
+			{ key = "j", action = pane_move.swap("Down") },
+			{ key = "k", action = pane_move.swap("Up") },
+			{ key = "l", action = pane_move.swap("Right") },
 			{ key = "Escape", action = "PopKeyTable" },
 			{ key = "Enter", action = "PopKeyTable" },
 		},

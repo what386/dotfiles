@@ -1,12 +1,9 @@
 local M = {}
 
 function M.apply(config)
-    -- Load plugin/module configurations
-    require("modules.tabline").apply(config)
-
-    -- Add other modules here as you create them:
-    -- require('modules.workspace').apply(config)
-    -- require('modules.statusbar').apply(config)
+	-- Load in-house modules and their event registrations.
+	require("modules.workspace")
+	require("modules.pane_move")
 end
 
 return M
