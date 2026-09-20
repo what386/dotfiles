@@ -74,13 +74,17 @@ local function create_device_row(device, active, kind)
 		widget = wibox.container.background,
 	})
 
-	row:buttons(gears.table.join(awful.button({}, 1, nil, function()
+	local function activate()
 		if active then
 			return
 		end
 
 		audio.set_default_device(kind, device.id)
-	end)))
+	end
+	row.keyboard_activate = activate
+	row.keyboard_action = "select"
+	row.keyboard_id = kind .. ":" .. tostring(device.name or device.id)
+	row:buttons(gears.table.join(awful.button({}, 1, nil, activate)))
 
 	return row
 end
@@ -128,6 +132,7 @@ return function(args)
 		devices = devices or {}
 
 		if #devices == 0 then
+			if args.wrap_rows then args.wrap_rows({}) end
 			local current_state = audio.get_state()
 			subtitle:set_text(current_state.available and "None" or "Unavailable")
 			device_list:add(wibox.widget({
@@ -140,9 +145,12 @@ return function(args)
 		end
 
 		subtitle:set_text(tostring(#devices))
+		local rows = {}
 		for _, device in ipairs(devices) do
-			device_list:add(create_device_row(device, device.name == default_device, kind))
+			rows[#rows + 1] = create_device_row(device, device.name == default_device, kind)
 		end
+		if args.wrap_rows then rows = args.wrap_rows(rows) end
+		for _, row in ipairs(rows) do device_list:add(row) end
 	end
 
 	local function refresh()

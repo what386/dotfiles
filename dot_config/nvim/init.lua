@@ -37,6 +37,7 @@ require("lazy").setup({
 	require("plugins.ui.colortheme"),
 	require("plugins.ui.indent-blankline"),
 	require("plugins.ui.noice"),
+	require("plugins.ui.incline"),
 
 	require("plugins.extras.language-extras"),
 	require("plugins.extras.misc"),

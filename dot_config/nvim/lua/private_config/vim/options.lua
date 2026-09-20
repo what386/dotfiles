@@ -28,7 +28,7 @@ vim.o.splitbelow = true -- force all horizontal splits below the cursor
 vim.o.splitright = true -- force all vertical splits to right of cursor
 vim.o.fileencoding = "utf-8" -- set filetype encoding
 vim.o.autoindent = true -- copy indent from previous line
-vim.opt.laststatus = 3 -- one native statusline for the whole editor
+vim.opt.laststatus = 0 -- floating Incline panels provide status information
 vim.opt.showtabline = 0
 vim.opt.iskeyword:append("-") -- allow hyphenated words to work in searches
 vim.opt.runtimepath:remove("/usr/share/vim/vimfiles") -- dont allow neovim to read vim plugins

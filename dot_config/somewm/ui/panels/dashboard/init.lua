@@ -21,7 +21,7 @@ return function(s)
 		wrap = "word", ellipsize = "end", widget = wibox.widget.textbox,
 	})
 	local selection = require("ui.panels.dashboard.selection")(function(selected, editing)
-		local action = selected and (selected.control.keyboard_adjust and "adjust" or "toggle") or "open"
+		local action = selected and (selected.control.keyboard_action or (selected.control.keyboard_adjust and "adjust" or "toggle")) or "open"
 		key_hints:set_text(editing
 			and "adjust: hl / left-right\ndone: enter / esc"
 			or "move: hjkl / arrows\n" .. action .. ": enter")
@@ -37,20 +37,37 @@ return function(s)
 		end
 		if selected then viewport:reveal(selected.widget) end
 	end, function(widget) return viewport:get_bounds(widget) end)
-	local function selectable(control)
+	local function selectable(control, items, group)
 		local wrapper = wibox.widget({
 			{ control, margins = dp(3), widget = wibox.container.margin },
 			border_width = dp(2), border_color = beautiful.transparent,
 			shape = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dp(6)) end,
 			widget = wibox.container.background,
 		})
-		local items = controls[building_page]
-		local index = #items + 1
-		items[index] = { widget = wrapper, control = control }
+		items = items or controls[building_page]
+		local item = { widget = wrapper, control = control, id = control.keyboard_id, group = group }
+		items[#items + 1] = item
 		wrapper:connect_signal("button::press", function()
-			if selection.items == items then selection:select(index) end
+			for index, candidate in ipairs(selection.items) do
+				if candidate == item then selection:select(index); break end
+			end
 		end)
 		return wrapper
+	end
+	local function devices(kind, title)
+		return require("ui.panels.dashboard.settings.audio-device-switcher")({
+			kind = kind, title = title,
+			wrap_rows = function(rows)
+				local items, widgets = {}, {}
+				for _, item in ipairs(controls.settings) do
+					if item.group ~= kind then items[#items + 1] = item end
+				end
+				for _, row in ipairs(rows) do widgets[#widgets + 1] = selectable(row, items, kind) end
+				controls.settings = items
+				if mode == "settings" then selection:refresh_items(items) end
+				return widgets
+			end,
+		})
 	end
 
 	local function setting(name) return selectable(require("ui.panels.dashboard.settings." .. name)) end
@@ -68,18 +85,15 @@ return function(s)
 			setting("brightness-slider"), setting("autobacklight-toggle"), setting("blur-toggle"), setting("blur-slider"))),
 			ui.card("Session", setting("sessionsave-toggle"))),
 		ui.column(ui.card("Sound", ui.column(setting("volume-slider"), setting("microphone-slider"),
-			require("ui.panels.dashboard.settings.audio-device-switcher")({ kind = "sink", title = "Output device" }),
-			require("ui.panels.dashboard.settings.audio-device-switcher")({ kind = "source", title = "Input device" })))))
+			devices("sink", "Output device"), devices("source", "Input device")))))
 	local meters = {}
-	for _, item in ipairs({
-		{ "CPU", "cpu-usage" }, { "Memory", "ram-usage" }, { "GPU", "gpu-usage" },
-		{ "Storage", "disk-usage" }, { "Temperature", "temp-meter" }, { "Fans", "fan-meter" },
+	for _, name in ipairs({
+		"cpu-usage", "ram-usage", "gpu-usage",
+		"disk-usage", "temp-meter", "fan-meter",
 	}) do
-		local meter = require("ui.panels.dashboard.sys-monitor." .. item[2])()
+		local meter = require("ui.panels.dashboard.sys-monitor." .. name)()
 		monitors[#monitors + 1] = meter
-		meters[#meters + 1] = ui.card(item[1], wibox.widget({
-			meter, forced_height = dp(78), widget = wibox.container.constraint, strategy = "exact",
-		}))
+		meters[#meters + 1] = ui.card(nil, meter)
 	end
 	pages.resources = columns(ui.column(meters[1], meters[3], meters[5]), ui.column(meters[2], meters[4], meters[6]))
 

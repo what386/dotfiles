@@ -4,6 +4,38 @@ vim.api.nvim_create_user_command("TrimWhitespace", function()
 	vim.fn.winrestview(view)
 end, { desc = "Remove trailing whitespace from the current buffer" })
 
+-- Retire empty placeholder buffers once a real file is opened.
+vim.api.nvim_create_autocmd("BufEnter", {
+	group = vim.api.nvim_create_augroup("close-empty-unnamed-buffers", { clear = true }),
+	callback = function(event)
+		local file = event.buf
+		vim.schedule(function()
+			if not vim.api.nvim_buf_is_valid(file) or vim.api.nvim_get_current_buf() ~= file then
+				return
+			end
+			local name = vim.api.nvim_buf_get_name(file)
+			if vim.bo[file].buftype ~= "" or name == "" or vim.fn.isdirectory(name) == 1 then
+				return
+			end
+			for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+				if
+					buf ~= file
+					and vim.api.nvim_buf_is_loaded(buf)
+					and vim.bo[buf].buflisted
+					and vim.bo[buf].buftype == ""
+					and not vim.bo[buf].modified
+					and vim.api.nvim_buf_get_name(buf) == ""
+					and #vim.fn.win_findbuf(buf) == 0
+					and vim.api.nvim_buf_line_count(buf) == 1
+					and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
+				then
+					vim.api.nvim_buf_delete(buf, { force = false })
+				end
+			end
+		end)
+	end,
+})
+
 -- Highlight yanked text
 vim.api.nvim_create_autocmd("TextYankPost", {
 	callback = function()
