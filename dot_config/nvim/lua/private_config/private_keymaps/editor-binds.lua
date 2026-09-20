@@ -1,10 +1,7 @@
 local defaults = { noremap = true, silent = true }
 
-function map(mode, lhs, rhs, opts)
-	local options = defaults
-	if opts then
-		options = vim.tbl_extend("force", options, opts)
-	end
+local function map(mode, lhs, rhs, opts)
+	local options = vim.tbl_extend("force", {}, defaults, opts or {})
 	vim.keymap.set(mode, lhs, rhs, options)
 end
 
@@ -78,7 +75,7 @@ map("x", "p", [["_dP]])
 map({ "n", "v" }, "<leader>d", [["_d]], { desc = "[D]elete (no yank)" })
 map({ "n", "v" }, "x", [["_x]])
 map({ "n", "v" }, "X", [["_X]])
-map("n", "<leader>dw", [[:%s/\s\+$//e<CR>]], { desc = "[D]elete trailing [W]hitespace" })
+map("n", "<leader>dw", "<cmd>TrimWhitespace<CR>", { desc = "[D]elete trailing [W]hitespace" })
 map("n", "<leader>dp", "yyp", { desc = "[D]u[P]licate line" })
 map("v", "<leader>dp", "y`>p", { desc = "[D]u[P]licate selection" })
 
@@ -249,47 +246,6 @@ map("n", "<S-Down>", ":m .+1<CR>==")
 map("n", "<S-Up>", ":m .-2<CR>==")
 map("v", "<S-Down>", ":m '>+1<CR>gv=gv")
 map("v", "<S-Up>", ":m '<-2<CR>gv=gv")
-
--- ============================================================================
--- <leader>l: LSP FEATURES
--- ============================================================================
-
--- Core LSP actions
-map("n", "<leader>lr", vim.lsp.buf.rename, { desc = "[L]SP: [R]ename" })
-map("n", "<leader>la", vim.lsp.buf.code_action, { desc = "[L]SP: Code [A]ction" })
-map("n", "<leader>lf", function()
-	vim.lsp.buf.format({ async = true })
-end, { desc = "[L]SP: [F]ormat buffer" })
-
--- Hover / signature help
-map("n", "K", vim.lsp.buf.hover, { desc = "LSP Hover" })
-map("n", "<C-k>", vim.lsp.buf.signature_help, { desc = "LSP Signature Help" })
-
--- Go-to functionality
-map("n", "gd", vim.lsp.buf.definition, { desc = "Go to [D]efinition" })
-map("n", "gD", vim.lsp.buf.declaration, { desc = "Go to [D]eclaration" })
-map("n", "gi", vim.lsp.buf.implementation, { desc = "Go to [I]mplementation" })
-map("n", "gr", vim.lsp.buf.references, { desc = "Go to [R]eferences" })
-map("n", "gt", vim.lsp.buf.type_definition, { desc = "Go to [T]ype definition" })
-
--- Workspace & document symbols
-map("n", "<leader>ls", vim.lsp.buf.document_symbol, { desc = "[L]SP: Document [S]ymbols" })
-map("n", "<leader>lS", vim.lsp.buf.workspace_symbol, { desc = "[L]SP: Workspace [S]ymbols" })
-
--- Diagnostics (extends your <leader>q section)
-map("n", "<leader>ld", vim.diagnostic.open_float, { desc = "[L]SP: Show [D]iagnostic" })
-map("n", "<leader>lq", vim.diagnostic.setloclist, { desc = "[L]SP: Diagnostic [Q]uickfix" })
-map("n", "[e", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
-map("n", "]e", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
-
--- Workspace folder management
-map("n", "<leader>lw", vim.lsp.buf.list_workspace_folders, { desc = "[L]SP: List [W]orkspaces" })
-map("n", "<leader>lA", vim.lsp.buf.add_workspace_folder, { desc = "[L]SP: [A]dd workspace folder" })
-map("n", "<leader>lR", vim.lsp.buf.remove_workspace_folder, { desc = "[L]SP: [R]emove workspace folder" })
-
--- Misc tools
-map("n", "<leader>li", vim.lsp.buf.incoming_calls, { desc = "[L]SP: [I]ncoming calls" })
-map("n", "<leader>lo", vim.lsp.buf.outgoing_calls, { desc = "[L]SP: [O]utgoing calls" })
 
 -- ============================================================================
 -- MISC: Useful one-off mappings

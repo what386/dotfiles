@@ -35,6 +35,9 @@ return function(event)
 	-- Execute a code action, usually your cursor needs to be on top of an error
 	-- or a suggestion from your LSP for this to activate.
 	map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
+	map("<leader>lf", function()
+		require("config.lsp.format").format(event.buf, true)
+	end, "[F]ormat buffer")
 
 	-- Opens a popup that displays documentation about the word under your cursor
 	--  See `:help K` for why this keymap
@@ -43,6 +46,7 @@ return function(event)
 	-- WARN: This is not Goto Definition, this is Goto Declaration.
 	--  For example, in C this would take you to the header
 	map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+	map("<C-k>", vim.lsp.buf.signature_help, "Signature help")
 
 	map("<leader>wa", vim.lsp.buf.add_workspace_folder, "[W]orkspace [A]dd Folder")
 	map("<leader>wr", vim.lsp.buf.remove_workspace_folder, "[W]orkspace [R]emove Folder")

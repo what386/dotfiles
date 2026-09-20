@@ -14,12 +14,13 @@ local config_dir = filesystem.get_configuration_dir()
 
 local icons = require("theme.icons")
 
-local create_profile = function()
+local create_profile = function(scale)
+	local dpi = scale or dpi
 	local profile_imagebox = wibox.widget({
 		{
 			id = "icon",
-			forced_height = dpi(65),
-			forced_width = dpi(65),
+			forced_height = dpi(40),
+			forced_width = dpi(40),
 			image = icons.system.default_user,
 			widget = wibox.widget.imagebox,
 			resize = true,
@@ -66,8 +67,8 @@ local create_profile = function()
 		widget = wibox.widget.textbox,
 	})
 
-	local left_column_width = dpi(130)
-	local right_column_width = dpi(125)
+	local left_column_width = dpi(120)
+	local right_column_width = dpi(115)
 
 	local top_left = wibox.widget({
 		profile_name,
@@ -182,7 +183,7 @@ local create_profile = function()
 
 	local user_profile = wibox.widget({
 		layout = wibox.layout.fixed.horizontal,
-		spacing = dpi(10),
+		spacing = dpi(8),
 		{
 			layout = wibox.layout.align.vertical,
 			expand = "none",

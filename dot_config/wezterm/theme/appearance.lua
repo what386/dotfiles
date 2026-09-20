@@ -1,13 +1,8 @@
-local gpu_adapters = require("utils").gpu_adapter
-
 local M = {}
 
 function M.apply(config)
 	-- Performance settings
 	config.max_fps = 144
-	config.front_end = "WebGpu"
-	config.webgpu_power_preference = "HighPerformance"
-	config.webgpu_preferred_adapter = gpu_adapters:pick_best()
 	config.underline_thickness = "1.5pt"
 
 	-- Cursor settings

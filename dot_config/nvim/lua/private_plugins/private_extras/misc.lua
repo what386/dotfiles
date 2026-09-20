@@ -15,11 +15,11 @@ return {
 		dependencies = { "nvim-lua/plenary.nvim" },
 		opts = { signs = false },
 	},
-	{ -- highlight hex color codes
-		"norcalli/nvim-colorizer.lua",
-		config = function()
-			require("colorizer").setup()
-		end,
+	{ -- highlight literal colors
+		"catgoose/nvim-colorizer.lua",
+		name = "catgoose-colorizer",
+		event = "BufReadPre",
+		opts = {},
 	},
 	{ -- lua functions
 		"nvim-lua/plenary.nvim",

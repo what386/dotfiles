@@ -1,6 +1,8 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
 local pane_move = require("modules.pane_move")
+local projects = require("modules.projects.launcher")
+local templates = require("modules.projects.templates")
 local M = {}
 
 local function create_keys()
@@ -54,6 +56,34 @@ local function create_keys()
 					end
 				end),
 			}),
+		},
+		{
+			key = "p",
+			mods = "ALT|SHIFT",
+			action = wezterm.action_callback(function(window, pane)
+				projects.open(window, pane)
+			end),
+		},
+		{
+			key = "o",
+			mods = "ALT|SHIFT",
+			action = wezterm.action_callback(function(window, pane)
+				projects.save_current(window, pane)
+			end),
+		},
+		{
+			key = "i",
+			mods = "ALT|SHIFT",
+			action = wezterm.action_callback(function(window, pane)
+				templates.open(window, pane)
+			end),
+		},
+		{
+			key = "u",
+			mods = "ALT|SHIFT",
+			action = wezterm.action_callback(function(window, pane)
+				templates.save_current(window, pane)
+			end),
 		},
 	}
 

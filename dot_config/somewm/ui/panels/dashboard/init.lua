@@ -2,317 +2,195 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
-local dpi = beautiful.xresources.apply_dpi
-panel_visible = false
+local icons = require("theme.icons")
 
-local format_item = function(widget)
-	return wibox.widget({
-		{
-			{
-				layout = wibox.layout.align.vertical,
-				expand = "none",
-				nil,
-				widget,
-				nil,
-			},
-			margins = dpi(10),
-			widget = wibox.container.margin,
-		},
-		forced_height = dpi(88),
-		bg = beautiful.groups_bg,
-		shape = function(cr, width, height)
-			gears.shape.rounded_rect(cr, width, height, beautiful.groups_radius)
-		end,
-		widget = wibox.container.background,
+return function(s)
+	local function dp(value) return beautiful.xresources.apply_dpi(value, s) end
+	local ui = require("ui.panels.components")(dp)
+	local calendar = require("ui.panels.dashboard.calendar")(dp, ui)
+	local viewport = ui.viewport()
+	local mode = "overview"
+	local tab_order = { "overview", "settings", "resources" }
+	local panel, navigation
+	local pages, monitors, nav_buttons = {}, {}, {}
+	local controls = { overview = {}, settings = {}, resources = {} }
+	local building_page = "overview"
+	local key_hints = wibox.widget({
+		text = "move: hjkl / arrows\nopen: enter",
+		font = "Inter Regular 9", align = "center", valign = "center",
+		wrap = "word", ellipsize = "end", widget = wibox.widget.textbox,
 	})
-end
-
-local format_item_no_fix_height = function(widget)
-	return wibox.widget({
-		{
-			{
-				layout = wibox.layout.align.vertical,
-				expand = "none",
-				nil,
-				widget,
-				nil,
-			},
-			margins = dpi(5),
-			widget = wibox.container.margin,
-		},
-		bg = beautiful.groups_bg,
-		shape = function(cr, width, height)
-			gears.shape.rounded_rect(cr, width, height, beautiful.groups_radius)
-		end,
-		widget = wibox.container.background,
-	})
-end
-
-local vertical_separator = wibox.widget({
-	orientation = "vertical",
-	forced_height = dpi(1),
-	forced_width = dpi(1),
-	span_ratio = 0.55,
-	widget = wibox.widget.separator,
-})
-
-local control_center_row_one = wibox.widget({
-	layout = wibox.layout.align.horizontal,
-	forced_height = dpi(55),
-	nil,
-	format_item(require("ui.panels.dashboard.user-profile")()),
-	{
-		format_item({
-			layout = wibox.layout.fixed.horizontal,
-			spacing = dpi(10),
-			require("ui.panels.dashboard.switch")(),
-			vertical_separator,
-			--require("ui.panels.dashboard.end-session")(),
-		}),
-		left = dpi(10),
-		widget = wibox.container.margin,
-	},
-})
-
-local main_control_row_two = wibox.widget({
-	layout = wibox.layout.flex.horizontal,
-	spacing = dpi(10),
-	format_item_no_fix_height({
-		layout = wibox.layout.fixed.vertical,
-		spacing = dpi(5),
-		require("ui.panels.dashboard.settings.airplane-toggle"),
-		require("ui.panels.dashboard.settings.bluetooth-toggle"),
-		require("ui.panels.dashboard.settings.redshift-toggle"),
-		require("ui.panels.dashboard.settings.autobacklight-toggle"),
-	}),
-	{
-		layout = wibox.layout.flex.vertical,
-		spacing = dpi(10),
-		format_item_no_fix_height({
-			layout = wibox.layout.align.vertical,
-			expand = "none",
-			nil,
-			require("ui.panels.dashboard.settings.dont-disturb-toggle"),
-			nil,
-		}),
-		format_item_no_fix_height({
-			layout = wibox.layout.align.vertical,
-			expand = "none",
-			nil,
-			require("ui.panels.dashboard.settings.blur-toggle"),
-			nil,
-		}),
-		format_item_no_fix_height({
-			layout = wibox.layout.align.vertical,
-			expand = "none",
-			nil,
-			require("ui.panels.dashboard.settings.sessionsave-toggle"),
-			nil,
-		}),
-	},
-})
-
-local main_control_row_sliders = wibox.widget({
-	layout = wibox.layout.fixed.vertical,
-	spacing = dpi(10),
-	format_item({
-		require("ui.panels.dashboard.settings.blur-slider"),
-		margins = dpi(10),
-		widget = wibox.container.margin,
-	}),
-	format_item({
-		require("ui.panels.dashboard.settings.brightness-slider"),
-		margins = dpi(10),
-		widget = wibox.container.margin,
-	}),
-	format_item({
-		require("ui.panels.dashboard.settings.volume-slider"),
-		margins = dpi(10),
-		widget = wibox.container.margin,
-	}),
-	format_item({
-		require("ui.panels.dashboard.settings.microphone-slider"),
-		margins = dpi(10),
-		widget = wibox.container.margin,
-	}),
-	format_item_no_fix_height({
-		require("ui.panels.dashboard.settings.audio-device-switcher")({
-			kind = "sink",
-			title = "Output Device",
-		}),
-		margins = dpi(10),
-		widget = wibox.container.margin,
-	}),
-	format_item_no_fix_height({
-		require("ui.panels.dashboard.settings.audio-device-switcher")({
-			kind = "source",
-			title = "Input Device",
-		}),
-		margins = dpi(10),
-		widget = wibox.container.margin,
-	}),
-})
-local dashboard = function(s)
-	-- Set the control center geometry
-	local panel_width = dpi(550)
-	local panel_margins = dpi(15)
-
-	local cpu = require("ui.panels.dashboard.sys-monitor.cpu-usage")()
-	local gpu = require("ui.panels.dashboard.sys-monitor.gpu-usage")()
-	local ram = require("ui.panels.dashboard.sys-monitor.ram-usage")()
-	local disk = require("ui.panels.dashboard.sys-monitor.disk-usage")()
-	local fan = require("ui.panels.dashboard.sys-monitor.fan-meter")()
-	local temp = require("ui.panels.dashboard.sys-monitor.temp-meter")()
-
-	local monitors = { cpu, gpu, ram, disk, fan, temp }
-
-	local monitor_control_row_progressbars = wibox.widget({
-		layout = wibox.layout.fixed.vertical,
-		spacing = dpi(10),
-		format_item(cpu),
-		format_item(gpu),
-		format_item(ram),
-		format_item(disk),
-		format_item(fan),
-		format_item(temp),
-	})
-
-	local panel = awful.popup({
-		widget = {
-			{
-				{
-					layout = wibox.layout.fixed.vertical,
-					spacing = dpi(10),
-					control_center_row_one,
-					{
-						layout = wibox.layout.stack,
-						{
-							id = "main_control",
-							visible = true,
-							layout = wibox.layout.fixed.vertical,
-							spacing = dpi(10),
-							main_control_row_two,
-							main_control_row_sliders,
-						},
-						{
-							id = "monitor_control",
-							visible = false,
-							layout = wibox.layout.fixed.vertical,
-							spacing = dpi(10),
-							monitor_control_row_progressbars,
-						},
-					},
-				},
-				margins = dpi(16),
-				widget = wibox.container.margin,
-			},
-			id = "dashboard",
-			bg = beautiful.background,
-			shape = function(cr, w, h)
-				gears.shape.rounded_rect(cr, w, h, beautiful.groups_radius)
-			end,
+	local selection = require("ui.panels.dashboard.selection")(function(selected, editing)
+		local action = selected and (selected.control.keyboard_adjust and "adjust" or "toggle") or "open"
+		key_hints:set_text(editing
+			and "adjust: hl / left-right\ndone: enter / esc"
+			or "move: hjkl / arrows\n" .. action .. ": enter")
+		for _, items in pairs(controls) do
+			for _, item in ipairs(items) do
+				item.widget.border_color = item == selected and (editing and beautiful.fg_normal or beautiful.accent) or beautiful.transparent
+				item.widget.bg = item == selected and editing and beautiful.groups_bg or beautiful.transparent
+			end
+		end
+		for name, button in pairs(nav_buttons) do
+			button.border_width = dp(2)
+			button.border_color = not selected and name == mode and beautiful.fg_normal or beautiful.transparent
+		end
+		if selected then viewport:reveal(selected.widget) end
+	end, function(widget) return viewport:get_bounds(widget) end)
+	local function selectable(control)
+		local wrapper = wibox.widget({
+			{ control, margins = dp(3), widget = wibox.container.margin },
+			border_width = dp(2), border_color = beautiful.transparent,
+			shape = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dp(6)) end,
 			widget = wibox.container.background,
-		},
-		screen = s,
-		type = "dock",
-		visible = false,
-		ontop = true,
-		width = dpi(panel_width),
-		maximum_width = dpi(panel_width),
-		maximum_height = dpi(s.geometry.height - 38),
-		bg = beautiful.transparent,
-		fg = beautiful.fg_normal,
-		shape = gears.shape.rectangle,
+		})
+		local items = controls[building_page]
+		local index = #items + 1
+		items[index] = { widget = wrapper, control = control }
+		wrapper:connect_signal("button::press", function()
+			if selection.items == items then selection:select(index) end
+		end)
+		return wrapper
+	end
+
+	local function setting(name) return selectable(require("ui.panels.dashboard.settings." .. name)) end
+	local columns = ui.columns
+	local quick = ui.card("Quick controls", ui.column(
+		columns(setting("airplane-toggle"), setting("bluetooth-toggle"), 360),
+		columns(setting("dont-disturb-toggle"), setting("redshift-toggle"), 360),
+		setting("brightness-slider"), setting("volume-slider")))
+	pages.overview = columns(
+		ui.column(ui.card(nil, selectable(calendar))),
+		ui.column(quick))
+	building_page = "settings"
+	pages.settings = columns(
+		ui.column(ui.card("Display & appearance", ui.column(
+			setting("brightness-slider"), setting("autobacklight-toggle"), setting("blur-toggle"), setting("blur-slider"))),
+			ui.card("Session", setting("sessionsave-toggle"))),
+		ui.column(ui.card("Sound", ui.column(setting("volume-slider"), setting("microphone-slider"),
+			require("ui.panels.dashboard.settings.audio-device-switcher")({ kind = "sink", title = "Output device" }),
+			require("ui.panels.dashboard.settings.audio-device-switcher")({ kind = "source", title = "Input device" })))))
+	local meters = {}
+	for _, item in ipairs({
+		{ "CPU", "cpu-usage" }, { "Memory", "ram-usage" }, { "GPU", "gpu-usage" },
+		{ "Storage", "disk-usage" }, { "Temperature", "temp-meter" }, { "Fans", "fan-meter" },
+	}) do
+		local meter = require("ui.panels.dashboard.sys-monitor." .. item[2])()
+		monitors[#monitors + 1] = meter
+		meters[#meters + 1] = ui.card(item[1], wibox.widget({
+			meter, forced_height = dp(78), widget = wibox.container.constraint, strategy = "exact",
+		}))
+	end
+	pages.resources = columns(ui.column(meters[1], meters[3], meters[5]), ui.column(meters[2], meters[4], meters[6]))
+
+	local function update_monitors()
+		for _, meter in ipairs(monitors) do
+			if panel and panel.visible and mode == "resources" then
+				if meter.start then meter:start() end
+			elseif meter.stop then meter:stop() end
+		end
+	end
+	local function select_page(name)
+		if not pages[name] then return end
+		mode = name
+		viewport:set_content(pages[name])
+		for key, button in pairs(nav_buttons) do
+			button.bg = key == name and beautiful.accent or beautiful.groups_bg
+		end
+		selection:set_items(controls[name])
+		if name == "settings" then awesome.emit_signal("audio::devices:refresh") end
+		update_monitors()
+	end
+	navigation = wibox.layout.fixed.horizontal()
+	navigation.spacing = dp(8)
+	for _, item in ipairs({
+		{ "overview", "Overview", icons.system.menu },
+		{ "settings", "Settings", icons.dashboard.switch.gear },
+		{ "resources", "Resources", icons.dashboard.switch.chart },
+	}) do
+		local button = ui.button(item[2], function() select_page(item[1]) end, item[3])
+		nav_buttons[item[1]] = button
+		navigation:add(button)
+	end
+	local compact_navigation = wibox.widget({
+		{ navigation, height = dp(42), strategy = "exact", widget = wibox.container.constraint },
+		valign = "center", widget = wibox.container.place,
 	})
-
-	awful.placement.top_left(panel, {
-		honor_workarea = true,
-		parent = s,
-		margins = {
-			top = dpi(36) + panel_margins,
-			left = panel_margins,
-		},
+	local body = wibox.widget({
+		{ { compact_navigation,
+			{ key_hints, left = dp(12), right = dp(12), widget = wibox.container.margin },
+			ui.card(nil, require("ui.panels.dashboard.user-profile")(dp), 8), layout = wibox.layout.align.horizontal },
+			bottom = dp(12), widget = wibox.container.margin },
+		viewport,
+		nil,
+		layout = wibox.layout.align.vertical,
 	})
-
-	panel.opened = false
-
 	s.backdrop_dashboard = wibox({
-		ontop = true,
-		screen = s,
-		bg = beautiful.transparent,
-		type = "utility",
-		x = s.geometry.x,
-		y = s.geometry.y,
-		width = s.geometry.width,
-		height = s.geometry.height,
+		ontop = true, screen = s, bg = beautiful.transparent, type = "utility", visible = false,
+		x = s.geometry.x, y = s.geometry.y, width = s.geometry.width, height = s.geometry.height,
 	})
-
-	panel.start_monitors = function()
-		for _, m in ipairs(monitors) do
-			if m.start then
-				m:start()
+	panel = awful.popup({
+		widget = { body, margins = dp(12), widget = wibox.container.margin },
+		screen = s, type = "dock", visible = false, ontop = true,
+		bg = beautiful.background, fg = beautiful.fg_normal,
+		shape = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dp(16)) end,
+	})
+	local function geometry()
+		local area = s.workarea or s.geometry
+		local margin = dp(12)
+		-- Workarea is already in physical pixels; scale only design dimensions.
+		local width = math.max(1, math.min(dp(940), area.width - 2 * margin))
+		local height = math.max(1, math.min(dp(600), area.height - 2 * margin))
+		panel.minimum_width, panel.maximum_width = width, width
+		panel.minimum_height, panel.maximum_height = height, height
+		panel.width, panel.height = width, height
+		panel.x = area.x + math.floor((area.width - width) / 2)
+		panel.y = area.y + area.height - height - margin
+		local g = s.geometry
+		s.backdrop_dashboard.x, s.backdrop_dashboard.y = g.x, g.y
+		s.backdrop_dashboard.width, s.backdrop_dashboard.height = g.width, g.height
+	end
+	panel.opened = false
+	local keyboard = require("ui.panels.dashboard.keyboard")(function(direction)
+		for index, name in ipairs(tab_order) do
+			if name == mode then
+				select_page(tab_order[(index - 1 + direction) % #tab_order + 1])
+				return
 			end
 		end
-	end
-
-	panel.stop_monitors = function()
-		for _, m in ipairs(monitors) do
-			if m.stop then
-				m:stop()
-			end
-		end
-	end
-
-	local open_panel = function()
-		local focused = awful.screen.focused()
-		panel_visible = true
-
-		focused.backdrop_dashboard.visible = true
-		focused.dashboard.visible = true
-
-		awesome.emit_signal("audio::devices:refresh")
-		panel:emit_signal("opened")
-	end
-
-	local close_panel = function()
-		local focused = awful.screen.focused()
-		panel_visible = false
-
-		focused.dashboard.visible = false
-		focused.backdrop_dashboard.visible = false
-
-		panel:emit_signal("closed")
-	end
-
-	panel:connect_signal("opened", function()
-		panel:start_monitors()
-	end)
-
-	panel:connect_signal("closed", function()
-		panel:stop_monitors()
-	end)
-
-	-- Hide this panel when app dashboard is called.
+	end, function() panel:hide_dashboard() end, selection)
+	local refresh_timer = gears.timer({
+		timeout = 60, autostart = false,
+		callback = function()
+			if mode == "overview" then calendar:refresh() end
+		end,
+	})
 	function panel:hide_dashboard()
-		close_panel()
+		keyboard:stop()
+		self.opened = false
+		self.visible = false
+		s.backdrop_dashboard.visible = false
+		refresh_timer:stop()
+		update_monitors()
+		self:emit_signal("closed")
 	end
-
 	function panel:toggle()
-		self.opened = not self.opened
-		if self.opened then
-			open_panel()
-		else
-			close_panel()
-		end
+		if self.opened then self:hide_dashboard(); return end
+		geometry()
+		self.opened = true
+		s.backdrop_dashboard.visible = true
+		self.visible = true
+		select_page("overview")
+		calendar:refresh()
+		refresh_timer:start()
+		keyboard:start()
+		self:emit_signal("opened")
 	end
-
-	s.backdrop_dashboard:buttons({awful.button({}, 1, nil, function()
-		panel:toggle()
-	end)})
-
-	panel:stop_monitors()
-
+	function panel:switch_pane(name) select_page(name) end
+	s.backdrop_dashboard:buttons({ awful.button({}, 1, function() panel:hide_dashboard() end) })
+	s:connect_signal("property::geometry", geometry)
+	s:connect_signal("property::workarea", geometry)
+	select_page("overview")
+	geometry()
 	return panel
 end
-
-return dashboard

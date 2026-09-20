@@ -142,4 +142,5 @@ awesome.connect_signal("setting::blur:toggle", function()
 	toggle_blur_fx()
 end)
 
+action_widget.keyboard_activate = toggle_blur_fx
 return action_widget

@@ -131,4 +131,5 @@ awesome.connect_signal("setting::redshift:toggle", function()
 	toggle_action()
 end)
 
+action_widget.keyboard_activate = toggle_action
 return action_widget

@@ -4,9 +4,20 @@ local beautiful = require("beautiful")
 local gears = require("gears")
 local rubato = require("dependencies.rubato")
 local dpi = beautiful.xresources.apply_dpi
-panel_visible = false
 
 local infopanel = function(s)
+	local function dp(value) return beautiful.xresources.apply_dpi(value, s) end
+	local ui = require("ui.panels.components")(dp)
+	local mail = require("ui.panels.infopanel.recent-mail")(ui)
+	local notifications = require("ui.panels.infopanel.notif-center")(s)
+	local pages = { notifications = notifications, emails = ui.column(ui.card("Recent email", mail)) }
+	local content = ui.viewport()
+	local mode = "notifications"
+	local tabs = {}
+	local mail_timer = gears.timer({
+		timeout = 60, autostart = false,
+		callback = function() mail:refresh() end,
+	})
 	-- Set right panel geometry
 	local panel_width = dpi(290)
 	local panel_x = s.geometry.x + s.geometry.width - panel_width
@@ -26,6 +37,27 @@ local infopanel = function(s)
 	})
 
 	panel.opened = false
+	function panel:switch_pane(name)
+		if not pages[name] then return end
+		mode = name
+		content:set_content(pages[name])
+		for key, tab in pairs(tabs) do
+			tab.bg = key == name and beautiful.accent or beautiful.groups_bg
+		end
+		mail_timer:stop()
+		if name == "emails" and self.opened then
+			mail:refresh()
+			mail_timer:start()
+		end
+	end
+	local switcher = wibox.layout.flex.horizontal()
+	switcher.spacing = dp(8)
+	for _, item in ipairs({ { "notifications", "Notifications" }, { "emails", "Emails" } }) do
+		local tab = ui.button(item[2], function() panel:switch_pane(item[1]) end)
+		tabs[item[1]] = tab
+		switcher:add(tab)
+	end
+	panel:switch_pane(mode)
 	panel.opacity = 0
 	panel.x = hidden_x
 	local animation_token = 0
@@ -36,6 +68,7 @@ local infopanel = function(s)
 		outro = 0.12,
 		duration = 0.22,
 		easing = rubato.easing.quadratic,
+		clamp_position = true,
 		subscribed = function(pos)
 			panel.x = pos
 		end,
@@ -47,6 +80,7 @@ local infopanel = function(s)
 		outro = 0.1,
 		duration = 0.16,
 		easing = rubato.easing.linear,
+		clamp_position = true,
 		subscribed = function(opacity)
 			panel.opacity = opacity
 		end,
@@ -68,14 +102,14 @@ local infopanel = function(s)
 	})
 
 	local open_panel = function()
-		local focused = awful.screen.focused()
 		animation_token = animation_token + 1
-		panel_visible = true
+		panel.opened = true
+		panel:switch_pane(mode)
 
-		focused.backdrop_rdb.visible = true
-		focused.infopanel.visible = true
-		focused.infopanel.x = hidden_x
-		focused.infopanel.opacity = 0
+		s.backdrop_rdb.visible = true
+		panel.visible = true
+		panel.x = hidden_x
+		panel.opacity = 0
 		slide_anim.target = panel_x
 		fade_anim.target = 1
 
@@ -83,10 +117,10 @@ local infopanel = function(s)
 	end
 
 	local close_panel = function()
-		local focused = awful.screen.focused()
 		animation_token = animation_token + 1
+		panel.opened = false
+		mail_timer:stop()
 		local token = animation_token
-		panel_visible = false
 
 		slide_anim.target = hidden_x
 		fade_anim.target = 0
@@ -96,8 +130,8 @@ local infopanel = function(s)
 			single_shot = true,
 			callback = function()
 				if token == animation_token then
-					focused.infopanel.visible = false
-					focused.backdrop_rdb.visible = false
+					panel.visible = false
+					s.backdrop_rdb.visible = false
 				end
 			end,
 		})
@@ -119,76 +153,16 @@ local infopanel = function(s)
 		end
 	end
 
-	function panel:switch_pane(mode)
-		if mode == "notif_mode" then
-			-- Update Content
-			panel:get_children_by_id("notif_id")[1].visible = true
-			panel:get_children_by_id("pane_id")[1].visible = false
-		elseif mode == "today_mode" then
-			-- Update Content
-			panel:get_children_by_id("notif_id")[1].visible = false
-			panel:get_children_by_id("pane_id")[1].visible = true
-		end
-	end
-
 	s.backdrop_rdb:buttons({awful.button({}, 1, function()
 		panel:toggle()
 	end)})
 
-	local separator = wibox.widget({
-		orientation = "horizontal",
-		opacity = 0.0,
-		forced_height = 15,
-		widget = wibox.widget.separator,
-	})
-
-	local line_separator = wibox.widget({
-		orientation = "horizontal",
-		forced_height = dpi(1),
-		span_ratio = 1.0,
-		color = beautiful.groups_title_bg,
-		widget = wibox.widget.separator,
-	})
-
 	panel:setup({
 		{
-			expand = "none",
-			layout = wibox.layout.fixed.vertical,
-			{
-				layout = wibox.layout.align.horizontal,
-				expand = "none",
-				nil,
-				require("ui.panels.infopanel.info-center-switch"),
-				nil,
-			},
-			separator,
-			line_separator,
-			separator,
-			{
-				layout = wibox.layout.stack,
-				-- Today Pane
-				{
-					id = "pane_id",
-					visible = true,
-					layout = wibox.layout.fixed.vertical,
-					{
-						layout = wibox.layout.fixed.vertical,
-						spacing = dpi(7),
-						require("ui.panels.infopanel.user-profile"),
-						require("ui.panels.infopanel.agenda"),
-						require("ui.panels.infopanel.weather"),
-						require("ui.panels.infopanel.calculator"),
-					},
-				},
-				-- Notification Center
-				{
-					id = "notif_id",
-					visible = false,
-					--require("widget.notif-center"),
-					require("ui.panels.infopanel.notif-center")(s),
-					layout = wibox.layout.fixed.vertical,
-				},
-			},
+			layout = wibox.layout.align.vertical,
+			{ switcher, bottom = dp(16), widget = wibox.container.margin },
+			content,
+			nil,
 		},
 		margins = dpi(16),
 		widget = wibox.container.margin,

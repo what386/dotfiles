@@ -14,8 +14,6 @@ function M.apply(config)
 
 	-- Linux-specific settings
 
-	config.window_decorations = "RESIZE" -- Let WM handle decorations
-
 	-- May need to adjust based on your distro font rendering
 	config.freetype_load_target = "Normal"
 	config.freetype_render_target = "Normal"

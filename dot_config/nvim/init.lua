@@ -31,15 +31,12 @@ require("lazy").setup({
 	require("plugins.lsp.lsp-setup"),
 	require("plugins.lsp.blink-cmp"),
 	require("plugins.lsp.none-ls"),
-	--require("plugins.lsp.autocompletion"),
 	require("plugins.lsp.trouble"),
 
 	require("plugins.ui.alpha"),
 	require("plugins.ui.colortheme"),
 	require("plugins.ui.indent-blankline"),
 	require("plugins.ui.noice"),
-	require("plugins.ui.incline"),
-	require("plugins.ui.bufferline"),
 
 	require("plugins.extras.language-extras"),
 	require("plugins.extras.misc"),
@@ -62,5 +59,3 @@ require("lazy").setup({
 })
 
 require("plugins.lsp.manual")
-
-print("config loaded!")

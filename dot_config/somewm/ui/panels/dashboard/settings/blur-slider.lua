@@ -179,4 +179,8 @@ local volume_setting = wibox.widget({
 	},
 })
 
+function volume_setting:keyboard_adjust(direction)
+	blur_slider:set_value(math.max(0, math.min(100, (blur_slider:get_value() or 0) + direction * 10)))
+end
+
 return volume_setting

@@ -105,4 +105,5 @@ local action_widget = wibox.widget({
 	},
 })
 
+action_widget.keyboard_activate = toggle_action
 return action_widget

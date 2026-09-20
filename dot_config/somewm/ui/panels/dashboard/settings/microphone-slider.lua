@@ -177,4 +177,8 @@ local volume_setting = wibox.widget({
 	},
 })
 
+function volume_setting:keyboard_adjust(direction)
+	mic_slider:set_value(math.max(0, math.min(100, (mic_slider:get_value() or 0) + direction * 5)))
+end
+
 return volume_setting

@@ -19,10 +19,8 @@ vim.o.whichwrap = "bs<>[]hl" -- characters that can travel between lines
 vim.o.scrolloff = 4 -- minimum number of lines between cursor and edge
 vim.o.sidescrolloff = 8 -- minimum number of columns between cursor and edge
 vim.o.smartindent = true -- enable smart indent
-vim.o.swapfile = false -- disable swap file
 vim.o.backspace = "indent,eol,start" -- allow backspace on
-vim.o.backup = false -- disable backup file
-vim.o.writebackup = false -- allow multi-editing between other programs
+vim.o.undofile = true -- retain undo history across restarts
 vim.o.conceallevel = 0 -- show '' in markdown
 vim.o.cmdheight = 1 -- command menu height in lines
 vim.o.pumheight = 10 -- size of pop-up menus in lines
@@ -30,8 +28,7 @@ vim.o.splitbelow = true -- force all horizontal splits below the cursor
 vim.o.splitright = true -- force all vertical splits to right of cursor
 vim.o.fileencoding = "utf-8" -- set filetype encoding
 vim.o.autoindent = true -- copy indent from previous line
-vim.opt.laststatus = 0 -- disable statusline
-vim.opt.showtabline = 0 -- hide top tabline (bufferline is replaced by bottom incline panels)
+vim.opt.laststatus = 3 -- one native statusline for the whole editor
+vim.opt.showtabline = 0
 vim.opt.iskeyword:append("-") -- allow hyphenated words to work in searches
 vim.opt.runtimepath:remove("/usr/share/vim/vimfiles") -- dont allow neovim to read vim plugins
-vim.o.shell = "/usr/bin/bash"

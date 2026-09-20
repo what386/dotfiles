@@ -2,6 +2,10 @@
   "version": 1,
   "templates": [
     {
+      "name": "cpp-cli",
+      "path": "templates/cpp-cli"
+    },
+    {
       "name": "dotnet-cli",
       "path": "templates/dotnet-cli"
     },

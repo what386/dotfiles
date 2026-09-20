@@ -120,4 +120,5 @@ local action_widget = wibox.widget({
 	},
 })
 
+action_widget.keyboard_activate = toggle_session_save
 return action_widget

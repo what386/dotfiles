@@ -48,9 +48,12 @@ action_info:buttons({awful.button({}, 1, nil, toggle_action)})
 awesome.connect_signal("brightness::auto-backlight", update_widget)
 update_widget(brightness.get_state().auto_backlight)
 
-return wibox.widget({
+local action_widget = wibox.widget({
 	layout = wibox.layout.fixed.horizontal,
 	spacing = dpi(10),
 	widget_button,
 	{ layout = wibox.layout.align.vertical, expand = "none", nil, action_info, nil },
 })
+
+action_widget.keyboard_activate = toggle_action
+return action_widget

@@ -1,19 +1,8 @@
--- Trim trailing whitespace on save
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*",
-	callback = function()
-		vim.cmd([[%s/\s\+$//e]])
-	end,
-})
-
--- Autoreload config
-vim.api.nvim_create_autocmd("BufWritePost", {
-	pattern = "~/.config/nvim/*",
-	callback = function()
-		vim.cmd("source <afile>")
-		print("Reloaded nvim config!")
-	end,
-})
+vim.api.nvim_create_user_command("TrimWhitespace", function()
+	local view = vim.fn.winsaveview()
+	vim.cmd([[%s/\s\+$//e]])
+	vim.fn.winrestview(view)
+end, { desc = "Remove trailing whitespace from the current buffer" })
 
 -- Highlight yanked text
 vim.api.nvim_create_autocmd("TextYankPost", {

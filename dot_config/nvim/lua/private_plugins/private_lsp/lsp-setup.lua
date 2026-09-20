@@ -31,14 +31,14 @@ return { -- LSP Configuration & Plugins
 
 			callback = function(event)
 				require("config.keymaps.lsp-binds")(event)
+				require("config.lsp.format").enable(event.buf)
 			end,
 		})
 
-		local capabilities = vim.lsp.protocol.make_client_capabilities()
-		--capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+		local capabilities = require("blink.cmp").get_lsp_capabilities()
 
 		local servers = require("config.lsp.servers")
-		local formatters = require("config.lsp.formatters")
+		local tools = require("config.lsp.tools")
 		local configured_servers = {}
 
 		local function setup_server(server_name)
@@ -58,12 +58,22 @@ return { -- LSP Configuration & Plugins
 		-- You can add other tools here that you want Mason to install
 		-- for you, so that they are available from within Neovim.
 		local ensure_installed = {}
-		for server_name, server_opts in pairs(servers or {}) do
-			if server_opts.mason ~= false then
-				table.insert(ensure_installed, server_name)
+		local installed = {}
+		local function ensure(package)
+			if not installed[package] then
+				installed[package] = true
+				table.insert(ensure_installed, package)
 			end
 		end
-		vim.list_extend(ensure_installed, formatters)
+		for server_name, server_opts in pairs(servers or {}) do
+			if server_opts.mason ~= false then
+				ensure(server_name)
+			end
+		end
+		for _, tool in ipairs(tools) do
+			ensure(tool)
+		end
+		table.sort(ensure_installed)
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
 		require("mason-lspconfig").setup({

@@ -31,4 +31,7 @@ action_info:buttons({awful.button({}, 1, nil, bluetooth.toggle_power)})
 awesome.connect_signal("bluetooth::state", render)
 render(bluetooth.get_state())
 
-return wibox.widget({ layout = wibox.layout.fixed.horizontal, spacing = dpi(10), widget_button, { layout = wibox.layout.align.vertical, expand = "none", nil, action_info, nil } })
+local action_widget = wibox.widget({ layout = wibox.layout.fixed.horizontal, spacing = dpi(10), widget_button, { layout = wibox.layout.align.vertical, expand = "none", nil, action_info, nil } })
+
+action_widget.keyboard_activate = bluetooth.toggle_power
+return action_widget

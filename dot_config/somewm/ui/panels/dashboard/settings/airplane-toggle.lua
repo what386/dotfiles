@@ -30,4 +30,7 @@ action_info:buttons({awful.button({}, 1, nil, network.toggle_airplane_mode)})
 awesome.connect_signal("network::airplane-mode", render)
 render(network.get_state().airplane_mode)
 
-return wibox.widget({ layout = wibox.layout.fixed.horizontal, spacing = dpi(10), widget_button, { layout = wibox.layout.align.vertical, expand = "none", nil, action_info, nil } })
+local action_widget = wibox.widget({ layout = wibox.layout.fixed.horizontal, spacing = dpi(10), widget_button, { layout = wibox.layout.align.vertical, expand = "none", nil, action_info, nil } })
+
+action_widget.keyboard_activate = network.toggle_airplane_mode
+return action_widget
