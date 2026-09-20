@@ -32,19 +32,19 @@ end
 awesome.connect_signal("lock::activate", function()
     -- Show your surfaces, start keygrabber
     lock_wb.visible = true
-    local password = ""
+    local psswrd = ""
 
     awful.keygrabber {
         autostart = true,
         keypressed_callback = function(_, _, key)
             if key == "Return" then
-                awesome.authenticate(password)
+                awesome.authenticate(psswrd)
                 awesome.unlock()
-                password = ""
+                psswrd = ""
             elseif key == "BackSpace" then
-                password = password:sub(1, -2)
+                psswrd = psswrd:sub(1, -2)
             elseif #key == 1 then
-                password = password .. key
+                psswrd = psswrd .. key
             end
         end,
     }
