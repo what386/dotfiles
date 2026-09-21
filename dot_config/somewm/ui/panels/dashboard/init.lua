@@ -95,7 +95,10 @@ return function(s)
 		monitors[#monitors + 1] = meter
 		meters[#meters + 1] = ui.card(nil, meter)
 	end
-	pages.resources = columns(ui.column(meters[1], meters[3], meters[5]), ui.column(meters[2], meters[4], meters[6]))
+	pages.resources = columns(
+		ui.column(meters[1], meters[3]),
+		ui.column(meters[2], meters[4], meters[5], meters[6])
+	)
 
 	local function update_monitors()
 		for _, meter in ipairs(monitors) do

@@ -29,6 +29,8 @@ local state = {
 	trusted = nil,
 	airplane_mode = settings.get_bool("airplane_mode", false),
 }
+local vpn_change_in_progress = false
+local watcher_restart_timers = {}
 
 local function is_trusted(ssid)
 	for _, trusted in ipairs(trusted_networks) do
@@ -173,7 +175,7 @@ function network.refresh()
 end
 
 function network.refresh_vpn(callback)
-	process.run_shell("ip link show " .. machine.vpn_interface.name, function(stdout, stderr, exit_code)
+	process.run({ "ip", "link", "show", machine.vpn_interface.name }, function(_, _, _, exit_code)
 		state.vpn_connected = exit_code == 0
 
 		emit_state()
@@ -186,20 +188,32 @@ end
 
 function network.set_vpn(connected)
 	connected = connected and true or false
-	if connected == state.vpn_connected then
+	if vpn_change_in_progress or connected == state.vpn_connected then
 		emit_state()
 		return
 	end
-	if connected then
-		process.spawn("sudo /usr/bin/wg-quick up " .. machine.vpn_interface.conf)
-		state.vpn_connected = true
-		naughty.notification({ message = "VPN tunnel has been enabled", title = "Connected to untrusted network", app_name = "System Notification", icon = icons.widgets.wifi.wifi_on })
-	else
-		process.spawn("sudo /usr/bin/wg-quick down " .. machine.vpn_interface.conf)
-		state.vpn_connected = false
-		naughty.notification({ message = "VPN tunnel has been disabled", title = "Connected to trusted network", app_name = "System Notification", icon = icons.widgets.wifi.wifi_on })
-	end
-	emit_state()
+
+	vpn_change_in_progress = true
+	process.run({ "sudo", "/usr/bin/wg-quick", connected and "up" or "down", machine.vpn_interface.conf }, function(_, stderr, _, exit_code)
+		network.refresh_vpn(function(is_connected)
+			vpn_change_in_progress = false
+			if exit_code == 0 and is_connected == connected then
+				naughty.notification({
+					message = connected and "VPN tunnel has been enabled" or "VPN tunnel has been disabled",
+					title = connected and "Connected to untrusted network" or "Connected to trusted network",
+					app_name = "System Notification",
+					icon = icons.widgets.wifi.wifi_on,
+				})
+			else
+				naughty.notification({
+					title = "VPN change failed",
+					message = tostring(stderr or ""):gsub("%s+$", "") ~= "" and tostring(stderr):gsub("%s+$", "") or "The VPN interface did not reach the requested state.",
+					app_name = "System Notification",
+					icon = icons.widgets.wifi.wifi_off,
+				})
+			end
+		end)
+	end)
 end
 
 function network.toggle_vpn()
@@ -223,9 +237,27 @@ function network.toggle_airplane_mode()
 	network.set_airplane_mode(not state.airplane_mode)
 end
 
+local function start_watcher(name, command, handlers)
+	local function launch()
+		process.watch(command, {
+			stdout = handlers.stdout,
+			stderr = handlers.stderr,
+			exit = function()
+				if watcher_restart_timers[name] then watcher_restart_timers[name]:stop() end
+				watcher_restart_timers[name] = gears.timer.start_new(2, function()
+					watcher_restart_timers[name] = nil
+					launch()
+					return false
+				end)
+			end,
+		})
+	end
+	launch()
+end
+
 function network.start()
-	process.watch("nmcli monitor", { stdout = function() state.last_health_check = 0; network.refresh() end })
-	process.watch("rfkill event", { stdout = function() emit_state() end })
+	start_watcher("network-monitor", "nmcli monitor", { stdout = function() state.last_health_check = 0; network.refresh() end })
+	start_watcher("rfkill-monitor", "rfkill event", { stdout = function() emit_state() end })
 	awesome.connect_signal("vpn::toggle", network.toggle_vpn)
 	awesome.connect_signal("network::airplane-mode:toggle", network.toggle_airplane_mode)
 	gears.timer({ timeout = 60, call_now = true, autostart = true, callback = function() network.refresh_vpn() end })

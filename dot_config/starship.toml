@@ -1,1 +1,10 @@
 add_newline = false
+
+[custom.push_dev]
+command = "printf 'push dev'"
+when = '''
+test "$(git branch --show-current)" = dev &&
+git show-ref --verify --quiet refs/remotes/origin/dev &&
+test "$(git rev-list --count origin/dev..HEAD)" -gt 0
+'''
+format = "[$output](bold yellow) "

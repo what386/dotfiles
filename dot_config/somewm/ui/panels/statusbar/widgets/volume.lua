@@ -6,6 +6,7 @@ local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
 local audio = require("services.audio")
 
+return function()
 local widget = wibox.widget({
 	{
 		id = "icon",
@@ -71,3 +72,4 @@ update_tooltip(audio.get_state())
 audio.refresh_state()
 
 return widget_button
+end

@@ -21,6 +21,7 @@ local state = {
 
 local started = false
 local subscriber_pid = nil
+local subscriber_restart_timer = nil
 local refreshing_state = false
 local refreshing_devices = false
 
@@ -346,13 +347,8 @@ function audio.schedule_refresh()
 	refresh_timer:again()
 end
 
-function audio.start()
-	if started then return end
-	started = true
-
-	audio.refresh()
-
-	-- Use pactl subscribe for change events since it's simpler than pw-cli
+local function start_subscription()
+	if subscriber_pid then return end
 	subscriber_pid = awful.spawn.with_line_callback("pactl subscribe", {
 		stdout = function(line)
 			if line:match(" on sink")
@@ -366,8 +362,23 @@ function audio.start()
 		end,
 		exit = function()
 			subscriber_pid = nil
+			if not started then return end
+			if subscriber_restart_timer then subscriber_restart_timer:stop() end
+			subscriber_restart_timer = gears.timer.start_new(2, function()
+				subscriber_restart_timer = nil
+				start_subscription()
+				return false
+			end)
 		end,
 	})
+end
+
+function audio.start()
+	if started then return end
+	started = true
+
+	audio.refresh()
+	start_subscription()
 end
 
 awesome.connect_signal("audio::devices:refresh", function() audio.refresh_devices() end)

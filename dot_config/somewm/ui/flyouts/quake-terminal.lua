@@ -10,6 +10,21 @@ local previous_client = nil
 local quake_client = nil
 local margins = dpi(2.5)
 local lr_margins = dpi(600)
+local opened = false
+local hide_timer = nil
+
+-- SomeWM's Lua hidden setter unbans the scene without clearing the xdg
+-- suspended state. Retagging this sticky client invokes native arrangement,
+-- which reconciles suspension too
+local function set_hidden(c, hidden)
+	c.hidden = hidden
+	local tags = c:tags()
+	if #tags == 0 and c.screen.selected_tag then
+		tags = { c.screen.selected_tag }
+	end
+	c:tags({})
+	c:tags(tags)
+end
 
 -- Function to get current screen dimensions and calculate positioning
 local function get_screen_geometry()
@@ -23,9 +38,10 @@ local function get_screen_geometry()
 	end
 	local screen_width = screen_geom.width
 	local screen_height = screen_geom.height
-	local panel_width = screen_width - lr_margins * 2
-	local panel_height = dpi(600)
-	local panel_x = screen_geom.x + lr_margins
+	local panel_width =
+		math.max(1, math.min(screen_width - margins * 2, math.max(dpi(640), screen_width - lr_margins * 2)))
+	local panel_height = math.max(1, math.min(dpi(600), screen_height - margins * 2))
+	local panel_x = screen_geom.x + (screen_width - panel_width) / 2
 	return {
 		screen = focused_screen,
 		workarea = screen_geom,
@@ -62,7 +78,7 @@ ruled.client.connect_signal("request::rules", function()
 		id = "quake_terminal",
 		rule_any = {
 			instance = { quake_instance_name },
-			class    = { quake_instance_name }, -- app_id maps to class on Wayland
+			class = { quake_instance_name }, -- app_id maps to class on Wayland
 		},
 		properties = quake_properties(),
 	})
@@ -102,16 +118,21 @@ local function animate_quake_terminal(show)
 	if not geom then
 		return
 	end
+	opened = show
+	if hide_timer then
+		hide_timer:stop()
+		hide_timer = nil
+	end
 
 	-- Update width/screen without touching y
 	if quake_client.screen ~= geom.screen then
 		quake_client:move_to_screen(geom.screen)
-		quake_client:geometry({
-			x = geom.panel_x,
-			width = geom.panel_width,
-			height = geom.panel_height,
-		})
 	end
+	quake_client:geometry({
+		x = geom.panel_x,
+		width = geom.panel_width,
+		height = geom.panel_height,
+	})
 
 	-- Animation target positions
 	local target_y_show = geom.workarea.y + margins
@@ -139,7 +160,7 @@ local function animate_quake_terminal(show)
 
 	if not quake_opacity_anim then
 		quake_opacity_anim = rubato.timed({
-			rate = 60,       -- half the rate of position animation
+			rate = 60, -- half the rate of position animation
 			intro = 0.1,
 			outro = 0.1,
 			duration = 0.25,
@@ -154,8 +175,10 @@ local function animate_quake_terminal(show)
 
 	-- Focus handling and initial setup
 	if show then
-		previous_client = client.focus
-		quake_client.hidden = false
+		if client.focus ~= quake_client then
+			previous_client = client.focus
+		end
+		set_hidden(quake_client, false)
 		quake_client:emit_signal("request::activate", "quake_toggle", { raise = true })
 		client.focus = quake_client
 		-- Start fade in slightly before the slide animation
@@ -176,7 +199,8 @@ local function animate_quake_terminal(show)
 
 	-- When animation finishes hiding, mark hidden
 	if not show then
-		gears.timer({
+		local hiding_client = quake_client
+		hide_timer = gears.timer({
 			timeout = math.max(
 				quake_y_anim.duration + quake_y_anim.intro,
 				quake_opacity_anim.duration + quake_opacity_anim.intro
@@ -184,23 +208,9 @@ local function animate_quake_terminal(show)
 			autostart = true,
 			single_shot = true,
 			callback = function()
-				if quake_client and quake_client.valid then
-					quake_client.hidden = true
-				end
-			end,
-		})
-	end
-
-	-- force repaint
-	if show then
-		gears.timer({
-			timeout = quake_opacity_anim.duration + quake_opacity_anim.outro,
-			autostart = true,
-			single_shot = true,
-			callback = function()
-				if quake_client and quake_client.valid then
-					local g = quake_client:geometry()
-					quake_client:geometry({ x = g.x, y = g.y, width = g.width, height = g.height })
+				hide_timer = nil
+				if not opened and quake_client == hiding_client and hiding_client.valid then
+					set_hidden(hiding_client, true)
 				end
 			end,
 		})
@@ -212,8 +222,7 @@ local function quake_toggle()
 	if not quake_client or not quake_client.valid then
 		awful.spawn(app)
 	else
-		local is_hidden = quake_client.hidden
-		animate_quake_terminal(is_hidden)
+		animate_quake_terminal(not opened)
 	end
 end
 
@@ -224,9 +233,8 @@ end)
 
 -- When client is managed, capture it if it's the quake terminal
 client.connect_signal("request::manage", function(c)
-    if c.instance == quake_instance_name
-    or c.class == quake_instance_name then
-        quake_client = c
+	if c.instance == quake_instance_name or c.class == quake_instance_name then
+		quake_client = c
 		local success = update_quake_geometry(c)
 		if success then
 			c.hidden = true
@@ -244,6 +252,11 @@ end)
 -- Clean up when the terminal is closed
 client.connect_signal("request::unmanage", function(c)
 	if c == quake_client then
+		opened = false
+		if hide_timer then
+			hide_timer:stop()
+			hide_timer = nil
+		end
 		quake_client = nil
 		quake_y_anim = nil
 		quake_opacity_anim = nil

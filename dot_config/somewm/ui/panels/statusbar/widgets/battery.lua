@@ -34,6 +34,7 @@ local icons_charging = {
 	icons.widgets.battery.charging.battery_charging_100,
 }
 
+return function()
 local widget = wibox.widget({ { id = "icon", image = icons.widgets.battery.battery_alert, widget = wibox.widget.imagebox, resize = true }, layout = wibox.layout.align.horizontal })
 local widget_button = wibox.widget({ { widget, margins = dpi(5.5), widget = wibox.container.margin }, widget = clickable_container })
 local battery_tooltip = awful.tooltip({ text = "Loading...", objects = { widget_button }, delay_show = 0.15, mode = "outside", align = "right", preferred_positions = { "left", "right", "top", "bottom" }, margin_leftright = dpi(8), margin_topbottom = dpi(8) })
@@ -67,3 +68,4 @@ awesome.connect_signal("power::battery", render)
 render(power.get_battery_state())
 
 return widget_button
+end

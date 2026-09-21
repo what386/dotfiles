@@ -1,15 +1,14 @@
 local wibox = require("wibox")
 local dpi = require("beautiful").xresources.apply_dpi
 
-local notif_header = wibox.widget({
-	text = "Notification Center",
-	font = "Inter Bold 16",
-	align = "left",
-	valign = "bottom",
-	widget = wibox.widget.textbox,
-})
-
 local notif_center = function(s)
+	local notif_header = wibox.widget({
+		text = "Notification Center",
+		font = "Inter Bold 16",
+		align = "left",
+		valign = "bottom",
+		widget = wibox.widget.textbox,
+	})
 	s.dont_disturb = require("ui.panels.infopanel.notif-center.dont-disturb")
 	s.clear_all = require("ui.panels.infopanel.notif-center.clear-all")
 	s.notifbox_layout = require("ui.panels.infopanel.notif-center.build-notifbox").notifbox_layout

@@ -4,7 +4,6 @@ insensitive=true
 width=2560
 height=1440
 prompt=
-term=foot
 columns=6
 image_size=72
 orientation=vertical

@@ -6,6 +6,7 @@ local clickable_container = require("ui.clickable-container")
 
 local icons = require("theme.icons")
 
+return function()
 local widget = wibox.widget({
 	{
 		id = "icon",
@@ -26,7 +27,15 @@ local widget_button = wibox.widget({
 })
 
 widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
-	awful.screen.focused().infopanel:toggle()
+	local panel = awful.screen.focused().infopanel
+	if not panel then return end
+	if panel.opened then
+		panel:toggle()
+	else
+		panel:switch_pane("notifications")
+		panel:toggle()
+	end
 end)))
 
 return widget_button
+end

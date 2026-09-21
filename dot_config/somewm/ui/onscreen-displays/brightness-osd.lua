@@ -161,39 +161,38 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	})
 	-- Reset timer on mouse hover
 	s.brightness_osd_overlay:connect_signal("mouse::enter", function()
-		local focused = awful.screen.focused()
-		if focused then focused.show_bri_osd = true end
-		awesome.emit_signal("osd::brightness_osd:rerun")
+		s.show_bri_osd = true
+		awesome.emit_signal("osd::brightness_osd:rerun", s)
 	end)
+	s.brightness_osd_hide_timer = gears.timer({
+		timeout = 2,
+		single_shot = true,
+		callback = function()
+			s.brightness_osd_overlay.visible = false
+			s.show_bri_osd = false
+		end,
+	})
 end)
-local hide_osd = gears.timer({
-	timeout = 2,
-	autostart = true,
-	callback = function()
-		local focused = awful.screen.focused()
-		if not focused then return end
-		focused.brightness_osd_overlay.visible = false
-		focused.show_bri_osd = false
-	end,
-})
-awesome.connect_signal("osd::brightness_osd:rerun", function()
-	if hide_osd.started then
-		hide_osd:again()
+awesome.connect_signal("osd::brightness_osd:rerun", function(target)
+	target = target or awful.screen.focused()
+	if not target or not target.brightness_osd_hide_timer then return end
+	if target.brightness_osd_hide_timer.started then
+		target.brightness_osd_hide_timer:again()
 	else
-		hide_osd:start()
+		target.brightness_osd_hide_timer:start()
 	end
 end)
-awesome.connect_signal("osd::brightness_osd:show", function(bool)
-	local focused = awful.screen.focused()
-	if not focused then return end
-	focused.brightness_osd_overlay.visible = bool
+awesome.connect_signal("osd::brightness_osd:show", function(bool, target)
+	target = target or awful.screen.focused()
+	if not target or not target.brightness_osd_overlay then return end
+	target.brightness_osd_overlay.visible = bool
 	if bool then
-		awesome.emit_signal("osd::brightness_osd:rerun")
-		awesome.emit_signal("osd::volume_osd:show", false)
-		--awesome.emit_signal("osd::microphone_osd:show", false)
+		awesome.emit_signal("osd::brightness_osd:rerun", target)
+		awesome.emit_signal("osd::volume_osd:show", false, target)
+		awesome.emit_signal("osd::microphone_osd:show", false, target)
 	else
-		if hide_osd.started then
-			hide_osd:stop()
+		if target.brightness_osd_hide_timer.started then
+			target.brightness_osd_hide_timer:stop()
 		end
 	end
 end)

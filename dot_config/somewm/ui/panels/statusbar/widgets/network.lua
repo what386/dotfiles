@@ -6,6 +6,7 @@ local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
 local network = require("services.network")
 
+return function()
 local widget = wibox.widget({ { id = "icon", image = icons.widgets.wifi.wifi_strength_off, widget = wibox.widget.imagebox, resize = true }, layout = wibox.layout.align.horizontal })
 local widget_button = wibox.widget({ { widget, margins = dpi(6), widget = wibox.container.margin }, widget = clickable_container })
 local network_tooltip = awful.tooltip({ text = "Loading...", objects = { widget_button }, delay_show = 0.15 })
@@ -41,3 +42,4 @@ awesome.connect_signal("network::state", render)
 render(network.get_state())
 
 return widget_button
+end

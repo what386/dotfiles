@@ -10,6 +10,7 @@ local icons = require("theme.icons")
 
 local systray = require("ui.panels.statusbar.applets.systray")
 
+return function()
 local opened = false
 
 local widget = wibox.widget({
@@ -50,3 +51,4 @@ widget_button:buttons(gears.table.join(awful.button({}, 1, nil, function()
 end)))
 
 return tray
+end

@@ -43,9 +43,9 @@ cargo publish --dry-run --locked
 
 git tag "${version}"
 
-echo -e "${BLUE}Publishing release on GitHub...${NC}"
-git push github "${version}"
-echo -e "${GREEN}Published on GitHub${NC}"
+echo -e "${BLUE}Publishing release...${NC}"
+git push origin "${version}"
+echo -e "${GREEN}Published${NC}"
 
 echo -e "${BLUE}Publishing on crates.io...${NC}"
 cargo publish --locked

@@ -6,7 +6,9 @@ local rubato = require("dependencies.rubato")
 local dpi = beautiful.xresources.apply_dpi
 
 local infopanel = function(s)
-	local function dp(value) return beautiful.xresources.apply_dpi(value, s) end
+	local function dp(value)
+		return beautiful.xresources.apply_dpi(value, s)
+	end
 	local ui = require("ui.panels.components")(dp)
 	local mail = require("ui.panels.infopanel.recent-mail")(ui)
 	local notifications = require("ui.panels.infopanel.notif-center")(s)
@@ -15,11 +17,14 @@ local infopanel = function(s)
 	local mode = "notifications"
 	local tabs = {}
 	local mail_timer = gears.timer({
-		timeout = 60, autostart = false,
-		callback = function() mail:refresh() end,
+		timeout = 60,
+		autostart = false,
+		callback = function()
+			mail:refresh()
+		end,
 	})
 	-- Set right panel geometry
-	local panel_width = dpi(290)
+	local panel_width = dp(420)
 	local panel_x = s.geometry.x + s.geometry.width - panel_width
 	local hidden_x = s.geometry.x + s.geometry.width + dpi(8)
 
@@ -38,7 +43,9 @@ local infopanel = function(s)
 
 	panel.opened = false
 	function panel:switch_pane(name)
-		if not pages[name] then return end
+		if not pages[name] then
+			return
+		end
 		mode = name
 		content:set_content(pages[name])
 		for key, tab in pairs(tabs) do
@@ -53,7 +60,9 @@ local infopanel = function(s)
 	local switcher = wibox.layout.flex.horizontal()
 	switcher.spacing = dp(8)
 	for _, item in ipairs({ { "notifications", "Notifications" }, { "emails", "Emails" } }) do
-		local tab = ui.button(item[2], function() panel:switch_pane(item[1]) end)
+		local tab = ui.button(item[2], function()
+			panel:switch_pane(item[1])
+		end)
 		tabs[item[1]] = tab
 		switcher:add(tab)
 	end
@@ -153,9 +162,9 @@ local infopanel = function(s)
 		end
 	end
 
-	s.backdrop_rdb:buttons({awful.button({}, 1, function()
+	s.backdrop_rdb:buttons({ awful.button({}, 1, function()
 		panel:toggle()
-	end)})
+	end) })
 
 	panel:setup({
 		{

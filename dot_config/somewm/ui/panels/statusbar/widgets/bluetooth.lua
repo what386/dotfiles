@@ -6,6 +6,7 @@ local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
 local bluetooth = require("services.bluetooth")
 
+return function()
 local widget = wibox.widget({ { id = "icon", image = icons.widgets.bluetooth.bluetooth_off, widget = wibox.widget.imagebox, resize = true }, layout = wibox.layout.align.horizontal })
 local widget_button = wibox.widget({ { widget, margins = dpi(6), widget = wibox.container.margin }, widget = clickable_container })
 local bluetooth_tooltip = awful.tooltip({ objects = { widget_button }, delay_show = 0.15, mode = "outside", align = "right", margin_leftright = dpi(8), margin_topbottom = dpi(8), preferred_positions = { "right", "left", "top", "bottom" } })
@@ -46,3 +47,4 @@ awesome.connect_signal("bluetooth::state", render)
 render(bluetooth.get_state())
 
 return widget_button
+end

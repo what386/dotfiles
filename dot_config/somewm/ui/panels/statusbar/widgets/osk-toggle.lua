@@ -11,6 +11,7 @@ local icons = require("theme.icons")
 
 local kbd_state = false
 
+return function()
 local widget = wibox.widget({
 	{
 		id = "icon",
@@ -56,3 +57,4 @@ end)))
 keyboard_tooltip.markup = "Toggle on-screen keyboard"
 
 return widget_button
+end

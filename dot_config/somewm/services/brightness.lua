@@ -1,22 +1,18 @@
 local gears = require("gears")
 local naughty = require("naughty")
-local gfs = require("gears.filesystem")
 local settings = require("utilities.settings")
 local process = require("utilities.process")
 
 local brightness = {}
 
-local script_dir = gfs.get_configuration_dir() .. "scripts/"
 local state = {
 	available = false,
 	level = 0,
-	auto_backlight = settings.get_bool("auto_backlight_enabled", false),
+	auto_backlight = false,
 	stream_running = false,
-	last_auto_percent = nil,
 	last_error = nil,
 }
 
-local timer = nil
 local apply_timer = nil
 local pending_level = nil
 
@@ -105,74 +101,16 @@ function brightness.change_level(delta)
 	brightness.set_level((state.level or 0) + (tonumber(delta) or 0))
 end
 
-local function start_stream()
-	if state.stream_running then
-		return
-	end
-	process.run({ "bash", script_dir .. "v4l2_brightness_stream.sh", "start" }, function(_, _, _, exit_code)
-		state.stream_running = exit_code == 0
-		if not state.stream_running then
-			state.auto_backlight = false
-			settings.set_bool("auto_backlight_enabled", false)
-			emit_state()
-			naughty.notification({ title = "Auto Backlight", message = "Unable to start brightness stream (camera/v4l2 unavailable)." })
-		end
-	end)
-end
-
-local function stop_stream()
-	if state.stream_running then
-		process.spawn({ "bash", script_dir .. "v4l2_brightness_stream.sh", "stop" })
-	end
-	state.stream_running = false
-end
-
-local function read_stream(callback)
-	process.run({ "bash", script_dir .. "v4l2_brightness_stream.sh", "read" }, function(stdout, _, _, exit_code)
-		if exit_code ~= 0 then
-			return
-		end
-		local value = tonumber(stdout:match("([%d%.]+)"))
-		if value then
-			callback(value)
-		end
-	end)
-end
-
-local function auto_update()
-	read_stream(function(raw)
-		local percent = clamp_percent(raw * 100, 5)
-		if state.last_auto_percent and math.abs(percent - state.last_auto_percent) < 3 then
-			return
-		end
-		state.last_auto_percent = percent
-		brightness.set_level(percent)
-		awesome.emit_signal("module::auto_brightness:brightness_changed", percent)
-	end)
-end
-
 function brightness.set_auto_backlight(enabled)
-	enabled = enabled and true or false
-	if state.auto_backlight == enabled then
-		emit_state()
-		return
-	end
-
-	state.auto_backlight = enabled
-	settings.set_bool("auto_backlight_enabled", enabled)
 	if enabled then
-		start_stream()
-		if not timer then
-			timer = gears.timer({ timeout = 3, callback = auto_update })
-		end
-		timer:start()
-	else
-		state.last_auto_percent = nil
-		if timer then
-			timer:stop()
-		end
-		stop_stream()
+		naughty.notification({
+			title = "Auto Backlight",
+			message = "Automatic brightness is not available on this system.",
+		})
 	end
+	state.auto_backlight = false
+	state.stream_running = false
+	settings.set_bool("auto_backlight_enabled", false)
 	emit_state()
 end
 
@@ -182,14 +120,9 @@ end
 
 function brightness.start()
 	brightness.refresh()
-	if state.auto_backlight then
-		state.auto_backlight = false
-		brightness.set_auto_backlight(true)
-	end
+	brightness.set_auto_backlight(false)
 end
 
 awesome.connect_signal("widget::brightness", brightness.refresh)
 awesome.connect_signal("setting::auto_backlight:toggle", brightness.toggle_auto_backlight)
-awesome.connect_signal("exit", stop_stream)
-
 return brightness

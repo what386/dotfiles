@@ -41,9 +41,9 @@ fi
 
 git tag "${version}"
 
-echo -e "${BLUE}Publishing release on GitHub...${NC}"
-git push github "${version}"
-echo -e "${GREEN}Published on GitHub${NC}"
+echo -e "${BLUE}Publishing release...${NC}"
+git push origin "${version}"
+echo -e "${GREEN}Published${NC}"
 
 printf "published" > .release-state
 

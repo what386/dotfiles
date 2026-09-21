@@ -1,6 +1,4 @@
 require("ui.flyouts.onscreen-keyboard")
-require("ui.flyouts.prompt-lua")
-require("ui.flyouts.prompt-signal")
 require("ui.flyouts.quake-terminal")
 require("ui.flyouts.clipboard-history")
 require("ui.flyouts.window-switcher")

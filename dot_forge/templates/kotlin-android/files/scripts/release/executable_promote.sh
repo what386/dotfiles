@@ -30,8 +30,7 @@ just verify-release
 
 echo -e "${BLUE}Pushing dev to remotes...${NC}"
 
-git push github dev
-git push gitea dev
+git push origin dev
 
 echo -e "${BLUE}Merging dev into main...${NC}"
 
@@ -40,8 +39,7 @@ git merge dev -m "Merge dev into main"
 
 echo -e "${BLUE}Pushing main to remotes...${NC}"
 
-git push github main
-git push gitea main
+git push origin main
 
 printf "promoted" > .release-state
 

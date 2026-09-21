@@ -6,6 +6,7 @@ local dpi = beautiful.xresources.apply_dpi
 local clickable_container = require("ui.clickable-container")
 local icons = require("theme.icons")
 local media = require("services.media")
+return function()
 local media_buttons = {}
 
 media_buttons.play_button_image = wibox.widget({
@@ -146,3 +147,4 @@ awesome.connect_signal("media::state", function(state)
 end)
 
 return navigate_buttons
+end

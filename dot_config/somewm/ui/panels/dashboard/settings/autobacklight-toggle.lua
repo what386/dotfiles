@@ -8,7 +8,7 @@ local icons = require("theme.icons")
 local brightness = require("services.brightness")
 
 local action_name = wibox.widget({ text = "Auto Backlight", font = "Inter Bold 10", align = "left", widget = wibox.widget.textbox })
-local action_status = wibox.widget({ text = "Off", font = "Inter Regular 10", align = "left", widget = wibox.widget.textbox })
+local action_status = wibox.widget({ text = "Unavailable", font = "Inter Regular 10", align = "left", widget = wibox.widget.textbox })
 local action_info = wibox.widget({ layout = wibox.layout.fixed.vertical, action_name, action_status })
 
 local button_widget = wibox.widget({
@@ -26,27 +26,12 @@ local widget_button = wibox.widget({
 	widget = wibox.container.background,
 })
 
-local function update_widget(enabled)
-	if enabled then
-		action_status:set_text("On")
-		widget_button.bg = beautiful.accent
-		button_widget.icon:set_image(icons.dashboard.settings.brightness)
-	else
-		action_status:set_text("Off")
-		widget_button.bg = beautiful.groups_bg
-		button_widget.icon:set_image(icons.dashboard.settings.brightness_off)
-	end
-end
-
 local function toggle_action()
 	brightness.toggle_auto_backlight()
 end
 
 widget_button:buttons({awful.button({}, 1, nil, toggle_action)})
 action_info:buttons({awful.button({}, 1, nil, toggle_action)})
-
-awesome.connect_signal("brightness::auto-backlight", update_widget)
-update_widget(brightness.get_state().auto_backlight)
 
 local action_widget = wibox.widget({
 	layout = wibox.layout.fixed.horizontal,

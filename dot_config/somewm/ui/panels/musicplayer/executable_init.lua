@@ -77,14 +77,15 @@ local create_musicplayer = function(s)
 	})
 
 	-- Register widgets with the updater
-	music_updater.register_widgets({
+	local widget_refs = {
 		title = title,
 		artist = artist,
 		length = length,
 		position = position,
 		progress_bar = progress_bar:get_children_by_id("music_bar")[1],
 		album_art = album_art:get_children_by_id("cover")[1],
-	})
+	}
+	music_updater.register_widgets(widget_refs)
 
 	local music_box_margin = dpi(25)
 	local music_box_height = dpi(375)
@@ -120,8 +121,17 @@ local create_musicplayer = function(s)
 
 	musicpop:connect_signal("mouse::leave", function()
 		musicpop.hover = false
-		awesome.emit_signal("panel::musicplayer:rerun")
+		awesome.emit_signal("panel::musicplayer:rerun", s)
 	end)
+
+	musicpop.hide_timer = gears.timer({
+		timeout = 4,
+		single_shot = true,
+		callback = function()
+			if not musicpop.hover then musicpop.visible = false end
+		end,
+	})
+	musicpop.widget_refs = widget_refs
 
 	musicpop:setup({
 		{
@@ -177,7 +187,7 @@ local create_musicplayer = function(s)
 							fps = 60,
 						},
 					},
-					media_buttons,
+					media_buttons(),
 				},
 			},
 			top = dpi(15),
@@ -195,29 +205,23 @@ local create_musicplayer = function(s)
 	return musicpop
 end
 
-local hide_musicplayer = gears.timer({
-	timeout = 4,
-	autostart = true,
-	callback = function()
-		local focused = awful.screen.focused()
-		if not focused.musicplayer.hover then
-			focused.musicplayer.visible = false
-		end
-	end,
-})
-
-awesome.connect_signal("panel::musicplayer:rerun", function()
-	if hide_musicplayer.started then
-		hide_musicplayer:again()
+awesome.connect_signal("panel::musicplayer:rerun", function(target)
+	target = target or awful.screen.focused()
+	local panel = target and target.musicplayer
+	if not panel then return end
+	if panel.hide_timer.started then
+		panel.hide_timer:again()
 	else
-		hide_musicplayer:start()
+		panel.hide_timer:start()
 	end
 end)
 
-awesome.connect_signal("panel::musicplayer:show", function()
-	local focused = awful.screen.focused()
-	focused.musicplayer.visible = true
-	awesome.emit_signal("panel::musicplayer:rerun")
+awesome.connect_signal("panel::musicplayer:show", function(target)
+	target = target or awful.screen.focused()
+	local panel = target and target.musicplayer
+	if not panel then return end
+	panel.visible = true
+	awesome.emit_signal("panel::musicplayer:rerun", target)
 end)
 
 return create_musicplayer

@@ -15,34 +15,37 @@ local bluetooth_widget = require(widgetdir .. "bluetooth")
 local vpn_widget = require(widgetdir .. "vpn-status")
 --local sd_card_widget = require(widgetdir .. "sd-card")
 local layoutbox_widget = require(widgetdir .. "layoutbox")
-local dashboard_widget = require(widgetdir .. "dashboard-toggle")
+local infopanel_widget = require(widgetdir .. "infopanel-toggle")
 local dropdown_widget = require(widgetdir .. "dropdown")
 local osk_widget = require(widgetdir .. "osk-toggle")
 local update_widget = require(widgetdir .. "update-manager")
 
-local separator = wibox.widget({
-	orientation = "vertical",
-	forced_height = dpi(1),
-	forced_width = dpi(1),
-	span_ratio = 0.55,
-	widget = wibox.widget.separator,
-})
+local function separator()
+	return wibox.widget({
+		orientation = "vertical",
+		forced_height = dpi(1),
+		forced_width = dpi(1),
+		span_ratio = 0.55,
+		widget = wibox.widget.separator,
+	})
+end
 
-local right_widgets = wibox.widget({
-	{
-		--sd_card_widget,
-		update_widget,
-		vpn_widget,
-		bluetooth_widget,
-		network_widget,
-		volume_widget,
-		battery_widget,
-		spacing = dpi(8),
-		layout = wibox.layout.fixed.horizontal,
-	},
-	margins = { top = dpi(1), bottom = dpi(1) },
-	widget = wibox.container.margin,
-})
+local function right_widgets(s)
+	local items = wibox.layout.fixed.horizontal()
+	items.spacing = dpi(8)
+	-- Update checks run once because they invoke several external commands.
+	if s == screen.primary then items:add(update_widget) end
+	items:add(vpn_widget())
+	items:add(bluetooth_widget())
+	items:add(network_widget())
+	items:add(volume_widget())
+	items:add(battery_widget())
+	return wibox.widget({
+		items,
+		margins = { top = dpi(1), bottom = dpi(1) },
+		widget = wibox.container.margin,
+	})
+end
 
 -- Store statusbars for each screen
 local statusbars = {}
@@ -54,12 +57,13 @@ local function update_statusbar_visibility(s)
 		return
 	end
 
-	local c = client.focus
-	if c and c.screen == s and c.fullscreen then
-		statusbar.visible = false
-	else
-		statusbar.visible = true
+	for _, c in ipairs(client.get()) do
+		if c.valid and c.screen == s and c.fullscreen and c:isvisible() then
+			statusbar.visible = false
+			return
+		end
 	end
+	statusbar.visible = true
 end
 
 -- Function to update all statusbars
@@ -74,10 +78,9 @@ local function statusbar(s)
 		screen = s,
 		position = "top",
 		type = "dock",
-		stretch = false,
+		stretch = true,
 		visible = true,
 		height = dpi(35),
-		width = s.geometry.width,
 		bg = beautiful.background,
 		fg = beautiful.system_white_dark,
 		opacity = 1,
@@ -87,9 +90,9 @@ local function statusbar(s)
 		expand = "none",
 		layout = wibox.layout.align.horizontal,
 		{ -- left
-			dashboard_widget,
-			osk_widget,
-			separator,
+			layoutbox_widget(s),
+			osk_widget(),
+			separator(),
 			clock_widget(s),
 			spacing = dpi(8),
 			layout = wibox.layout.fixed.horizontal,
@@ -97,10 +100,10 @@ local function statusbar(s)
 		-- middle
 		tasklist(s),
 		{ -- right
-			dropdown_widget,
-			right_widgets,
-			separator,
-			layoutbox_widget(s),
+			s == screen.primary and dropdown_widget() or nil,
+			right_widgets(s),
+			separator(),
+			infopanel_widget(),
 			spacing = dpi(8),
 			layout = wibox.layout.fixed.horizontal,
 		},
