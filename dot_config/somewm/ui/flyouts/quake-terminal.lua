@@ -4,14 +4,80 @@ local beautiful = require("beautiful")
 local gears = require("gears")
 local dpi = beautiful.xresources.apply_dpi
 local rubato = require("dependencies.rubato")
-local app = require("config.preferences.apps").quake -- e.g. "kitty --name QuakeTerminal"
-local quake_instance_name = "QuakeTerminal"
+local app = require("config.preferences.apps").quake
+local quake_app_id = "org.somewm.QuakeTerminal"
+local config_dir = gears.filesystem.get_configuration_dir()
+local quake_pid_path = config_dir .. "persistent/quake-terminal.pid"
 local previous_client = nil
 local quake_client = nil
+local quake_pid = nil
 local margins = dpi(2.5)
 local lr_margins = dpi(600)
 local opened = false
 local hide_timer = nil
+
+local function read_quake_pid()
+	local file = io.open(quake_pid_path, "r")
+	if not file then
+		return nil
+	end
+	local pid = tonumber(file:read("*a"))
+	file:close()
+	if pid and pid > 0 and pid == math.floor(pid) then
+		return pid
+	end
+	return nil
+end
+
+local function write_quake_pid(pid)
+	local temp_path = quake_pid_path .. ".tmp"
+	local file = io.open(temp_path, "w")
+	if not file then
+		return false
+	end
+	file:write(tostring(pid), "\n")
+	file:close()
+	return os.rename(temp_path, quake_pid_path)
+end
+
+local function clear_quake_pid()
+	os.remove(quake_pid_path)
+	quake_pid = nil
+end
+
+local function quake_process_is_running(pid)
+	if not pid then
+		return false
+	end
+	local file = io.open("/proc/" .. tostring(pid) .. "/cmdline", "r")
+	if not file then
+		return false
+	end
+	local command_line = file:read("*a")
+	file:close()
+	return command_line:find("ghostty", 1, true) ~= nil
+		and command_line:find("--class=" .. quake_app_id, 1, true) ~= nil
+end
+
+local function spawn_quake_terminal()
+	local pid = awful.spawn(app)
+	if pid and pid > 0 then
+		quake_pid = pid
+		write_quake_pid(pid)
+	end
+	return pid
+end
+
+local function ensure_quake_terminal()
+	if quake_client and quake_client.valid then
+		return
+	end
+	if quake_process_is_running(quake_pid) then
+		return
+	end
+	clear_quake_pid()
+	spawn_quake_terminal()
+end
 
 -- SomeWM's Lua hidden setter unbans the scene without clearing the xdg
 -- suspended state. Retagging this sticky client invokes native arrangement,
@@ -76,10 +142,7 @@ end
 ruled.client.connect_signal("request::rules", function()
 	ruled.client.append_rule({
 		id = "quake_terminal",
-		rule_any = {
-			instance = { quake_instance_name },
-			class = { quake_instance_name }, -- app_id maps to class on Wayland
-		},
+		rule = { class = quake_app_id }, -- Ghostty's Wayland app ID maps to class.
 		properties = quake_properties(),
 	})
 end)
@@ -136,7 +199,7 @@ local function animate_quake_terminal(show)
 
 	-- Animation target positions
 	local target_y_show = geom.workarea.y + margins
-	local target_y_hide = geom.workarea.y - ((geom.panel_height / 5) + margins + dpi(36))
+	local target_y_hide = geom.workarea.y - (dpi(48) + margins)
 
 	-- Opacity targets
 	local target_opacity_show = 1
@@ -146,10 +209,10 @@ local function animate_quake_terminal(show)
 	if not quake_y_anim then
 		quake_y_anim = rubato.timed({
 			rate = 144,
-			intro = 0.12,
-			outro = 0.12,
-			duration = 0.5,
-			easing = rubato.easing.linear,
+			intro = 0.06,
+			outro = 0.06,
+			duration = 0.32,
+			easing = rubato.easing.quadratic,
 			subscribed = function(pos)
 				if quake_client and quake_client.valid then
 					quake_client:geometry({ y = pos })
@@ -161,9 +224,9 @@ local function animate_quake_terminal(show)
 	if not quake_opacity_anim then
 		quake_opacity_anim = rubato.timed({
 			rate = 60, -- half the rate of position animation
-			intro = 0.1,
-			outro = 0.1,
-			duration = 0.25,
+			intro = 0.04,
+			outro = 0.04,
+			duration = 0.16,
 			easing = rubato.easing.zero,
 			subscribed = function(opacity)
 				if quake_client and quake_client.valid then
@@ -220,7 +283,7 @@ end
 -- Toggle quake terminal
 local function quake_toggle()
 	if not quake_client or not quake_client.valid then
-		awful.spawn(app)
+		ensure_quake_terminal()
 	else
 		animate_quake_terminal(not opened)
 	end
@@ -233,8 +296,14 @@ end)
 
 -- When client is managed, capture it if it's the quake terminal
 client.connect_signal("request::manage", function(c)
-	if c.instance == quake_instance_name or c.class == quake_instance_name then
+	local is_tracked_process = quake_pid and tonumber(c.pid) == quake_pid
+	local is_quake_app = c.class == quake_app_id
+	if is_tracked_process or is_quake_app then
 		quake_client = c
+		quake_pid = tonumber(c.pid) or quake_pid
+		if quake_pid then
+			write_quake_pid(quake_pid)
+		end
 		local success = update_quake_geometry(c)
 		if success then
 			c.hidden = true
@@ -260,7 +329,41 @@ client.connect_signal("request::unmanage", function(c)
 		quake_client = nil
 		quake_y_anim = nil
 		quake_opacity_anim = nil
+		clear_quake_pid()
 	end
 end)
 
-awful.spawn(app)
+-- Reattach after a config reload before considering a new spawn. Match the
+-- persisted PID first; the app ID adopts a quake window if no PID was saved.
+quake_pid = read_quake_pid()
+if not quake_process_is_running(quake_pid) then
+	clear_quake_pid()
+else
+	for _, c in ipairs(client.get()) do
+		if c.valid and tonumber(c.pid) == quake_pid then
+			quake_client = c
+			opened = not c.hidden
+			update_quake_geometry(c)
+			break
+		end
+	end
+end
+
+if not quake_client then
+	for _, c in ipairs(client.get()) do
+		if c.valid and c.class == quake_app_id then
+			quake_client = c
+			quake_pid = tonumber(c.pid)
+			if quake_pid then
+				write_quake_pid(quake_pid)
+			end
+			opened = not c.hidden
+			update_quake_geometry(c)
+			break
+		end
+	end
+end
+
+if not quake_client then
+	ensure_quake_terminal()
+end

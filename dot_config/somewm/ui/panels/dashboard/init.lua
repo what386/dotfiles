@@ -2,6 +2,7 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gears = require("gears")
 local beautiful = require("beautiful")
+local rubato = require("dependencies.rubato")
 local icons = require("theme.icons")
 
 return function(s)
@@ -152,6 +153,7 @@ return function(s)
 		bg = beautiful.background, fg = beautiful.fg_normal,
 		shape = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dp(16)) end,
 	})
+	local shown_y
 	local function geometry()
 		local area = s.workarea or s.geometry
 		local margin = dp(12)
@@ -162,12 +164,35 @@ return function(s)
 		panel.minimum_height, panel.maximum_height = height, height
 		panel.width, panel.height = width, height
 		panel.x = area.x + math.floor((area.width - width) / 2)
-		panel.y = area.y + area.height - height - margin
+		shown_y = area.y + area.height - height - margin
+		if not panel.visible then
+			panel.y = shown_y + dp(28)
+		end
 		local g = s.geometry
 		s.backdrop_dashboard.x, s.backdrop_dashboard.y = g.x, g.y
 		s.backdrop_dashboard.width, s.backdrop_dashboard.height = g.width, g.height
 	end
 	panel.opened = false
+	panel.opacity = 0
+	local animation_token = 0
+	local slide_anim = rubato.timed({
+		rate = 60,
+		intro = 0.08,
+		outro = 0.12,
+		duration = 0.28,
+		easing = rubato.easing.quadratic,
+		clamp_position = true,
+		subscribed = function(pos) panel.y = pos end,
+	})
+	local fade_anim = rubato.timed({
+		rate = 60,
+		intro = 0.06,
+		outro = 0.1,
+		duration = 0.2,
+		easing = rubato.easing.linear,
+		clamp_position = true,
+		subscribed = function(opacity) panel.opacity = opacity end,
+	})
 	local keyboard = require("ui.panels.dashboard.keyboard")(function(direction)
 		for index, name in ipairs(tab_order) do
 			if name == mode then
@@ -183,20 +208,38 @@ return function(s)
 		end,
 	})
 	function panel:hide_dashboard()
+		if not self.opened then return end
+		animation_token = animation_token + 1
+		local token = animation_token
 		keyboard:stop()
 		self.opened = false
-		self.visible = false
 		s.backdrop_dashboard.visible = false
 		refresh_timer:stop()
 		update_monitors()
+		slide_anim.target = shown_y + dp(28)
+		fade_anim.target = 0
+		gears.timer({
+			timeout = 0.36,
+			autostart = true,
+			single_shot = true,
+			callback = function()
+				if token == animation_token and not self.opened then self.visible = false end
+			end,
+		})
 		self:emit_signal("closed")
 	end
 	function panel:toggle()
 		if self.opened then self:hide_dashboard(); return end
+		animation_token = animation_token + 1
 		geometry()
+		if not self.visible then
+			self.opacity = 0
+		end
 		self.opened = true
 		s.backdrop_dashboard.visible = true
 		self.visible = true
+		slide_anim.target = shown_y
+		fade_anim.target = 1
 		select_page("overview")
 		calendar:refresh()
 		refresh_timer:start()

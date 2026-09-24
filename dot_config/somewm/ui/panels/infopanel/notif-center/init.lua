@@ -13,7 +13,7 @@ local notif_center = function(s)
 	s.clear_all = require("ui.panels.infopanel.notif-center.clear-all")
 	s.notifbox_layout = require("ui.panels.infopanel.notif-center.build-notifbox").notifbox_layout
 
-	return wibox.widget({
+	local center = wibox.widget({
 		expand = "none",
 		layout = wibox.layout.fixed.vertical,
 		spacing = dpi(10),
@@ -31,6 +31,16 @@ local notif_center = function(s)
 		},
 		s.notifbox_layout,
 	})
+	function center:keyboard_items()
+		local items = {}
+		for _, widget in ipairs(s.notifbox_layout.children) do
+			if widget.keyboard_activate then
+				items[#items + 1] = { widget = widget, control = widget }
+			end
+		end
+		return items
+	end
+	return center
 end
 
 return notif_center

@@ -2,15 +2,18 @@
 
 $env.config.history.path = "/dev/null"
 
-source ~/.config/nushell/conf.d/hooks.nu
-source ~/.config/nushell/conf.d/integrations.nu
-source ~/.config/nushell/conf.d/completions.nu
+const NU_CONFIG_DIR = $nu.default-config-dir
 
-source ~/.config/nushell/conf.d/aliases.nu
-source ~/.config/nushell/conf.d/commands.nu
-source ~/.config/nushell/conf.d/variables.nu
-source ~/.config/nushell/conf.d/paths.nu
+source ($NU_CONFIG_DIR | path join "conf.d/hooks.nu")
+source ($NU_CONFIG_DIR | path join "conf.d/integrations.nu")
+source ($NU_CONFIG_DIR | path join "conf.d/completions.nu")
+source ($NU_CONFIG_DIR | path join "conf.d/aliases.nu")
 
-source ~/.config/nushell/conf.d/autoexec.nu
+source ($NU_CONFIG_DIR | path join "conf.d/commands.nu")
+source ($NU_CONFIG_DIR | path join "conf.d/variables.nu")
+source ($NU_CONFIG_DIR | path join "conf.d/paths.nu")
+source ($NU_CONFIG_DIR | path join "conf.d/compatibility.nu")
+
+source ($NU_CONFIG_DIR | path join "conf.d/autoexec.nu")
 
 const upstream_paths_nu = if ("~/.upstream/generated/paths.nu" | path expand | path exists) { ("~/.upstream/generated/paths.nu" | path expand) } else { null }; source-env $upstream_paths_nu

@@ -123,16 +123,22 @@ notifbox_box = function(notif, icon, title, message, app, bgcolor)
 	local notifbox_delete = function()
 		notifbox_layout:remove_widgets(notifbox, true)
 	end
-
-	-- Delete notifbox on LMB
-	notifbox:buttons({awful.button({}, 1, function()
+	local function dismiss()
 		if #notifbox_layout.children == 1 then
 			reset_notifbox_layout()
 		else
 			notifbox_delete()
 		end
 		collectgarbage("collect")
-	end)})
+	end
+
+	-- Delete notifbox on LMB
+	notifbox:buttons({awful.button({}, 1, dismiss)})
+	function notifbox:keyboard_activate() dismiss() end
+	function notifbox:keyboard_selected(value)
+		self.border_width = value and dpi(2) or 0
+		self.border_color = value and beautiful.accent or nil
+	end
 
 	-- Add hover, and mouse leave events
 	notifbox_template:connect_signal("mouse::enter", function()
