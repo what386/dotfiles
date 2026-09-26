@@ -29,3 +29,14 @@ jobs:
 
       - name: Run tests
         run: cargo test --all
+
+      - name: Check generated completions
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          output_dir="$(mktemp -d)"
+          trap 'rm -rf "$output_dir"' EXIT
+          bash scripts/generate-completions.sh "$output_dir"
+          for extension in bash fish zsh ps1 elvish; do
+            test -s "$output_dir/completions.$extension"
+          done
+          bash -n "$output_dir/completions.bash"

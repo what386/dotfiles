@@ -36,12 +36,3 @@ publish version:
     scripts/release/publish.sh %{{version}}%
     git switch dev
     printf "ready" > .release-state
-
-gen-completions:
-    #!/usr/bin/env bash
-    mkdir -p ./completions
-    for shell in bash fish powershell zsh elvish; do
-        ext=$([ "$shell" = "powershell" ] && echo "ps1" || echo "$shell")
-        cargo run --bin completions --features="shell-completions" -- "$shell" \
-            > "./completions/completions.$ext"
-    done

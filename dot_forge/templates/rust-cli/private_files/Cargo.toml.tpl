@@ -11,8 +11,7 @@ categories = []
 
 exclude = [
     ".github",
-    "scripts/",
-    "completions/"
+    "scripts/"
 ]
 
 [features]
