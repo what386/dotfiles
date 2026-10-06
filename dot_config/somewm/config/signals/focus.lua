@@ -2,13 +2,9 @@ local beautiful = require("beautiful")
 
 -- autofocus urgent windows
 client.connect_signal("property::urgent", function(c)
+	if not c.urgent or c.hidden or not c.screen then return end
 	c.minimized = false
 	c:jump_to()
-end)
-
--- make focus follow mouse (sloppy focus)
-client.connect_signal("mouse::enter", function(c)
-	c:activate({ context = "mouse_enter", raise = false })
 end)
 
 -- set focus borders

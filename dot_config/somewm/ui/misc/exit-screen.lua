@@ -2,6 +2,7 @@ local awful = require("awful")
 local gears = require("gears")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local glib = require("lgi").GLib
 local dpi = beautiful.xresources.apply_dpi
 local icons = require("theme.icons")
 local sounds = require("theme.sounds")
@@ -9,6 +10,52 @@ local clickable_container = require("ui.clickable-container")
 local power = require("services.power")
 local filesystem = require("gears.filesystem")
 local config_dir = filesystem.get_configuration_dir()
+local TRANSITION_DURATION = 0.18
+local FRAME_INTERVAL = 1 / 60
+
+local active_screen
+local exit_screen_grabber
+local open = false
+local transition_progress = 0
+local transition_timer
+
+local function finish_hide()
+	if active_screen and active_screen.exit_screen then
+		active_screen.exit_screen.visible = false
+		active_screen.exit_screen.opacity = 0
+	end
+	active_screen = nil
+	transition_progress = 0
+end
+
+local function animate_to(target)
+	if transition_timer then transition_timer:stop(); transition_timer = nil end
+	local start = transition_progress
+	if start == target then
+		if target == 0 then finish_hide() end
+		return
+	end
+	local started_at = glib.get_monotonic_time()
+	local duration = TRANSITION_DURATION * math.abs(target - start)
+	transition_timer = gears.timer({
+		timeout = FRAME_INTERVAL,
+		callback = function()
+			local elapsed = (glib.get_monotonic_time() - started_at) / 1000000
+			local fraction = math.min(1, elapsed / duration)
+			local eased = target == 1 and (1 - (1 - fraction) ^ 3) or fraction ^ 3
+			transition_progress = start + (target - start) * eased
+			if active_screen and active_screen.exit_screen then
+				active_screen.exit_screen.opacity = transition_progress
+			end
+			if fraction == 1 then
+				transition_timer:stop()
+				transition_timer = nil
+				if target == 0 and not open then finish_hide() end
+			end
+		end,
+	})
+	transition_timer:start()
+end
 
 local msg_table = {
 	"See you later, alligator!",
@@ -96,6 +143,7 @@ local build_power_button = function(name, icon, callback)
 		font = "Inter Regular 10",
 		align = "center",
 		valign = "center",
+		forced_width = dpi(138),
 		widget = wibox.widget.textbox,
 	})
 	local power_button = wibox.widget({
@@ -168,10 +216,11 @@ local lock = build_power_button("[L]ock", icons.power.lock, lock_command)
 local create_exit_screen = function(s)
 	s.exit_screen = wibox({
 		screen = s,
-		type = "splash",
+		type = "notification",
 		visible = false,
 		ontop = true,
-		bg = beautiful.background,
+		opacity = 0,
+		bg = beautiful.overlay_backdrop,
 		fg = beautiful.fg_normal,
 		height = s.geometry.height,
 		width = s.geometry.width,
@@ -258,10 +307,17 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	create_exit_screen(s)
 end)
 screen.connect_signal("removed", function(s)
-	create_exit_screen(s)
+	if active_screen == s then
+		if transition_timer then transition_timer:stop(); transition_timer = nil end
+		if open and exit_screen_grabber then exit_screen_grabber:stop() end
+		active_screen = nil
+		open = false
+		transition_progress = 0
+	end
+	if s.exit_screen then s.exit_screen.visible = false; s.exit_screen = nil end
 end)
-local exit_screen_grabber = awful.keygrabber({
-	auto_start = true,
+exit_screen_grabber = awful.keygrabber({
+	auto_start = false,
 	stop_event = "release",
 	keypressed_callback = function(self, mod, key, command)
 		if key == "s" then
@@ -282,16 +338,28 @@ local exit_screen_grabber = awful.keygrabber({
 	end,
 })
 awesome.connect_signal("screen::exit_screen:show", function()
-	for s in screen do
-		s.exit_screen.visible = false
+	if open then return end
+	local focused = awful.screen.focused()
+	if not focused or not focused.exit_screen then return end
+	if active_screen and active_screen ~= focused then
+		active_screen.exit_screen.visible = false
+		transition_progress = 0
 	end
-	awful.screen.focused().exit_screen.visible = true
+	for s in screen do
+		if s ~= focused then s.exit_screen.visible = false end
+	end
+	active_screen = focused
+	focused.exit_screen:geometry(focused.geometry)
+	focused.exit_screen.opacity = transition_progress
+	focused.exit_screen.visible = true
+	open = true
+	animate_to(1)
 	exit_screen_grabber:start()
 end)
 awesome.connect_signal("screen::exit_screen:hide", function()
+	if not open then return end
+	open = false
 	update_greeter_msg()
 	exit_screen_grabber:stop()
-	for s in screen do
-		s.exit_screen.visible = false
-	end
+	animate_to(0)
 end)

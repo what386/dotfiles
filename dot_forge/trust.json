@@ -1,6 +1,10 @@
 {
   "entries": [
     {
+      "path": "/home/bmorin/.forge/templates/csharp-avalonia",
+      "checksum": "163aae47f95ec358bad889c8a91506b50be112a83b4f2c19257651a5d9ac55b4"
+    },
+    {
       "path": "/home/bmorin/.forge/templates/dotnet",
       "checksum": "419d02ff037169875c17e656d1f2efe771110e53eb7feb4c546dc8f76eb60fdd"
     },

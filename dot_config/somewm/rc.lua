@@ -42,4 +42,5 @@ require("theme")
 --	sounds.play("login")
 --end
 
+require("windowing")
 require("ui")

@@ -14,7 +14,6 @@ local network_widget = require(widgetdir .. "network")
 local bluetooth_widget = require(widgetdir .. "bluetooth")
 local vpn_widget = require(widgetdir .. "vpn-status")
 --local sd_card_widget = require(widgetdir .. "sd-card")
-local layoutbox_widget = require(widgetdir .. "layoutbox")
 local infopanel_widget = require(widgetdir .. "infopanel-toggle")
 local dropdown_widget = require(widgetdir .. "dropdown")
 local osk_widget = require(widgetdir .. "osk-toggle")
@@ -90,7 +89,6 @@ local function statusbar(s)
 		expand = "none",
 		layout = wibox.layout.align.horizontal,
 		{ -- left
-			layoutbox_widget(s),
 			osk_widget(),
 			separator(),
 			clock_widget(s),

@@ -44,6 +44,7 @@ theme.accent = theme.system_blue_light
 
 -- Background color
 theme.background = "#000000" .. "66"
+theme.overlay_backdrop = "#0b111bcc"
 
 -- Transparent
 theme.transparent = "#00000000"

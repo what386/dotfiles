@@ -113,7 +113,8 @@ local title = wibox.widget({
 })
 
 local hint = wibox.widget({
-	markup = '<span font="Inter 9" color="#b5bdc5">Enter: paste | Ctrl+Enter: copy | Esc: close</span>',
+	text   = "Enter: paste | Ctrl+Enter: copy | Esc: close",
+	font   = "Inter Regular 9",
 	align  = "right",
 	valign = "center",
 	widget = wibox.widget.textbox,
@@ -128,8 +129,8 @@ local popup = awful.popup({
 	ontop   = true,
 	visible = false,
 	type    = "dialog",
-	shape   = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dpi(9)) end,
-	bg      = "#11161de8",
+	shape   = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dpi(16)) end,
+	bg      = beautiful.background,
 	fg      = beautiful.fg_normal,
 	minimum_width = dpi(660),
 	maximum_width = dpi(660),
@@ -148,8 +149,8 @@ local popup = awful.popup({
 					margins = { left = dpi(8), right = dpi(8), top = dpi(6), bottom = dpi(6) },
 					widget  = wibox.container.margin,
 				},
-				bg     = "#00000066",
-				shape  = gears.shape.rounded_rect,
+				bg     = beautiful.groups_bg,
+				shape  = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dpi(8)) end,
 				widget = wibox.container.background,
 			},
 			list_layout,
@@ -197,7 +198,7 @@ local function rebuild_list()
 
 	if #visible_items == 0 then
 		list_layout:add(wibox.widget({
-			markup = '<span color="#99a1aa">No clipboard entries</span>',
+			text   = "No clipboard entries",
 			align  = "center",
 			valign = "center",
 			widget = wibox.widget.textbox,
@@ -210,16 +211,12 @@ local function rebuild_list()
 
 	for i, item in ipairs(visible_items) do
 		local sel        = i == selected_index
-		local bg_color   = sel and "#4f8cff44" or "#ffffff10"
-		local text_color = sel and "#d8e7ff"   or "#c7d0da"
+		local bg_color = sel and beautiful.groups_title_bg or beautiful.groups_bg
 
 		list_layout:add(wibox.widget({
 			{
 				{
-					markup = string.format(
-						'<span color="%s" font="Inter 10">%s</span>',
-						text_color, xml_escape(item.preview)
-					),
+					markup = string.format('<span font="Inter 10">%s</span>', xml_escape(item.preview)),
 					align  = "left",
 					valign = "center",
 					widget = wibox.widget.textbox,
@@ -228,7 +225,9 @@ local function rebuild_list()
 				widget  = wibox.container.margin,
 			},
 			bg     = bg_color,
-			shape  = gears.shape.rounded_rect,
+			shape  = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, dpi(8)) end,
+			border_width = dpi(2),
+			border_color = sel and beautiful.accent or beautiful.transparent,
 			widget = wibox.container.background,
 		}))
 	end

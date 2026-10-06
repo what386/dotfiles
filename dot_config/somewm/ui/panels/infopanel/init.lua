@@ -19,7 +19,7 @@ local infopanel = function(s)
 	local keyboard
 	local current_items = {}
 	local key_hints = wibox.widget({
-		text = "move: hjkl / arrows\nopen: enter · dismiss mail: delete",
+		text = "move: hjkl / arrows · panes: F1/F2\nopen: enter · dismiss mail: delete",
 		font = "Inter Regular 9",
 		align = "center",
 		valign = "center",
@@ -182,7 +182,7 @@ local infopanel = function(s)
 				return
 			end
 		end
-	end, close_panel, selection)
+	end, close_panel, selection, function(name) panel:activate_pane(name) end)
 
 	-- Hide this panel when app dashboard is called.
 	function panel:hide_dashboard()
@@ -195,6 +195,15 @@ local infopanel = function(s)
 			open_panel()
 		else
 			close_panel()
+		end
+	end
+
+	function panel:activate_pane(name)
+		if self.opened and mode == name then
+			self:toggle()
+		else
+			self:switch_pane(name)
+			if not self.opened then self:toggle() end
 		end
 	end
 

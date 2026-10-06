@@ -44,6 +44,12 @@ return {
 
 			-- JavaScript / TypeScript / HTML / CSS / JSON / YAML / Markdown
 			formatting.prettier.with({
+				extra_args = function(params)
+					if params.ft == "markdown" then
+						return { "--prose-wrap", "preserve", "--end-of-line", "lf" }
+					end
+					return {}
+				end,
 				filetypes = {
 					"html",
 					"css",

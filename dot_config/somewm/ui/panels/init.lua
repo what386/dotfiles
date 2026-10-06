@@ -1,14 +1,14 @@
 local statusbar = require("ui.panels.statusbar")
 local dashboard = require("ui.panels.dashboard")
 local infopanel = require("ui.panels.infopanel")
-local dock = require("ui.panels.dock")
+local workspace_panel = require("ui.panels.workspace")
 local musicplayer = require("ui.panels.musicplayer")
 
 screen.connect_signal("request::desktop_decoration", function(s)
 	s.statusbar = statusbar(s)
 	s.dashboard = dashboard(s)
 	s.infopanel = infopanel(s)
-	s.dockpanel = dock(s)
+	s.workspacepanel = workspace_panel(s)
 	s.musicplayer = musicplayer(s)
 end)
 

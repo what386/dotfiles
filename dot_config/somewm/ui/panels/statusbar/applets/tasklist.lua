@@ -5,6 +5,13 @@ local beautiful = require("beautiful")
 
 awesome.set_preferred_icon_size(64)
 
+local function oldest_first()
+	local clients = client.get()
+	local ordered = {}
+	for i = #clients, 1, -1 do ordered[#ordered + 1] = clients[i] end
+	return ordered
+end
+
 -- Middle-click to close
 local tasklist_buttons = {
 	awful.button({}, 1, function(c)
@@ -115,6 +122,7 @@ local function tasklist(s)
 	return awful.widget.tasklist({
 		screen = s,
 		filter = awful.widget.tasklist.filter.currenttags,
+		source = oldest_first,
 		buttons = tasklist_buttons,
 		layout = {
 			spacing = 2,

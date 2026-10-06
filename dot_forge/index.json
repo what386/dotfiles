@@ -6,8 +6,12 @@
       "path": "templates/cpp-cli"
     },
     {
-      "name": "dotnet-cli",
-      "path": "templates/dotnet-cli"
+      "name": "csharp-cli",
+      "path": "templates/csharp-cli"
+    },
+    {
+      "name": "csharp-avalonia",
+      "path": "templates/csharp-avalonia"
     },
     {
       "name": "go-cli",
